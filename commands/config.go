@@ -20,10 +20,58 @@ func init() {
 		configPathCmd(),
 		configViewCmd(),
 		configSetCmd(),
+		configSetURLCmd(),
+		configSetAPIKeyCmd(),
 		configUseCmd(),
 		configListProfilesCmd(),
 	)
 	rootCmd.AddCommand(cfgCmd)
+}
+
+// configSetURLCmd sets the active profile's base URL (familiar shorthand for
+// `config set base_url`, matching the official CLI's `config set-url`).
+func configSetURLCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "set-url <url>",
+		Short: "Set the active profile's instance URL",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := loadConfig()
+			if err != nil {
+				return err
+			}
+			p := c.Profile(c.ActiveProfileName(flagProfile))
+			p.BaseURL = args[0]
+			c.SetProfile(p)
+			if err := c.Save(); err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "set base_url = %s\n", args[0])
+			return nil
+		},
+	}
+}
+
+// configSetAPIKeyCmd stores an API key in the OS keyring for the active profile
+// (matching the official CLI's `config set-api-key`; unlike `auth login` it does
+// not verify the key against the instance).
+func configSetAPIKeyCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "set-api-key <key>",
+		Short: "Store an API key in the keyring for the active profile (no verification)",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			profile, _, err := activeProfile()
+			if err != nil {
+				return err
+			}
+			if err := auth.Set(profile, args[0]); err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "stored API key for profile %q in the keyring\n", profile)
+			return nil
+		},
+	}
 }
 
 func configPathCmd() *cobra.Command {
@@ -40,9 +88,10 @@ func configPathCmd() *cobra.Command {
 
 func configViewCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "view",
-		Short: "Show the resolved configuration (secrets redacted)",
-		Args:  cobra.NoArgs,
+		Use:     "view",
+		Aliases: []string{"show"},
+		Short:   "Show the resolved configuration (secrets redacted)",
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			c, err := loadConfig()
 			if err != nil {

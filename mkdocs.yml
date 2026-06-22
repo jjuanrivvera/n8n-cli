@@ -54,6 +54,7 @@ nav:
   - Authentication: authentication.md
   - Output & Filtering: output.md
   - Beyond the API: beyond-api.md
+  - vs. the official CLI: comparison.md
   - Reference:
       - Command Reference: commands/index.md
   - Contributing: contributing.md

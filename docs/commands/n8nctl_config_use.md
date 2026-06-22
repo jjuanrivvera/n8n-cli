@@ -23,7 +23,9 @@ n8nctl config use <profile> [flags]
       --base-url string   override the instance base URL (e.g. https://host/api/v1)
       --columns strings   comma-separated columns for table/csv output
       --dry-run           print the equivalent curl and send no request
+      --jq string         apply a jq program to the result (e.g. '.[].id'); implies JSON input
       --no-color          disable colored output [env: NO_COLOR]
+      --no-header         hide the table header row
   -o, --output string     output format: table|json|yaml|csv [env: N8NCTL_OUTPUT]
       --profile string    config profile (instance) to use [env: N8NCTL_PROFILE]
   -q, --quiet             suppress non-essential chatter

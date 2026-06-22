@@ -49,6 +49,8 @@ var (
 	flagNoColor   bool
 	flagQuiet     bool
 	flagColumns   []string
+	flagNoHeader  bool
+	flagJQ        string
 )
 
 var rootCmd = &cobra.Command{
@@ -82,6 +84,8 @@ func init() {
 	pf.BoolVar(&flagNoColor, "no-color", false, "disable colored output [env: NO_COLOR]")
 	pf.BoolVarP(&flagQuiet, "quiet", "q", false, "suppress non-essential chatter")
 	pf.StringSliceVar(&flagColumns, "columns", nil, "comma-separated columns for table/csv output")
+	pf.BoolVar(&flagNoHeader, "no-header", false, "hide the table header row")
+	pf.StringVar(&flagJQ, "jq", "", "apply a jq program to the result (e.g. '.[].id'); implies JSON input")
 }
 
 // Execute expands user aliases then runs the command tree.
@@ -224,6 +228,10 @@ func outputFormat() (output.Format, error) {
 // (each resource declares a sensible set so list output stays readable instead of
 // dumping every nested field).
 func render(cmd *cobra.Command, data any, defaultCols ...string) error {
+	// --jq short-circuits formatting: filter the data and emit JSON results.
+	if flagJQ != "" {
+		return output.ApplyJQ(cmd.OutOrStdout(), data, flagJQ)
+	}
 	format, err := outputFormat()
 	if err != nil {
 		return err
@@ -235,9 +243,10 @@ func render(cmd *cobra.Command, data any, defaultCols ...string) error {
 	noColor := flagNoColor || os.Getenv("NO_COLOR") != ""
 	isTTY := term.IsTerminal(int(os.Stdout.Fd()))
 	opts := output.Options{
-		Columns: cols,
-		NoColor: noColor,
-		Color:   isTTY && !noColor,
+		Columns:  cols,
+		NoColor:  noColor,
+		Color:    isTTY && !noColor,
+		NoHeader: flagNoHeader,
 	}
 	return output.Render(cmd.OutOrStdout(), data, format, opts)
 }

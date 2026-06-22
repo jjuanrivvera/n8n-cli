@@ -51,6 +51,21 @@ one instance or script against n8n in CI:
 - **Dry-run before you touch anything.** `--dry-run` prints the equivalent
   `curl` and sends no request, so destructive commands are easy to review.
 
+- **Fleet operations beyond CRUD.** `workflows sync` promotes a workflow across
+  instances, `backup`/`restore` snapshot an instance to git-friendly JSON, and
+  `workflows search` finds workflows by node type, credential, or webhook path.
+- **Faster to invoke.** A single Go binary starts in ~6 ms versus ~150 ms for the
+  Node-based official CLI — invisible for one command, but real in loops and CI.
+
+`n8nctl` covers every command the official CLI exposes (data tables, package
+import/export, `--jq`, an `id-only` output mode, a `skills install` command) and
+adds the above. The official `@n8n/cli` is still the right pick if you want the
+**first-party** tool, work with a single instance, or already live in Node — it
+is maintained by the n8n team and tracks new endpoints first.
+
+See the full side-by-side, including performance benchmarks, in the
+[comparison guide](https://jjuanrivvera.github.io/n8n-cli/comparison/).
+
 If you only ever touch one instance from one laptop, the official CLI may be all
 you need. If you run several instances, want secrets out of plaintext, or script
 n8n from machines without Node, that is what `n8nctl` is for.
@@ -132,7 +147,7 @@ Flags: `--to <profile>` (required), `--from <profile>` (default: active
 profile), `--update-by-name` (overwrite a destination workflow with the same
 name instead of creating a new one), `--activate`.
 
-> **Honest caveat.** Credentials are referenced by id and are **not** copied.
+> **Caveat.** Credentials are referenced by id and are **not** copied.
 > Create matching credentials on the destination first (`n8nctl credentials`);
 > the synced nodes will resolve them by id.
 
@@ -155,7 +170,7 @@ n8nctl --profile staging restore --in ./backups/prod --update-by-name --activate
 `backup` flags: `--out <dir>` (required). `restore` flags: `--in <dir>`
 (required), `--update-by-name`, `--activate`.
 
-> **Honest caveat.** Credential **secrets** are write-only in the n8n API and are
+> **Caveat.** Credential **secrets** are write-only in the n8n API and are
 > never exported — the backup records credential metadata only. On restore,
 > referenced credentials must already exist on the target instance.
 

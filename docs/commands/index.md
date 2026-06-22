@@ -13,11 +13,16 @@ Auto-generated from the CLI. See [n8nctl](n8nctl.md) for the root command.
 - [backup](n8nctl_backup.md) — Export workflows, tags, and variables to a directory of JSON
 - [config](n8nctl_config.md) — Inspect and edit configuration and profiles
 - [credentials](n8nctl_credentials.md) — Manage credentials
+- [data-tables](n8nctl_data-tables.md) — Manage data tables and their rows
 - [doctor](n8nctl_doctor.md) — Diagnose configuration, credentials, and connectivity
 - [executions](n8nctl_executions.md) — Inspect and control workflow executions
 - [init](n8nctl_init.md) — Interactive first-run setup for an instance/profile
+- [login](n8nctl_login.md) — Authenticate the active profile (alias for `auth login`)
+- [logout](n8nctl_logout.md) — Remove the active profile's API key (alias for `auth logout`)
+- [packages](n8nctl_packages.md) — Export and import workflows as .n8np packages (beta)
 - [projects](n8nctl_projects.md) — Manage projects and their members
 - [restore](n8nctl_restore.md) — Recreate workflows from a backup directory
+- [skills](n8nctl_skills.md) — Install this CLI's AI-agent skill into Claude, Cursor, and other agents
 - [source-control](n8nctl_source-control.md) — Interact with the Source Control (Git) integration
 - [tags](n8nctl_tags.md) — Manage workflow tags
 - [users](n8nctl_users.md) — Manage users (instance owner only)

@@ -24,7 +24,9 @@ key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
       --columns strings   comma-separated columns for table/csv output
       --dry-run           print the equivalent curl and send no request
   -h, --help              help for n8nctl
+      --jq string         apply a jq program to the result (e.g. '.[].id'); implies JSON input
       --no-color          disable colored output [env: NO_COLOR]
+      --no-header         hide the table header row
   -o, --output string     output format: table|json|yaml|csv [env: N8NCTL_OUTPUT]
       --profile string    config profile (instance) to use [env: N8NCTL_PROFILE]
   -q, --quiet             suppress non-essential chatter
@@ -43,11 +45,16 @@ key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
 * [n8nctl completion](n8nctl_completion.md)	 - Generate a shell completion script
 * [n8nctl config](n8nctl_config.md)	 - Inspect and edit configuration and profiles
 * [n8nctl credentials](n8nctl_credentials.md)	 - Manage credentials
+* [n8nctl data-tables](n8nctl_data-tables.md)	 - Manage data tables and their rows
 * [n8nctl doctor](n8nctl_doctor.md)	 - Diagnose configuration, credentials, and connectivity
 * [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
 * [n8nctl init](n8nctl_init.md)	 - Interactive first-run setup for an instance/profile
+* [n8nctl login](n8nctl_login.md)	 - Authenticate the active profile (alias for `auth login`)
+* [n8nctl logout](n8nctl_logout.md)	 - Remove the active profile's API key (alias for `auth logout`)
+* [n8nctl packages](n8nctl_packages.md)	 - Export and import workflows as .n8np packages (beta)
 * [n8nctl projects](n8nctl_projects.md)	 - Manage projects and their members
 * [n8nctl restore](n8nctl_restore.md)	 - Recreate workflows from a backup directory
+* [n8nctl skills](n8nctl_skills.md)	 - Install this CLI's AI-agent skill into Claude, Cursor, and other agents
 * [n8nctl source-control](n8nctl_source-control.md)	 - Interact with the Source Control (Git) integration
 * [n8nctl tags](n8nctl_tags.md)	 - Manage workflow tags
 * [n8nctl users](n8nctl_users.md)	 - Manage users (instance owner only)

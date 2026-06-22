@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strings"
@@ -184,6 +185,7 @@ func (c *Client) do(ctx context.Context, method, rawURL string, body []byte) ([]
 			return nil, err
 		}
 
+		c.logger.Debug("http request", "method", method, "url", rawURL, "attempt", attempt+1)
 		resp, err := c.httpClient.Do(req)
 		if err != nil {
 			lastErr = err
@@ -200,6 +202,7 @@ func (c *Client) do(ctx context.Context, method, rawURL string, body []byte) ([]
 			return nil, fmt.Errorf("reading response from %s: %w", rawURL, readErr)
 		}
 
+		c.logger.Debug("http response", "method", method, "url", rawURL, "status", resp.StatusCode, "bytes", len(respBody))
 		if resp.StatusCode == http.StatusTooManyRequests {
 			c.rateLimiter.Throttle()
 		}
@@ -285,6 +288,81 @@ func encodeBody(body any) ([]byte, error) {
 		}
 		return raw, nil
 	}
+}
+
+// PostMultipart sends a multipart/form-data POST (file upload) and returns the
+// raw response body. Uploads are non-idempotent, so this does a single request
+// (no auto-retry) but still applies auth and rate limiting. In dry-run it prints
+// an equivalent curl and returns errDryRun.
+func (c *Client) PostMultipart(ctx context.Context, path string, fields map[string]string, fileField, fileName string, fileData []byte) ([]byte, error) {
+	var buf bytes.Buffer
+	mw := multipart.NewWriter(&buf)
+	for k, v := range fields {
+		if v != "" {
+			_ = mw.WriteField(k, v)
+		}
+	}
+	fw, err := mw.CreateFormFile(fileField, fileName)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := fw.Write(fileData); err != nil {
+		return nil, err
+	}
+	if err := mw.Close(); err != nil {
+		return nil, err
+	}
+
+	rawURL := c.buildURL(path, nil)
+	if c.dryRun {
+		c.printCurlMultipart(rawURL, fields, fileField, fileName)
+		return nil, errDryRun
+	}
+	if err := c.rateLimiter.Wait(ctx); err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, rawURL, bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", c.userAgent)
+	if c.apiKey != "" {
+		req.Header.Set(apiKeyHeader, c.apiKey)
+	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("upload to %s failed: %w", rawURL, err)
+	}
+	respBody, readErr := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if readErr != nil {
+		return nil, fmt.Errorf("reading upload response: %w", readErr)
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, newAPIError(resp.StatusCode, respBody)
+	}
+	return respBody, nil
+}
+
+// printCurlMultipart writes a copy-pasteable curl -F command for a dry-run upload.
+func (c *Client) printCurlMultipart(rawURL string, fields map[string]string, fileField, fileName string) {
+	var b strings.Builder
+	fmt.Fprintf(&b, "curl -X POST %s", shellQuote(rawURL))
+	key := "<redacted>"
+	if c.showToken {
+		key = c.apiKey
+	}
+	b.WriteString(" \\\n  -H " + shellQuote(apiKeyHeader+": "+key))
+	b.WriteString(" \\\n  -F " + shellQuote(fileField+"=@"+fileName))
+	for k, v := range fields {
+		if v != "" {
+			b.WriteString(" \\\n  -F " + shellQuote(k+"="+v))
+		}
+	}
+	fmt.Fprintln(c.dryRunWriter, b.String())
 }
 
 // printCurl writes a copy-pasteable, header-redacted curl command for dry-run.

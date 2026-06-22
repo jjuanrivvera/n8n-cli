@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/itchyny/gojq"
 	"gopkg.in/yaml.v3"
 )
 
@@ -18,16 +19,17 @@ import (
 type Format string
 
 const (
-	Table Format = "table"
-	JSON  Format = "json"
-	YAML  Format = "yaml"
-	CSV   Format = "csv"
+	Table  Format = "table"
+	JSON   Format = "json"
+	YAML   Format = "yaml"
+	CSV    Format = "csv"
+	IDOnly Format = "id" // one id per line, for xargs-style piping
 )
 
 // Valid reports whether f is a supported format.
 func (f Format) Valid() bool {
 	switch f {
-	case Table, JSON, YAML, CSV:
+	case Table, JSON, YAML, CSV, IDOnly:
 		return true
 	default:
 		return false
@@ -35,22 +37,68 @@ func (f Format) Valid() bool {
 }
 
 // Parse converts a string to a Format, defaulting to Table for "".
+// "id-only" is accepted as an alias for "id".
 func Parse(s string) (Format, error) {
 	if s == "" {
 		return Table, nil
 	}
+	if strings.EqualFold(s, "id-only") {
+		return IDOnly, nil
+	}
 	f := Format(strings.ToLower(s))
 	if !f.Valid() {
-		return "", fmt.Errorf("invalid output format %q (want table|json|yaml|csv)", s)
+		return "", fmt.Errorf("invalid output format %q (want table|json|yaml|csv|id)", s)
 	}
 	return f, nil
 }
 
 // Options tune rendering.
 type Options struct {
-	Columns []string // explicit column selection/order (table & csv)
-	NoColor bool     // disable ANSI color even on a TTY
-	Color   bool     // enable color (caller decides based on TTY + NO_COLOR)
+	Columns  []string // explicit column selection/order (table & csv)
+	NoColor  bool     // disable ANSI color even on a TTY
+	Color    bool     // enable color (caller decides based on TTY + NO_COLOR)
+	NoHeader bool     // hide the table header row
+}
+
+// ApplyJQ runs a jq program (via gojq, a full jq implementation) over data and
+// writes each result as a JSON value to w. This is the engine behind the global
+// --jq flag; it is strictly more capable than a hand-rolled path filter.
+func ApplyJQ(w io.Writer, data any, program string) error {
+	query, err := gojq.Parse(program)
+	if err != nil {
+		return fmt.Errorf("invalid jq program: %w", err)
+	}
+	// gojq expects numbers as float64/int (not json.Number), so use a plain
+	// json round-trip rather than the UseNumber-based normalize().
+	raw, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	var input any
+	if err := json.Unmarshal(raw, &input); err != nil {
+		return err
+	}
+	iter := query.Run(input)
+	for {
+		v, ok := iter.Next()
+		if !ok {
+			break
+		}
+		if err, isErr := v.(error); isErr {
+			return fmt.Errorf("jq: %w", err)
+		}
+		switch s := v.(type) {
+		case string:
+			fmt.Fprintln(w, s) // bare strings print unquoted, like `jq -r`
+		default:
+			out, merr := json.MarshalIndent(v, "", "  ")
+			if merr != nil {
+				return merr
+			}
+			fmt.Fprintln(w, string(out))
+		}
+	}
+	return nil
 }
 
 // Render writes data to w in the requested format. data may be a struct, a slice,
@@ -63,11 +111,27 @@ func Render(w io.Writer, data any, format Format, opts Options) error {
 		return renderYAML(w, data)
 	case CSV:
 		return renderCSV(w, data, opts.Columns)
+	case IDOnly:
+		return renderIDOnly(w, data)
 	case Table, "":
 		return renderTable(w, data, opts)
 	default:
 		return fmt.Errorf("unsupported format %q", format)
 	}
+}
+
+// renderIDOnly prints the id field of each record, one per line.
+func renderIDOnly(w io.Writer, data any) error {
+	rows, ok := asRows(data)
+	if !ok {
+		return fmt.Errorf("cannot render value as id list")
+	}
+	for _, r := range rows {
+		if id, present := r["id"]; present {
+			fmt.Fprintln(w, scalar(id))
+		}
+	}
+	return nil
 }
 
 func renderJSON(w io.Writer, data any) error {
@@ -211,15 +275,17 @@ func renderTable(w io.Writer, data any, opts Options) error {
 		}
 	}
 
-	header := make([]string, len(cols))
-	for i, c := range cols {
-		header[i] = pad(strings.ToUpper(c), widths[i])
+	if !opts.NoHeader {
+		header := make([]string, len(cols))
+		for i, c := range cols {
+			header[i] = pad(strings.ToUpper(c), widths[i])
+		}
+		headerLine := strings.TrimRight(strings.Join(header, "  "), " ")
+		if opts.Color && !opts.NoColor {
+			headerLine = "\x1b[1m" + headerLine + "\x1b[0m"
+		}
+		fmt.Fprintln(w, headerLine)
 	}
-	headerLine := strings.TrimRight(strings.Join(header, "  "), " ")
-	if opts.Color && !opts.NoColor {
-		headerLine = "\x1b[1m" + headerLine + "\x1b[0m"
-	}
-	fmt.Fprintln(w, headerLine)
 
 	for _, row := range cells {
 		out := make([]string, len(cols))
