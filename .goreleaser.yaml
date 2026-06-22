@@ -1,0 +1,153 @@
+version: 2
+project_name: n8n-cli
+
+before:
+  hooks:
+    - go mod tidy
+    - mkdir -p completions
+    - sh -c "go run ./cmd/n8nctl completion bash       > completions/n8nctl.bash"
+    - sh -c "go run ./cmd/n8nctl completion zsh        > completions/n8nctl.zsh"
+    - sh -c "go run ./cmd/n8nctl completion fish       > completions/n8nctl.fish"
+    - sh -c "go run ./cmd/n8nctl completion powershell > completions/n8nctl.ps1"
+
+builds:
+  - id: n8nctl
+    main: ./cmd/n8nctl
+    binary: n8nctl
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/jjuanrivvera/n8n-cli/internal/version.Version={{ .Version }}
+      - -X github.com/jjuanrivvera/n8n-cli/internal/version.Commit={{ .ShortCommit }}
+      - -X github.com/jjuanrivvera/n8n-cli/internal/version.BuildDate={{ .Date }}
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+      - completions/*
+
+nfpms:
+  - id: packages
+    package_name: n8n-cli
+    vendor: jjuanrivvera
+    homepage: https://github.com/jjuanrivvera/n8n-cli
+    maintainer: Juan Rivera <jjuanrivvera@users.noreply.github.com>
+    description: Command-line interface for the n8n workflow automation API
+    license: MIT
+    formats: [deb, rpm, apk]
+    bindir: /usr/bin
+    contents:
+      - src: ./completions/n8nctl.bash
+        dst: /usr/share/bash-completion/completions/n8nctl
+        file_info: { mode: 0644 }
+      - src: ./completions/n8nctl.fish
+        dst: /usr/share/fish/vendor_completions.d/n8nctl.fish
+        file_info: { mode: 0644 }
+      - src: ./completions/n8nctl.zsh
+        dst: /usr/share/zsh/site-functions/_n8nctl
+        file_info: { mode: 0644 }
+
+checksum:
+  name_template: checksums.txt
+
+sboms:
+  - id: archive
+    artifacts: archive
+
+# Keyless signing of the checksums file (Sigstore/Fulcio/Rekor) with a v2 bundle.
+# The cosign binary is pinned to v2.6.3 by the release workflow. Verify with:
+#   cosign verify-blob --bundle checksums.txt.cosign.bundle \
+#     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+#     --certificate-identity-regexp 'https://github.com/jjuanrivvera/n8n-cli.*' \
+#     checksums.txt
+signs:
+  - cmd: cosign
+    signature: "${artifact}.cosign.bundle"
+    args:
+      - sign-blob
+      - "--new-bundle-format=true"
+      - "--bundle=${signature}"
+      - "${artifact}"
+      - "--yes"
+    artifacts: checksum
+    output: true
+
+changelog:
+  sort: asc
+  use: github
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: Bug fixes
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: Performance improvements
+      regexp: '^.*?perf(\(.+\))??!?:.+$'
+      order: 2
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: jjuanrivvera
+    name: n8n-cli
+  draft: false
+  prerelease: auto
+
+# Homebrew tap. GoReleaser deprecated `brews` (formulae) in favor of
+# `homebrew_casks`, which is the supported path for distributing prebuilt
+# binaries. The cask installs the `n8nctl` binary plus shell completions.
+homebrew_casks:
+  - name: n8nctl-cli
+    repository:
+      owner: jjuanrivvera
+      name: homebrew-n8n-cli
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: https://github.com/jjuanrivvera/n8n-cli
+    description: Command-line interface for the n8n workflow automation API
+    skip_upload: auto
+    completions:
+      bash: completions/n8nctl.bash
+      zsh: completions/n8nctl.zsh
+      fish: completions/n8nctl.fish
+    # Strip the quarantine attribute so the unsigned binary runs without a Gatekeeper prompt.
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/n8nctl"]
+          end
+
+scoops:
+  - repository:
+      owner: jjuanrivvera
+      name: scoop-n8n-cli
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: https://github.com/jjuanrivvera/n8n-cli
+    description: Command-line interface for the n8n workflow automation API
+    license: MIT

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "n8nctl-cli",
+  "version": "0.1.0",
+  "description": "Manage n8n workflows, executions, credentials, and more across one or many instances from the terminal with the n8nctl CLI.",
+  "author": {
+    "name": "Juan Rivera",
+    "url": "https://github.com/jjuanrivvera"
+  },
+  "homepage": "https://github.com/jjuanrivvera/n8n-cli",
+  "repository": "https://github.com/jjuanrivvera/n8n-cli",
+  "license": "MIT",
+  "skills": "./skills",
+  "keywords": [
+    "n8n",
+    "cli",
+    "workflow-automation",
+    "ai-agent"
+  ]
+}

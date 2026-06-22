@@ -1,0 +1,27 @@
+# Binaries & build output
+/bin/
+/dist/
+/site/
+/completions/
+/n8nctl
+*.exe
+
+# Test & coverage
+coverage.*
+*.out
+*.test
+
+# Secrets / local env — never commit credentials
+.env
+.env.*
+*.env
+credentials.json
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Worktree checkouts created by the worktree skill
+/.claude/worktrees/

@@ -1,0 +1,57 @@
+---
+title: n8nctl
+---
+
+## n8nctl
+
+Control any n8n instance from the terminal via its public API
+
+### Synopsis
+
+n8nctl is a portable, single-binary client for the n8n public REST API.
+
+It manages workflows, executions, credentials, tags, variables, projects and
+users on any n8n instance — self-hosted or Cloud — over HTTPS with an API key.
+
+Multi-instance is first class: define named profiles, store each instance's API
+key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
+
+### Options
+
+```
+      --api-key string    override the API key (prefer keyring via 'auth login')
+      --base-url string   override the instance base URL (e.g. https://host/api/v1)
+      --columns strings   comma-separated columns for table/csv output
+      --dry-run           print the equivalent curl and send no request
+  -h, --help              help for n8nctl
+      --no-color          disable colored output [env: NO_COLOR]
+  -o, --output string     output format: table|json|yaml|csv [env: N8NCTL_OUTPUT]
+      --profile string    config profile (instance) to use [env: N8NCTL_PROFILE]
+  -q, --quiet             suppress non-essential chatter
+      --rps float         client-side rate limit in requests/sec (0 = use config/default)
+      --show-token        do not redact the API key in --dry-run output
+  -v, --verbose           verbose (debug) logging to stderr
+```
+
+### SEE ALSO
+
+* [n8nctl alias](n8nctl_alias.md)	 - Define command shortcuts expanded before parsing
+* [n8nctl api](n8nctl_api.md)	 - Make a raw authenticated API request (escape hatch)
+* [n8nctl audit](n8nctl_audit.md)	 - Generate a security audit of the instance
+* [n8nctl auth](n8nctl_auth.md)	 - Authenticate against an n8n instance
+* [n8nctl backup](n8nctl_backup.md)	 - Export workflows, tags, and variables to a directory of JSON
+* [n8nctl completion](n8nctl_completion.md)	 - Generate a shell completion script
+* [n8nctl config](n8nctl_config.md)	 - Inspect and edit configuration and profiles
+* [n8nctl credentials](n8nctl_credentials.md)	 - Manage credentials
+* [n8nctl doctor](n8nctl_doctor.md)	 - Diagnose configuration, credentials, and connectivity
+* [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
+* [n8nctl init](n8nctl_init.md)	 - Interactive first-run setup for an instance/profile
+* [n8nctl projects](n8nctl_projects.md)	 - Manage projects and their members
+* [n8nctl restore](n8nctl_restore.md)	 - Recreate workflows from a backup directory
+* [n8nctl source-control](n8nctl_source-control.md)	 - Interact with the Source Control (Git) integration
+* [n8nctl tags](n8nctl_tags.md)	 - Manage workflow tags
+* [n8nctl users](n8nctl_users.md)	 - Manage users (instance owner only)
+* [n8nctl variables](n8nctl_variables.md)	 - Manage instance variables
+* [n8nctl version](n8nctl_version.md)	 - Print version, commit, and build date
+* [n8nctl workflows](n8nctl_workflows.md)	 - Manage workflows
+

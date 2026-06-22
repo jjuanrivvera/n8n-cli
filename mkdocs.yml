@@ -1,0 +1,59 @@
+site_name: n8nctl
+site_description: A portable, single-binary CLI for the n8n public REST API
+site_url: https://jjuanrivvera.github.io/n8n-cli/
+repo_url: https://github.com/jjuanrivvera/n8n-cli
+repo_name: jjuanrivvera/n8n-cli
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: red
+      accent: red
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: red
+      accent: red
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - toc.follow
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Multi-instance & Profiles: profiles.md
+  - Authentication: authentication.md
+  - Output & Filtering: output.md
+  - Beyond the API: beyond-api.md
+  - Reference:
+      - Command Reference: commands/index.md
+  - Contributing: contributing.md

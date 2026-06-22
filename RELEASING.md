@@ -1,0 +1,175 @@
+# Releasing & external setup
+
+Everything in this repo is ready. This checklist covers the steps that must be
+done **outside the codebase** (GitHub, Homebrew, secrets) to ship `n8nctl` as a
+polished CLI — installable via `go install`, Homebrew, and prebuilt binaries,
+with CI, signed releases, and a docs site.
+
+Boxes are ordered. Commands assume you're in the repo root and authenticated
+with `gh` (`gh auth login`).
+
+---
+
+## 1. Create the GitHub repository
+
+- [ ] Create the repo (public):
+  ```bash
+  gh repo create jjuanrivvera/n8n-cli --public \
+    --description "Command-line interface for the n8n workflow automation API" \
+    --source . --remote origin --push
+  ```
+- [ ] Set topics/homepage:
+  ```bash
+  gh repo edit jjuanrivvera/n8n-cli \
+    --add-topic n8n --add-topic cli --add-topic workflow-automation --add-topic golang \
+    --homepage https://jjuanrivvera.github.io/n8n-cli/
+  ```
+- [ ] Create the `develop` integration branch (the CI + branch model expect it):
+  ```bash
+  git checkout -b develop && git push -u origin develop && git checkout main
+  ```
+
+## 2. Homebrew tap (required before the first non-prerelease tag)
+
+GoReleaser pushes the cask to a separate tap repo. `.goreleaser.yaml` already
+points `homebrew_casks` at `jjuanrivvera/homebrew-n8n-cli`. The cask is named
+`n8nctl-cli` and installs the `n8nctl` binary plus shell completions, so the
+end-user install line is `brew install jjuanrivvera/n8n-cli/n8nctl-cli`.
+
+- [ ] Create the tap repo:
+  ```bash
+  gh repo create jjuanrivvera/homebrew-n8n-cli --public \
+    --description "Homebrew tap for n8nctl"
+  ```
+- [ ] Create a **Personal Access Token** with `repo` scope (covering **both** the
+  Homebrew tap **and** the Scoop bucket below), and add it as a secret on the
+  `n8n-cli` repo named `HOMEBREW_TAP_TOKEN` (the release workflow reads
+  `secrets.HOMEBREW_TAP_TOKEN` for `homebrew_casks` and `scoops`):
+  ```bash
+  gh secret set HOMEBREW_TAP_TOKEN --repo jjuanrivvera/n8n-cli
+  ```
+  > If you want to cut a release **before** setting this up, tag a prerelease
+  > (e.g. `v0.1.0-rc.1`) — `skip_upload: auto` skips the tap push on
+  > prereleases. The first stable `vX.Y.Z` tag requires the tap + token.
+
+### 2b. Scoop bucket (Windows)
+
+- [ ] Create the bucket repo (the `scoops` config points at it):
+  ```bash
+  gh repo create jjuanrivvera/scoop-n8n-cli --public \
+    --description "Scoop bucket for n8nctl"
+  ```
+  The `HOMEBREW_TAP_TOKEN` above must be able to push here too.
+
+### 2c. Supply chain — no setup needed
+
+The release workflow already generates an **SBOM** (syft) for each archive and
+**signs the checksums** keyless with **cosign** (Sigstore, via the `id-token`
+permission). No extra secrets required. Verify a release:
+
+```bash
+cosign verify-blob \
+  --bundle checksums.txt.cosign.bundle \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp 'https://github.com/jjuanrivvera/n8n-cli.*' \
+  checksums.txt
+```
+
+> No Docker image is published. n8nctl is a single static binary; the supported
+> install paths are Homebrew, Scoop, `go install`, and the prebuilt archives.
+
+## 3. Documentation site (GitHub Pages)
+
+The `docs.yml` workflow generates the command reference and runs
+`mkdocs gh-deploy` on pushes to `main` that touch `docs/**`, `mkdocs.yml`,
+`commands/**`, or `tools/gendocs/**`. It publishes to a `gh-pages` branch.
+
+- [ ] First run is easiest manually:
+  ```bash
+  pip install mkdocs-material mkdocs-git-revision-date-localized-plugin
+  make docs-gen
+  mkdocs gh-deploy --force        # creates & pushes gh-pages
+  ```
+- [ ] In **Settings → Pages**, set Source = "Deploy from a branch", Branch =
+  `gh-pages` / `/ (root)`. Site will be at
+  `https://jjuanrivvera.github.io/n8n-cli/`.
+- [ ] (Optional) trigger via CI later: `gh workflow run docs.yml`.
+
+## 4. First release
+
+Releases are automated by `.github/workflows/release.yml` + GoReleaser on any
+`v*` tag.
+
+- [ ] Tag and push:
+  ```bash
+  git checkout main
+  git tag -a v0.1.0 -m "n8nctl v0.1.0"
+  git push origin main --tags
+  ```
+- [ ] Watch it: `gh run watch` — GoReleaser builds linux/darwin/windows
+  (amd64/arm64) binaries, creates the GitHub Release with changelog, signs the
+  checksums, and updates the Homebrew cask.
+
+### Ongoing releases
+
+The repo integrates on `develop` and ships from `main`. To cut a release:
+
+1. Land changes on `develop` (PRs, green CI).
+2. Add the `chore(release): vX.Y.Z` commit (CHANGELOG) on `develop`; push.
+3. Tag that commit and push the tag:
+   ```bash
+   git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z
+   ```
+4. `release.yml` publishes via GoReleaser **and fast-forwards `main`** to the
+   released commit automatically (skipped for pre-release tags like `vX.Y.Z-rc1`).
+   No manual `main` promotion needed; if `main` ever diverged from the tag, the
+   step fails loudly so you can resolve it.
+
+## 5. Branch protection (optional)
+
+- [ ] Protect `main` (require PRs + green CI):
+  ```bash
+  gh api -X PUT repos/jjuanrivvera/n8n-cli/branches/main/protection \
+    -H "Accept: application/vnd.github+json" \
+    -f required_status_checks.strict=true \
+    -F 'required_status_checks.contexts[]=test (ubuntu-latest)' \
+    -F enforce_admins=true \
+    -F required_pull_request_reviews.required_approving_review_count=0 \
+    -F restrictions=null
+  ```
+
+## 6. Code coverage (Codecov)
+
+CI already uploads `coverage.out` to Codecov from the `coverage` job in
+`.github/workflows/ci.yml`. To light up the README badge:
+
+- [ ] Connect the repo at <https://codecov.io/gh/jjuanrivvera/n8n-cli>
+  (public repos usually work tokenless).
+- [ ] If uploads are rejected, add a `CODECOV_TOKEN` secret:
+  ```bash
+  gh secret set CODECOV_TOKEN --repo jjuanrivvera/n8n-cli
+  ```
+
+## 7. Verify after publishing
+
+- [ ] `go install github.com/jjuanrivvera/n8n-cli/cmd/n8nctl@latest` → `n8nctl version`
+- [ ] `brew install jjuanrivvera/n8n-cli/n8nctl-cli` → `n8nctl version`
+- [ ] Docs site loads and the command reference is present.
+- [ ] CI is green on `main`; release assets (archives, packages, checksums,
+  SBOMs, signature bundle) attached to the GitHub Release.
+
+---
+
+## Notes / decisions
+
+- **Credentials never go in CI.** Tests are unit tests (`httptest`); they need
+  no n8n API key. Do **not** add `N8NCTL_API_KEY` as a repo secret.
+- **Go version:** workflows read the Go version from `go.mod` via
+  `go-version-file`. Bump `go.mod` to upgrade.
+- **No Docker.** A single static binary covers every supported platform; there
+  is intentionally no container image to publish or scan.
+- **Skill / plugin:** the bundled agent skill ships under `skills/` and is
+  exposed as a Claude Code plugin via `.claude-plugin/`. Install it with
+  `/plugin marketplace add jjuanrivvera/n8n-cli` then
+  `/plugin install n8nctl-cli@n8nctl`.
+</content>
