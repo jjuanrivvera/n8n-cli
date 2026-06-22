@@ -94,8 +94,10 @@ func TestProfileCreatesOnDemand(t *testing.T) {
 
 func TestDefaultPath_XDG(t *testing.T) {
 	t.Setenv("N8NCTL_CONFIG", "")
-	t.Setenv("XDG_CONFIG_HOME", "/tmp/xdg")
-	assert.Equal(t, "/tmp/xdg/n8nctl-cli/config.yaml", DefaultPath())
+	xdg := filepath.Join(string(filepath.Separator)+"tmp", "xdg")
+	t.Setenv("XDG_CONFIG_HOME", xdg)
+	// Build the expected path with filepath.Join so it is correct on Windows too.
+	assert.Equal(t, filepath.Join(xdg, "n8nctl-cli", "config.yaml"), DefaultPath())
 	t.Setenv("N8NCTL_CONFIG", "/explicit/path.yaml")
 	assert.Equal(t, "/explicit/path.yaml", DefaultPath())
 }
