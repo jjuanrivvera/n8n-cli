@@ -140,7 +140,7 @@ func newListCmd[T any](sp resourceSpec[T]) *cobra.Command {
 				if truncated && !flagQuiet {
 					fmt.Fprintf(cmd.ErrOrStderr(), "warning: results truncated at %d pages; narrow filters or raise --max-pages\n", maxPages)
 				}
-				return render(cmd, items)
+				return render(cmd, items, sp.Columns...)
 			}
 			items, next, err := res.List(context.Background(), params)
 			if err != nil {
@@ -152,7 +152,7 @@ func newListCmd[T any](sp resourceSpec[T]) *cobra.Command {
 			if next != "" && !flagQuiet {
 				fmt.Fprintf(cmd.ErrOrStderr(), "more results available — re-run with --cursor %s (or --all)\n", next)
 			}
-			return render(cmd, items)
+			return render(cmd, items, sp.Columns...)
 		},
 	}
 	cmd.Flags().IntVar(&limit, "limit", 0, "max items to return (page size, capped at 250)")

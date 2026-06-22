@@ -89,12 +89,14 @@ func init() {
 	rootCmd.AddCommand(cmd)
 }
 
-func keySource(profile, envKey string) string {
+func keySource(profile, resolvedKey string) string {
 	switch {
 	case flagAPIKey != "":
 		return "from --api-key flag"
-	case envKey != "":
+	case os.Getenv("N8NCTL_API_KEY") != "":
 		return "from N8NCTL_API_KEY env"
+	case resolvedKey != "":
+		return "from config file"
 	case auth.Lookup(profile) != "":
 		return "from OS keyring"
 	default:

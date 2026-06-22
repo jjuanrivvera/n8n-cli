@@ -220,15 +220,22 @@ func outputFormat() (output.Format, error) {
 }
 
 // render writes data to stdout in the resolved format with column/color options.
-func render(cmd *cobra.Command, data any) error {
+// defaultCols supplies the table/csv columns when the user did not pass --columns
+// (each resource declares a sensible set so list output stays readable instead of
+// dumping every nested field).
+func render(cmd *cobra.Command, data any, defaultCols ...string) error {
 	format, err := outputFormat()
 	if err != nil {
 		return err
 	}
+	cols := flagColumns
+	if len(cols) == 0 {
+		cols = defaultCols
+	}
 	noColor := flagNoColor || os.Getenv("NO_COLOR") != ""
 	isTTY := term.IsTerminal(int(os.Stdout.Fd()))
 	opts := output.Options{
-		Columns: flagColumns,
+		Columns: cols,
 		NoColor: noColor,
 		Color:   isTTY && !noColor,
 	}

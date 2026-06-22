@@ -66,38 +66,49 @@ func backupCmd() *cobra.Command {
 				}
 			}
 
-			tags, err := client.Tags().ListAll(context.Background(), api.ListParams{}, 0)
-			if err != nil {
-				return err
-			}
-			if err := writeJSON(filepath.Join(outDir, "tags.json"), tags); err != nil {
-				return err
+			// Tags, variables, and credentials are best-effort: on a Community
+			// instance some are unlicensed (403) and must not abort the backup of
+			// the core workflows. Skipped sections are recorded in the manifest.
+			counts := map[string]int{"workflows": len(workflows)}
+			var skipped []string
+			optional := func(name, file string, fetch func() (any, int, error)) error {
+				v, n, err := fetch()
+				if err != nil {
+					fmt.Fprintf(cmd.ErrOrStderr(), "skipping %s: %v\n", name, err)
+					skipped = append(skipped, name)
+					return nil
+				}
+				counts[name] = n
+				return writeJSON(filepath.Join(outDir, file), v)
 			}
 
-			variables, err := client.Variables().ListAll(context.Background(), api.ListParams{}, 0)
-			if err != nil {
+			if err := optional("tags", "tags.json", func() (any, int, error) {
+				t, e := client.Tags().ListAll(context.Background(), api.ListParams{}, 0)
+				return t, len(t), e
+			}); err != nil {
 				return err
 			}
-			if err := writeJSON(filepath.Join(outDir, "variables.json"), variables); err != nil {
+			if err := optional("variables", "variables.json", func() (any, int, error) {
+				v, e := client.Variables().ListAll(context.Background(), api.ListParams{}, 0)
+				return v, len(v), e
+			}); err != nil {
 				return err
 			}
-
 			// Credential inventory: metadata only. Secrets are write-only in the API.
-			creds, cerr := client.Credentials().ListAll(context.Background(), api.ListParams{}, 0)
-			if cerr == nil {
-				_ = writeJSON(filepath.Join(outDir, "credentials.inventory.json"), creds)
+			if err := optional("credentials", "credentials.inventory.json", func() (any, int, error) {
+				c, e := client.Credentials().ListAll(context.Background(), api.ListParams{}, 0)
+				return c, len(c), e
+			}); err != nil {
+				return err
 			}
 
 			manifest := map[string]any{
 				"profile":    profile,
 				"baseUrl":    client.BaseURL(),
 				"exportedAt": time.Now().UTC().Format(time.RFC3339),
-				"counts": map[string]int{
-					"workflows": len(workflows),
-					"tags":      len(tags),
-					"variables": len(variables),
-				},
-				"note": "credentials.inventory.json holds metadata only; secret values are not exported by the n8n API",
+				"counts":     counts,
+				"skipped":    skipped,
+				"note":       "credentials.inventory.json holds metadata only; secret values are not exported by the n8n API",
 			}
 			if err := writeJSON(filepath.Join(outDir, "manifest.json"), manifest); err != nil {
 				return err
@@ -105,7 +116,10 @@ func backupCmd() *cobra.Command {
 
 			if !flagQuiet {
 				fmt.Fprintf(cmd.OutOrStdout(), "backed up %d workflows, %d tags, %d variables to %s\n",
-					len(workflows), len(tags), len(variables), outDir)
+					counts["workflows"], counts["tags"], counts["variables"], outDir)
+				if len(skipped) > 0 {
+					fmt.Fprintf(cmd.OutOrStdout(), "skipped (unlicensed or unavailable): %s\n", strings.Join(skipped, ", "))
+				}
 			}
 			return nil
 		},
