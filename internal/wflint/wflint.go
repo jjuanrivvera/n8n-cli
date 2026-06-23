@@ -149,13 +149,15 @@ func Lint(wf *api.Workflow, disabled map[string]bool) []Finding {
 		}
 
 		// invalid-parameter-value: an options/multiOptions parameter set to a value
-		// the node doesn't allow, evaluated against the property variant that is
-		// active for this node's other parameters (n8n shows a different option set
-		// per resource/operation). Conservative: skips dynamic/expression values.
+		// not in the node's current options, evaluated against the variant active for
+		// this node's other parameters. A Warning, not an Error: the value may be a
+		// typo (see the "did you mean" hint) or a legacy value removed in a newer node
+		// version (which the matching `breaking-changes` report covers), so it informs
+		// rather than blocks. Conservative: skips dynamic/expression values.
 		if on("invalid-parameter-value") && nodeKnown(n.Type) {
 			for field, val := range n.Parameters {
 				for _, msg := range invalidOptionValues(n.Type, field, val, n.Parameters) {
-					out = append(out, Finding{"invalid-parameter-value", Error, n.Name, msg})
+					out = append(out, Finding{"invalid-parameter-value", Warning, n.Name, msg})
 				}
 			}
 		}

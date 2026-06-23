@@ -121,25 +121,47 @@ func templateCreateBody(d *api.TemplateDetail, name string) (map[string]any, err
 	if name == "" {
 		name = "Imported template"
 	}
-	body := map[string]any{
+	nodes, err := wantArray(def["nodes"], "nodes")
+	if err != nil {
+		return nil, err
+	}
+	connections, err := wantObject(def["connections"], "connections")
+	if err != nil {
+		return nil, err
+	}
+	settings, err := wantObject(def["settings"], "settings")
+	if err != nil {
+		return nil, err
+	}
+	return map[string]any{
 		"name":        name,
-		"nodes":       orEmptyArray(def["nodes"]),
-		"connections": orEmptyObject(def["connections"]),
-		"settings":    orEmptyObject(def["settings"]),
-	}
-	return body, nil
+		"nodes":       nodes,
+		"connections": connections,
+		"settings":    settings,
+	}, nil
 }
 
-func orEmptyArray(v any) any {
+// wantArray returns v as a JSON array, an empty array if absent, or an error if it
+// is present but the wrong shape — so a malformed template fails clearly here
+// rather than as an opaque 422 from the instance.
+func wantArray(v any, field string) ([]any, error) {
 	if v == nil {
-		return []any{}
+		return []any{}, nil
 	}
-	return v
+	arr, ok := v.([]any)
+	if !ok {
+		return nil, fmt.Errorf("template %q is not an array", field)
+	}
+	return arr, nil
 }
 
-func orEmptyObject(v any) any {
+func wantObject(v any, field string) (map[string]any, error) {
 	if v == nil {
-		return map[string]any{}
+		return map[string]any{}, nil
 	}
-	return v
+	obj, ok := v.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("template %q is not an object", field)
+	}
+	return obj, nil
 }

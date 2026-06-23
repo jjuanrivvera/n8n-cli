@@ -129,7 +129,7 @@ func fetch(c *http.Client, url string) ([]map[string]any, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("HTTP %d", resp.StatusCode)
 	}
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 64<<20))
 	if err != nil {
 		return nil, err
 	}
@@ -213,9 +213,17 @@ func displayOptions(v any) map[string]map[string][]string {
 			if arr, ok := vals.([]any); ok {
 				var ss []string
 				for _, x := range arr {
-					ss = append(ss, stringifyValue(x))
+					// Keep only scalar conditions; n8n also uses comparator objects
+					// like {_cnd: {gte: 1.2}} that we cannot evaluate — skip them so
+					// they never become a bogus literal the lint rule compares against.
+					switch x.(type) {
+					case string, float64, bool:
+						ss = append(ss, stringifyValue(x))
+					}
 				}
-				conds[param] = ss
+				if len(ss) > 0 {
+					conds[param] = ss
+				}
 			}
 		}
 		if len(conds) > 0 {

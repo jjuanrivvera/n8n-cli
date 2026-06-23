@@ -8,20 +8,20 @@ import (
 )
 
 // VersionIssue describes one workflow node pinned to an older typeVersion than the
-// catalog's latest, plus any parameters it uses that the latest schema no longer
-// defines — the concrete signal of a potential breaking change on upgrade.
+// catalog's latest, plus any parameters it uses that the catalog does not recognize
+// for that node type — a signal of a potential breaking change on upgrade.
 type VersionIssue struct {
 	Node           string   `json:"node"`
 	Type           string   `json:"type"`
 	CurrentVersion int      `json:"currentVersion"`
 	LatestVersion  int      `json:"latestVersion"`
-	RemovedParams  []string `json:"removedParams,omitempty"`
+	UnknownParams  []string `json:"unknownParams,omitempty"`
 }
 
 // BreakingChanges reports nodes whose typeVersion trails the catalog's latest for
-// that node type. For each, RemovedParams lists parameters present on the node that
-// the latest schema does not define (candidates that were renamed or removed). It
-// only considers catalogued node types with a known version, so community/custom
+// that node type. For each, UnknownParams lists parameters present on the node that
+// the catalog does not define for any version of it (renamed, removed, or typos).
+// It only considers catalogued node types with a known version, so community/custom
 // nodes are never reported.
 func BreakingChanges(wf *api.Workflow) []VersionIssue {
 	var nodes []struct {
@@ -38,6 +38,8 @@ func BreakingChanges(wf *api.Workflow) []VersionIssue {
 		if !ok {
 			continue
 		}
+		// Skip nodes with no typeVersion (0 = field omitted) and nodes already at or
+		// past the catalog's latest — both are "nothing to report".
 		cur := int(n.TypeVersion)
 		if cur == 0 || cur >= latest {
 			continue
@@ -45,10 +47,10 @@ func BreakingChanges(wf *api.Workflow) []VersionIssue {
 		vi := VersionIssue{Node: n.Name, Type: n.Type, CurrentVersion: cur, LatestVersion: latest}
 		for p := range n.Parameters {
 			if !paramKnown(n.Type, p) {
-				vi.RemovedParams = append(vi.RemovedParams, p)
+				vi.UnknownParams = append(vi.UnknownParams, p)
 			}
 		}
-		sort.Strings(vi.RemovedParams)
+		sort.Strings(vi.UnknownParams)
 		out = append(out, vi)
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Node < out[j].Node })

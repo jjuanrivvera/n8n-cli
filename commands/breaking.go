@@ -19,12 +19,12 @@ type breakingRow struct {
 	Type           string   `json:"type"`
 	CurrentVersion int      `json:"currentVersion"`
 	LatestVersion  int      `json:"latestVersion"`
-	RemovedParams  []string `json:"removedParams,omitempty"`
+	UnknownParams  []string `json:"unknownParams,omitempty"`
 }
 
 // workflowBreakingChangesCmd reports nodes pinned to an older typeVersion than the
 // catalog's latest — the upgrade-risk signal — plus parameters those nodes use that
-// the latest schema no longer defines.
+// the catalog does not recognize for any version of the node.
 func workflowBreakingChangesCmd() *cobra.Command {
 	var dir string
 	var files []string
@@ -35,8 +35,8 @@ func workflowBreakingChangesCmd() *cobra.Command {
 		Short:   "Find nodes pinned to an outdated typeVersion (upgrade risk)",
 		Long: "Compare each workflow's nodes against the embedded node catalog and report\n" +
 			"those pinned to an older typeVersion than the latest known one, along with any\n" +
-			"parameters they use that the latest schema no longer defines (renamed/removed).\n" +
-			"Community/custom nodes are skipped. Informational — exits 0.",
+			"parameters they use that the catalog does not recognize for the node (renamed,\n" +
+			"removed, or typos). Community/custom nodes are skipped. Informational — exits 0.",
 		Args: cobra.MaximumNArgs(1),
 		Example: "  n8nctl workflows breaking-changes --dir ./workflows\n" +
 			"  n8nctl workflows breaking-changes 42\n" +
@@ -100,7 +100,7 @@ func workflowBreakingChangesCmd() *cobra.Command {
 					rows = append(rows, breakingRow{
 						Workflow: k, Node: vi.Node, Type: vi.Type,
 						CurrentVersion: vi.CurrentVersion, LatestVersion: vi.LatestVersion,
-						RemovedParams: vi.RemovedParams,
+						UnknownParams: vi.UnknownParams,
 					})
 				}
 			}
@@ -117,8 +117,8 @@ func workflowBreakingChangesCmd() *cobra.Command {
 			for _, r := range rows {
 				line := fmt.Sprintf("%s · %s (%s): typeVersion %d → latest %d",
 					r.Workflow, r.Node, r.Type, r.CurrentVersion, r.LatestVersion)
-				if len(r.RemovedParams) > 0 {
-					line += "; params not in latest schema: " + strings.Join(r.RemovedParams, ", ")
+				if len(r.UnknownParams) > 0 {
+					line += "; params not in catalog: " + strings.Join(r.UnknownParams, ", ")
 				}
 				fmt.Fprintln(cmd.OutOrStdout(), line)
 			}

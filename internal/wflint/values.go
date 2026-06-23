@@ -8,37 +8,38 @@ import (
 
 // invalidOptionValues validates one parameter's value against the node's schema.
 // It returns a finding message per invalid value, and is deliberately conservative
-// — it only flags `options`/`multiOptions` parameters whose currently-active
-// property variant has a *static* allowed-value list. Anything dynamic (loaded at
-// runtime), expression-driven, or ambiguous is left alone, so the rule never
-// reports a false positive on a legitimate workflow.
+// — it flags an `options`/`multiOptions` value only when it is absent from the
+// union of static allowed-values across every variant that could plausibly be
+// shown. Anything dynamic (loaded at runtime), expression-driven, or whose
+// visibility it cannot resolve is left alone, so the rule never reports a false
+// positive on a legitimate workflow.
 func invalidOptionValues(nodeType, param string, value any, params map[string]any) []string {
 	variants, ok := paramVariants(nodeType, param)
 	if !ok {
 		return nil
 	}
 
-	// Gather the allowed values across the variants that are active for this node's
-	// current parameters. If any active variant is a dynamic options list (no static
-	// values), we cannot validate safely — bail out.
+	// Gather the allowed values across every variant that could plausibly be shown
+	// for this node's current parameters. If any such variant is a dynamic options
+	// list (no static values), we cannot validate safely — bail out.
 	allowed := map[string]bool{}
-	active := false
+	haveStatic := false
 	for _, ps := range variants {
 		if ps.Type != "options" && ps.Type != "multiOptions" {
 			continue
 		}
-		if !variantActive(ps, params) {
+		if variantHidden(ps, params) {
 			continue
 		}
 		if len(ps.Options) == 0 {
 			return nil // dynamic options — don't guess
 		}
-		active = true
+		haveStatic = true
 		for _, o := range ps.Options {
 			allowed[o] = true
 		}
 	}
-	if !active {
+	if !haveStatic {
 		return nil
 	}
 
@@ -56,26 +57,38 @@ func invalidOptionValues(nodeType, param string, value any, params map[string]an
 	return out
 }
 
-// variantActive reports whether a property variant is visible given the node's
-// current parameters, by evaluating its displayOptions. A show condition must be
-// satisfied by a present parameter; a missing controlling parameter makes the
-// condition fail (conservative: we won't validate against a variant that may not
-// apply). A hide condition that matches makes the variant inactive.
-func variantActive(ps ParamSchema, params map[string]any) bool {
-	if ps.DisplayOptions == nil {
-		return true
-	}
+// variantHidden reports whether a property variant is *definitely* not shown for
+// the node's current parameters. It errs toward visible: it returns true only when
+// a controlling parameter is actually present and contradicts the variant's
+// displayOptions. A missing controlling parameter (using its default), a meta-key
+// reference (`@version` = the node's typeVersion, `/foo` = a root-context ref), or
+// a non-scalar comparator condition (`{_cnd: …}`, stripped to an empty list) is
+// treated as unknown — so the value rule never narrows the allowed set on a guess,
+// and never false-positives on a parameter whose real options it cannot resolve.
+func variantHidden(ps ParamSchema, params map[string]any) bool {
 	for ctrl, allowed := range ps.DisplayOptions["show"] {
-		if !valueMatchesAny(params[ctrl], allowed) {
-			return false
+		if metaKey(ctrl) || len(allowed) == 0 {
+			continue
+		}
+		if v, present := params[ctrl]; present && !valueMatchesAny(v, allowed) {
+			return true
 		}
 	}
 	for ctrl, vals := range ps.DisplayOptions["hide"] {
-		if valueMatchesAny(params[ctrl], vals) {
-			return false
+		if metaKey(ctrl) || len(vals) == 0 {
+			continue
+		}
+		if v, present := params[ctrl]; present && valueMatchesAny(v, vals) {
+			return true
 		}
 	}
-	return true
+	return false
+}
+
+// metaKey reports whether a displayOptions control key is a meta/context reference
+// (`@version`, `@tool`, `/rootRef`) rather than a sibling node parameter.
+func metaKey(k string) bool {
+	return strings.HasPrefix(k, "@") || strings.HasPrefix(k, "/")
 }
 
 // valueMatchesAny reports whether v (a scalar or a list) intersects allowed.
@@ -117,9 +130,12 @@ func isExpressionValue(s string) bool {
 	return strings.HasPrefix(s, "=") || strings.Contains(s, "{{")
 }
 
-// closest returns the nearest allowed value to v within edit distance 2.
+// maxSuggestionDist is the largest edit distance for a "did you mean" suggestion.
+const maxSuggestionDist = 2
+
+// closest returns the nearest allowed value to v within maxSuggestionDist.
 func closest(v string, allowed map[string]bool) (string, bool) {
-	best, bestDist := "", 3
+	best, bestDist := "", maxSuggestionDist+1
 	for a := range allowed {
 		if d := levenshtein(strings.ToLower(a), strings.ToLower(v)); d < bestDist {
 			best, bestDist = a, d

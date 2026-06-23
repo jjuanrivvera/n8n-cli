@@ -17,14 +17,7 @@
        "planAndExecuteAgent",
        "reActAgent",
        "sqlAgent"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.5]]"
-        ]
-       }
-      }
+      ]
      },
      {
       "type": "options",
@@ -35,24 +28,10 @@
        "reActAgent",
        "sqlAgent",
        "toolsAgent"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[between:map[from:1.6 to:1.7]]]"
-        ]
-       }
-      }
+      ]
      },
      {
-      "type": "hidden",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.8]]"
-        ]
-       }
-      }
+      "type": "hidden"
      }
     ],
     "aiAgentStarterCallout": [
@@ -102,27 +81,6 @@
       ],
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.4]]"
-        ],
-        "agent": [
-         "sqlAgent"
-        ]
-       }
-      }
-     },
-     {
-      "type": "options",
-      "options": [
-       "mysql",
-       "postgres",
-       "sqlite"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
         "agent": [
          "sqlAgent"
         ]
@@ -166,9 +124,6 @@
       "type": "boolean",
       "displayOptions": {
        "hide": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "agent": [
          "sqlAgent"
         ]
@@ -182,9 +137,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "agent": [
          "sqlAgent"
         ]
@@ -195,16 +147,6 @@
     "needsFallback": [
      {
       "type": "boolean"
-     },
-     {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.1]]"
-        ]
-       }
-      }
      }
     ],
     "notice": [
@@ -251,26 +193,6 @@
     "options": [
      {
       "type": "collection"
-     },
-     {
-      "type": "collection",
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lt:2.2]]"
-        ]
-       }
-      }
-     },
-     {
-      "type": "collection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.2]]"
-        ]
-       }
-      }
      },
      {
       "type": "collection",
@@ -340,35 +262,13 @@
        "auto",
        "define",
        "guardrails"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:3.1]]"
-        ]
-       }
-      }
+      ]
      },
      {
       "type": "options",
       "options": [
        "auto",
        "define"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:3.1]]"
-        ]
-       }
-      }
-     },
-     {
-      "type": "options",
-      "options": [
-       "auto",
-       "define",
-       "guardrails"
       ]
      },
      {
@@ -380,9 +280,6 @@
       ],
       "displayOptions": {
        "hide": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "agent": [
          "sqlAgent"
         ]
@@ -397,11 +294,6 @@
        "guardrails"
       ],
       "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ]
-       },
        "show": {
         "agent": [
          "sqlAgent"
@@ -463,29 +355,12 @@
       "type": "string",
       "required": true,
       "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.7]]"
-        ],
-        "promptType": [
-         "guardrails"
-        ]
-       }
-      }
-     },
-     {
-      "type": "string",
-      "required": true,
-      "displayOptions": {
        "hide": {
         "agent": [
          "sqlAgent"
         ]
        },
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.7]]"
-        ],
         "promptType": [
          "auto"
         ]
@@ -639,9 +514,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.7]]"
-        ],
         "agent": [
          "sqlAgent"
         ],
@@ -656,9 +528,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.7]]"
-        ],
         "agent": [
          "sqlAgent"
         ],
@@ -750,16 +619,6 @@
     ],
     "needsFallback": [
      {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.1]]"
-        ]
-       }
-      }
-     },
-     {
       "type": "boolean"
      }
     ],
@@ -776,26 +635,6 @@
      }
     ],
     "options": [
-     {
-      "type": "collection",
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lt:2.2]]"
-        ]
-       }
-      }
-     },
-     {
-      "type": "collection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.2]]"
-        ]
-       }
-      }
-     },
      {
       "type": "collection"
      }
@@ -1078,9 +917,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "operation": [
          "message"
         ],
@@ -1115,9 +951,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "operation": [
          "analyze"
         ],
@@ -1155,9 +988,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "operation": [
          "generate"
         ],
@@ -1191,9 +1021,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "operation": [
          "textToVideo"
         ],
@@ -1228,9 +1055,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "operation": [
          "imageToVideo"
         ],
@@ -2217,14 +2041,7 @@
    "params": {
     "batching": [
      {
-      "type": "collection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.7]]"
-        ]
-       }
-      }
+      "type": "collection"
      }
     ],
     "fallbackNotice": [
@@ -2330,29 +2147,14 @@
        "auto",
        "define",
        "guardrails"
-      ],
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lte:1.3]]",
-         "map[_cnd:map[gte:1.8]]"
-        ]
-       }
-      }
+      ]
      },
      {
       "type": "options",
       "options": [
        "auto",
        "define"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.8]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "text": [
@@ -2361,9 +2163,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.5]]"
-        ],
         "promptType": [
          "guardrails"
         ]
@@ -2375,9 +2174,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.5]]"
-        ],
         "promptType": [
          "auto"
         ]
@@ -2419,29 +2215,14 @@
        "auto",
        "define",
        "guardrails"
-      ],
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]",
-         "map[_cnd:map[gte:1.7]]"
-        ]
-       }
-      }
+      ]
      },
      {
       "type": "options",
       "options": [
        "auto",
        "define"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.7]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "query": [
@@ -2485,9 +2266,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
         "promptType": [
          "guardrails"
         ]
@@ -2499,9 +2277,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
         "promptType": [
          "auto"
         ]
@@ -2654,28 +2429,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -2724,14 +2477,7 @@
       "options": [
        "send",
        "sendAndWait"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "options": [
@@ -2790,14 +2536,7 @@
     ],
     "waitUserReply": [
      {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.1]]"
-        ]
-       }
-      }
+      "type": "boolean"
      }
     ]
    }
@@ -2811,9 +2550,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -2930,9 +2666,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -2978,9 +2711,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -3107,9 +2837,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -3155,9 +2882,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -3274,9 +2998,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -3322,9 +3043,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "availableInChat": [
          "true"
         ]
@@ -3337,9 +3055,6 @@
       "type": "icon",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "availableInChat": [
          "true"
         ]
@@ -3352,9 +3067,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "availableInChat": [
          "true"
         ]
@@ -3389,22 +3101,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.2]]"
-        ],
-        "availableInChat": [
-         "true"
-        ]
-       }
-      }
-     },
-     {
-      "type": "notice",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "availableInChat": [
          "true"
         ]
@@ -3527,9 +3223,6 @@
       "type": "collection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "public": [
          "false"
         ]
@@ -3540,9 +3233,6 @@
       "type": "collection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "mode": [
          "hostedChat",
          "webhook"
@@ -3564,9 +3254,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "availableInChat": [
          "true"
         ]
@@ -4302,9 +3989,6 @@
       "type": "collection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "operation": [
          "message"
         ],
@@ -4702,9 +4386,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.2]]"
-        ],
         "operation": [
          "generate"
         ],
@@ -4719,43 +4400,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
-        "operation": [
-         "generate"
-        ],
-        "resource": [
-         "image"
-        ]
-       }
-      }
-     },
-     {
-      "type": "resourceLocator",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.2]]"
-        ],
-        "operation": [
-         "message"
-        ],
-        "resource": [
-         "text"
-        ]
-       }
-      }
-     },
-     {
-      "type": "resourceLocator",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "operation": [
          "message"
         ],
@@ -5400,9 +5044,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "schemaType": [
          "fromJson"
         ]
@@ -5521,14 +5162,7 @@
        "claude-3-haiku-20240307",
        "claude-3-opus-20240229",
        "claude-3-sonnet-20240229"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ]
-       }
-      }
+      ]
      },
      {
       "type": "resourceLocator",
@@ -5554,14 +5188,7 @@
      },
      {
       "type": "resourceLocator",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.5]]"
-        ]
-       }
-      }
+      "required": true
      }
     ],
     "notice": [
@@ -5617,14 +5244,7 @@
       "options": [
        "inferenceProfile",
        "onDemand"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "notice": [
@@ -5738,24 +5358,7 @@
    "params": {
     "modelName": [
      {
-      "type": "options",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[eq:1]]"
-        ]
-       }
-      }
-     },
-     {
-      "type": "options",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ]
-       }
-      }
+      "type": "options"
      }
     ],
     "notice": [
@@ -5907,14 +5510,7 @@
       }
      },
      {
-      "type": "options",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ]
-       }
-      }
+      "type": "options"
      }
     ],
     "notice": [
@@ -6013,9 +5609,6 @@
        "show": {
         "/responsesApiEnabled": [
          "true"
-        ],
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
         ]
        }
       }
@@ -6023,25 +5616,11 @@
     ],
     "model": [
      {
-      "type": "options",
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      "type": "options"
      },
      {
       "type": "resourceLocator",
-      "required": true,
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lte:1.1]]"
-        ]
-       }
-      }
+      "required": true
      }
     ],
     "notice": [
@@ -6067,16 +5646,6 @@
         ]
        }
       }
-     },
-     {
-      "type": "notice",
-      "displayOptions": {
-       "show": {
-        "/options.baseURL": [
-         "map[_cnd:map[exists:true]]"
-        ]
-       }
-      }
      }
     ],
     "options": [
@@ -6086,14 +5655,7 @@
     ],
     "responsesApiEnabled": [
      {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ]
-       }
-      }
+      "type": "boolean"
      }
     ]
    }
@@ -6268,14 +5830,7 @@
     ],
     "notice": [
      {
-      "type": "notice",
-      "displayOptions": {
-       "show": {
-        "/options.baseURL": [
-         "map[_cnd:map[exists:true]]"
-        ]
-       }
-      }
+      "type": "notice"
      }
     ],
     "options": [
@@ -6426,14 +5981,7 @@
        "bearerAuth",
        "headerAuth",
        "none"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.2]]"
-        ]
-       }
-      }
+      ]
      },
      {
       "type": "options",
@@ -6443,14 +5991,7 @@
        "mcpOAuth2Api",
        "multipleHeadersAuth",
        "none"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "credentials": [
@@ -6471,14 +6012,7 @@
     "endpointUrl": [
      {
       "type": "string",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ]
-       }
-      }
+      "required": true
      }
     ],
     "excludeTools": [
@@ -6545,14 +6079,7 @@
       "options": [
        "httpStreamable",
        "sse"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "sseEndpoint": [
@@ -6672,9 +6199,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -6688,14 +6212,7 @@
       "options": [
        "customKey",
        "fromInput"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "sessionKey": [
@@ -6723,9 +6240,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -6889,9 +6403,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -6913,9 +6424,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -6954,9 +6462,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -6993,14 +6498,7 @@
       "options": [
        "customKey",
        "fromInput"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "sessionKey": [
@@ -7008,9 +6506,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -7036,14 +6531,7 @@
    "params": {
     "contextWindowLength": [
      {
-      "type": "number",
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lt:1.1]]"
-        ]
-       }
-      }
+      "type": "number"
      }
     ],
     "notice": [
@@ -7056,9 +6544,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -7080,9 +6565,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -7113,14 +6595,7 @@
    "params": {
     "contextWindowLength": [
      {
-      "type": "number",
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lt:1.3]]"
-        ]
-       }
-      }
+      "type": "number"
      }
     ],
     "notice": [
@@ -7133,9 +6608,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.6]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -7149,14 +6621,7 @@
       "options": [
        "customKey",
        "fromInput"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "sessionKey": [
@@ -7184,9 +6649,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -7217,14 +6679,7 @@
    "params": {
     "contextWindowLength": [
      {
-      "type": "number",
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lt:1.3]]"
-        ]
-       }
-      }
+      "type": "number"
      }
     ],
     "notice": [
@@ -7237,9 +6692,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.5]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -7276,14 +6728,7 @@
       "options": [
        "customKey",
        "fromInput"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "sessionKey": [
@@ -7301,9 +6746,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -7332,9 +6774,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -7371,14 +6810,7 @@
       "options": [
        "customKey",
        "fromInput"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "sessionKey": [
@@ -7386,9 +6818,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "sessionIdType": [
          "fromInput"
         ]
@@ -7489,14 +6918,7 @@
     ],
     "needsFallback": [
      {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.1]]"
-        ]
-       }
-      }
+      "type": "boolean"
      }
     ],
     "notice": [
@@ -8678,9 +8100,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "/modelId": [
-         "map[_cnd:map[includes:dall-e]]"
-        ],
         "operation": [
          "edit"
         ],
@@ -8915,9 +8334,6 @@
       "type": "hidden",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "modelId": [
          "gpt-3.5-turbo-16k-0613",
          "dall-e-3",
@@ -8989,9 +8405,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "/modelId": [
-         "map[_cnd:map[includes:gpt-image]]"
-        ],
         "operation": [
          "edit"
         ],
@@ -9103,9 +8516,6 @@
       ],
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.6]]"
-        ],
         "operation": [
          "message"
         ],
@@ -9187,9 +8597,6 @@
       ],
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.2]]"
-        ],
         "operation": [
          "generate"
         ],
@@ -9207,29 +8614,8 @@
       ],
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.3]]"
-        ],
         "operation": [
          "edit"
-        ],
-        "resource": [
-         "image"
-        ]
-       }
-      }
-     },
-     {
-      "type": "options",
-      "options": [
-       "dall-e-2",
-       "dall-e-3",
-       "gpt-image-1"
-      ],
-      "displayOptions": {
-       "show": {
-        "operation": [
-         "generate"
         ],
         "resource": [
          "image"
@@ -9244,9 +8630,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ],
         "operation": [
          "generate"
         ],
@@ -9275,9 +8658,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.3]]"
-        ],
         "operation": [
          "edit"
         ],
@@ -9325,23 +8705,6 @@
         ],
         "resource": [
          "assistant"
-        ]
-       }
-      }
-     },
-     {
-      "type": "resourceLocator",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ],
-        "operation": [
-         "analyze"
-        ],
-        "resource": [
-         "image"
         ]
        }
       }
@@ -9661,25 +9024,6 @@
       "type": "collection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.2]]"
-        ],
-        "operation": [
-         "generate"
-        ],
-        "resource": [
-         "image"
-        ]
-       }
-      }
-     },
-     {
-      "type": "collection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ],
         "operation": [
          "generate"
         ],
@@ -9706,9 +9050,6 @@
       "type": "collection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.3]]"
-        ],
         "operation": [
          "edit"
         ],
@@ -9722,25 +9063,6 @@
       "type": "collection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.3]]"
-        ],
-        "operation": [
-         "edit"
-        ],
-        "resource": [
-         "image"
-        ]
-       }
-      }
-     },
-     {
-      "type": "collection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.1]]"
-        ],
         "operation": [
          "classify"
         ],
@@ -9833,32 +9155,6 @@
       "displayOptions": {
        "show": {
         "operation": [
-         "generate"
-        ],
-        "resource": [
-         "image"
-        ]
-       }
-      }
-     },
-     {
-      "type": "collection",
-      "displayOptions": {
-       "show": {
-        "operation": [
-         "classify"
-        ],
-        "resource": [
-         "text"
-        ]
-       }
-      }
-     },
-     {
-      "type": "collection",
-      "displayOptions": {
-       "show": {
-        "operation": [
          "message"
         ],
         "resource": [
@@ -9893,9 +9189,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "/modelId": [
-         "map[_cnd:map[includes:gpt-image]]"
-        ],
         "operation": [
          "edit"
         ],
@@ -9941,9 +9234,6 @@
       ],
       "displayOptions": {
        "show": {
-        "/modelId": [
-         "map[_cnd:map[includes:gpt-image]]"
-        ],
         "operation": [
          "edit"
         ],
@@ -10050,9 +9340,6 @@
       ],
       "displayOptions": {
        "show": {
-        "/modelId": [
-         "map[_cnd:map[includes:gpt-image]]"
-        ],
         "operation": [
          "edit"
         ],
@@ -10115,9 +9402,6 @@
       ],
       "displayOptions": {
        "show": {
-        "/modelId": [
-         "map[_cnd:map[includes:dall-e]]"
-        ],
         "operation": [
          "edit"
         ],
@@ -10304,9 +9588,6 @@
       "type": "string",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.6]]"
-        ],
         "memory": [
          "threadId"
         ],
@@ -10537,14 +9818,7 @@
     "jsonSchema": [
      {
       "type": "json",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.1]]"
-        ]
-       }
-      }
+      "required": true
      }
     ],
     "jsonSchemaExample": [
@@ -10567,9 +9841,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "schemaType": [
          "fromJson"
         ]
@@ -10598,14 +9869,7 @@
       "options": [
        "fromJson",
        "manual"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ]
    }
@@ -10687,9 +9951,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[eq:1]]"
-        ],
         "source": [
          "database"
         ]
@@ -10701,9 +9962,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "source": [
          "database"
         ]
@@ -10951,9 +10209,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "schemaType": [
          "fromJson"
         ],
@@ -11587,14 +10842,7 @@
     ],
     "name": [
      {
-      "type": "string",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:2.1]]"
-        ]
-       }
-      }
+      "type": "string"
      },
      {
       "type": "string",
@@ -11602,16 +10850,6 @@
        "show": {
         "@version": [
          "1"
-        ]
-       }
-      }
-     },
-     {
-      "type": "string",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
         ]
        }
       }
@@ -11630,14 +10868,7 @@
     "responsePropertyName": [
      {
       "type": "string",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.3]]"
-        ]
-       }
-      }
+      "required": true
      }
     ],
     "schemaType": [
@@ -11687,23 +10918,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.1]]"
-        ],
-        "source": [
-         "database"
-        ]
-       }
-      }
-     },
-     {
-      "type": "workflowSelector",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "source": [
          "database"
         ]
@@ -11753,9 +10967,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -11889,9 +11100,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -11952,9 +11160,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -12081,9 +11286,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -12141,9 +11343,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -12179,25 +11378,11 @@
     ],
     "memoryKey": [
      {
-      "type": "string",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.1]]"
-        ]
-       }
-      }
+      "type": "string"
      },
      {
       "type": "resourceLocator",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      "required": true
      }
     ],
     "mode": [
@@ -12281,9 +11466,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -12361,9 +11543,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -12475,9 +11654,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -12529,9 +11705,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -12671,9 +11844,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -12725,9 +11895,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -12859,9 +12026,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -12907,9 +12071,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -13041,9 +12202,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -13089,9 +12247,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -13225,9 +12380,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -13322,9 +12474,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -13457,9 +12606,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -13505,9 +12651,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -13641,9 +12784,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -13689,9 +12829,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -13835,9 +12972,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -13934,9 +13068,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -14063,9 +13194,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -14128,9 +13256,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "mode": [
          "insert"
         ]
@@ -14257,9 +13382,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.2]]"
-        ],
         "mode": [
          "retrieve-as-tool"
         ]
@@ -47326,31 +46448,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "resource": [
-         "message"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -52176,31 +51273,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "resource": [
-         "email"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -53236,9 +52308,6 @@
       ],
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:4.7]]"
-        ],
         "operation": [
          "setMetrics"
         ]
@@ -53453,26 +52522,6 @@
       ],
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:4.8]]"
-        ],
-        "operation": [
-         "setOutputs"
-        ]
-       }
-      }
-     },
-     {
-      "type": "options",
-      "options": [
-       "dataTable",
-       "googleSheets"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:4.7]]"
-        ],
         "operation": [
          "setOutputs"
         ]
@@ -53655,28 +52704,7 @@
       "options": [
        "dataTable",
        "googleSheets"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:4.7]]"
-        ]
-       }
-      }
-     },
-     {
-      "type": "options",
-      "options": [
-       "dataTable",
-       "googleSheets"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:4.6]]"
-        ]
-       }
-      }
+      ]
      }
     ]
    }
@@ -53759,14 +52787,7 @@
    "params": {
     "executeWorkflowNotice": [
      {
-      "type": "notice",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.1]]"
-        ]
-       }
-      }
+      "type": "notice"
      }
     ],
     "mode": [
@@ -53790,14 +52811,7 @@
     ],
     "outdatedVersionWarning": [
      {
-      "type": "notice",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.1]]"
-        ]
-       }
-      }
+      "type": "notice"
      }
     ],
     "source": [
@@ -53808,28 +52822,14 @@
        "localFile",
        "parameter",
        "url"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:1.1]]"
-        ]
-       }
-      }
+      ]
      },
      {
       "type": "options",
       "options": [
        "database",
        "parameter"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "workflowId": [
@@ -53852,9 +52852,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "source": [
          "database"
         ]
@@ -53873,9 +52870,6 @@
         ]
        },
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ],
         "source": [
          "database"
         ]
@@ -53940,14 +52934,7 @@
        "jsonExample",
        "passthrough",
        "workflowInputs"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "jsonExample": [
@@ -53955,9 +52942,6 @@
       "type": "json",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "inputSource": [
          "jsonExample"
         ]
@@ -53970,9 +52954,6 @@
       "type": "notice",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "inputSource": [
          "jsonExample"
         ]
@@ -53982,26 +52963,12 @@
     ],
     "notice": [
      {
-      "type": "notice",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[eq:1]]"
-        ]
-       }
-      }
+      "type": "notice"
      }
     ],
     "outdatedVersionWarning": [
      {
-      "type": "notice",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[eq:1]]"
-        ]
-       }
-      }
+      "type": "notice"
      }
     ],
     "workflowInputs": [
@@ -54009,9 +52976,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "inputSource": [
          "workflowInputs"
         ]
@@ -54781,14 +53745,7 @@
     ],
     "looseTypeValidation": [
      {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.1]]"
-        ]
-       }
-      }
+      "type": "boolean"
      }
     ],
     "options": [
@@ -55106,25 +54063,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "page"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -55485,26 +54423,6 @@
     ],
     "formFields": [
      {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ]
-       }
-      }
-     },
-     {
       "type": "fixedCollection"
      }
     ],
@@ -55544,17 +54462,6 @@
     "path": [
      {
       "type": "string",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:2.1]]"
-        ]
-       }
-      }
-     },
-     {
-      "type": "string",
       "required": true
      }
     ],
@@ -55565,35 +54472,13 @@
        "lastNode",
        "onReceived",
        "responseNode"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lte:2.1]]"
-        ]
-       }
-      }
+      ]
      },
      {
       "type": "options",
       "options": [
        "lastNode",
        "onReceived"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ]
-       }
-      }
-     },
-     {
-      "type": "options",
-      "options": [
-       "lastNode",
-       "onReceived",
-       "responseNode"
       ]
      }
     ]
@@ -61474,9 +60359,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "operation": [
          "addConfig"
         ]
@@ -61488,9 +60370,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.1]]"
-        ],
         "operation": [
          "addConfig"
         ]
@@ -62548,9 +61427,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lte:1]]"
-        ],
         "operation": [
          "dispatch",
          "dispatchAndWait"
@@ -62566,9 +61442,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "operation": [
          "dispatch",
          "dispatchAndWait"
@@ -63945,31 +62818,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "resource": [
-         "message"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -68419,26 +67267,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.3]]"
-        ],
-        "operation": [
-         "create"
-        ],
-        "resource": [
-         "event"
-        ]
-       }
-      }
-     },
-     {
-      "type": "dateTime",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "operation": [
          "create"
         ],
@@ -68522,12 +67350,6 @@
        "show": {
         "@tool": [
          "false"
-        ],
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
-        "eventId": [
-         "map[_cnd:map[includes:_]]"
         ],
         "operation": [
          "update"
@@ -68689,26 +67511,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.3]]"
-        ],
-        "operation": [
-         "create"
-        ],
-        "resource": [
-         "event"
-        ]
-       }
-      }
-     },
-     {
-      "type": "dateTime",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "operation": [
          "create"
         ],
@@ -68725,26 +67527,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.3]]"
-        ],
-        "operation": [
-         "availability"
-        ],
-        "resource": [
-         "calendar"
-        ]
-       }
-      }
-     },
-     {
-      "type": "dateTime",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "operation": [
          "availability"
         ],
@@ -68758,9 +67540,6 @@
       "type": "dateTime",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "operation": [
          "getAll"
         ],
@@ -68777,26 +67556,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:1.3]]"
-        ],
-        "operation": [
-         "availability"
-        ],
-        "resource": [
-         "calendar"
-        ]
-       }
-      }
-     },
-     {
-      "type": "dateTime",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "operation": [
          "availability"
         ],
@@ -68810,9 +67569,6 @@
       "type": "dateTime",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "operation": [
          "getAll"
         ],
@@ -68981,31 +67737,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "resource": [
-         "message"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -72891,9 +71622,6 @@
         ]
        },
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:4]]"
-        ],
         "operation": [
          "append"
         ],
@@ -72913,9 +71641,6 @@
         ]
        },
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:4.7]]"
-        ],
         "operation": [
          "update"
         ],
@@ -72935,53 +71660,6 @@
         ]
        },
        "show": {
-        "@version": [
-         "map[_cnd:map[between:map[from:4 to:4.6]]]"
-        ],
-        "operation": [
-         "update"
-        ],
-        "resource": [
-         "sheet"
-        ]
-       }
-      }
-     },
-     {
-      "type": "resourceMapper",
-      "required": true,
-      "displayOptions": {
-       "hide": {
-        "sheetName": [
-         ""
-        ]
-       },
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:4.7]]"
-        ],
-        "operation": [
-         "appendOrUpdate"
-        ],
-        "resource": [
-         "sheet"
-        ]
-       }
-      }
-     },
-     {
-      "type": "resourceMapper",
-      "required": true,
-      "displayOptions": {
-       "hide": {
-        "sheetName": [
-         ""
-        ]
-       },
-       "show": {
-        "@version": [
-         "map[_cnd:map[between:map[from:4 to:4.6]]]"
-        ],
         "operation": [
          "appendOrUpdate"
         ],
@@ -73029,34 +71707,6 @@
         ]
        },
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:4.3]]"
-        ],
-        "operation": [
-         "read"
-        ],
-        "resource": [
-         "sheet"
-        ]
-       }
-      }
-     },
-     {
-      "type": "options",
-      "options": [
-       "AND",
-       "OR"
-      ],
-      "displayOptions": {
-       "hide": {
-        "sheetName": [
-         ""
-        ]
-       },
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:4.3]]"
-        ],
         "operation": [
          "read"
         ],
@@ -75405,9 +74055,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ],
         "requestMethod": [
          "POST"
         ]
@@ -80278,9 +78925,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gt:1]]"
-        ],
         "operation": [
          "extractHtmlContent"
         ]
@@ -81727,9 +80371,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ],
         "operation": [
          "create"
         ],
@@ -83405,14 +82046,7 @@
     ],
     "looseTypeValidation": [
      {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.1]]"
-        ]
-       }
-      }
+      "type": "boolean"
      }
     ],
     "options": [
@@ -87768,14 +86402,7 @@
     ],
     "authenticateWebhook": [
      {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ]
-       }
-      }
+      "type": "boolean"
      }
     ],
     "events": [
@@ -88083,9 +86710,6 @@
       ],
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ],
         "resolveOffset": [
          "onStatus"
         ]
@@ -88112,14 +86736,7 @@
        "onCompletion",
        "onStatus",
        "onSuccess"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.3]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "schemaRegistryUrl": [
@@ -102950,31 +101567,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "resource": [
-         "message"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -105788,31 +104380,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "resource": [
-         "chatMessage"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -115141,11 +113708,6 @@
       "type": "resourceLocator",
       "required": true,
       "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ]
-       },
        "show": {
         "operation": [
          "append"
@@ -115161,45 +113723,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ],
-        "operation": [
-         "append"
-        ],
-        "resource": [
-         "block"
-        ]
-       }
-      }
-     },
-     {
-      "type": "resourceLocator",
-      "required": true,
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ]
-       },
-       "show": {
-        "operation": [
-         "getAll"
-        ],
-        "resource": [
-         "block"
-        ]
-       }
-      }
-     },
-     {
-      "type": "resourceLocator",
-      "required": true,
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ],
         "operation": [
          "getAll"
         ],
@@ -124650,14 +123173,7 @@
        "deleted",
        "merged",
        "updated"
-      ],
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ]
-       }
-      }
+      ]
      },
      {
       "type": "options",
@@ -124666,14 +123182,7 @@
        "change",
        "create",
        "delete"
-      ],
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lte:1]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "authentication": [
@@ -124700,14 +123209,7 @@
        "product",
        "stage",
        "user"
-      ],
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[lte:1]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "incomingAuthentication": [
@@ -124734,14 +123236,7 @@
        "product",
        "stage",
        "user"
-      ],
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[gte:1.1]]"
-        ]
-       }
-      }
+      ]
      }
     ]
    }
@@ -125392,9 +123887,6 @@
         ]
        },
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ],
         "operation": [
          "insert"
         ],
@@ -125414,9 +123906,6 @@
         ]
        },
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ],
         "operation": [
          "update"
         ],
@@ -125436,9 +123925,6 @@
         ]
        },
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ],
         "operation": [
          "upsert"
         ],
@@ -131381,14 +129867,7 @@
     ],
     "enableResponseOutput": [
      {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.4]]"
-        ]
-       }
-      }
+      "type": "boolean"
      }
     ],
     "generalNotice": [
@@ -131475,14 +129954,7 @@
        "noData",
        "redirect",
        "text"
-      ],
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:1.2]]"
-        ]
-       }
-      }
+      ]
      }
     ],
     "responseBody": [
@@ -142456,9 +140928,6 @@
       "required": true,
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.2]]"
-        ],
         "operation": [
          "upload"
         ],
@@ -143335,31 +141804,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "resource": [
-         "message"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -149957,14 +148401,7 @@
     ],
     "looseTypeValidation": [
      {
-      "type": "boolean",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:3.1]]"
-        ]
-       }
-      }
+      "type": "boolean"
      }
     ],
     "mode": [
@@ -149981,22 +148418,6 @@
       "type": "number",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:3.3]]"
-        ],
-        "mode": [
-         "expression"
-        ]
-       }
-      }
-     },
-     {
-      "type": "number",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[lt:3.3]]"
-        ],
         "mode": [
          "expression"
         ]
@@ -152545,31 +150966,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "resource": [
-         "message"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],
@@ -157447,9 +155843,6 @@
       "type": "collection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.1]]"
-        ],
         "operation": [
          "move"
         ],
@@ -157654,24 +156047,6 @@
      }
     ],
     "section": [
-     {
-      "type": "options",
-      "displayOptions": {
-       "hide": {
-        "@version": [
-         "map[_cnd:map[gte:2.1]]"
-        ]
-       },
-       "show": {
-        "operation": [
-         "move"
-        ],
-        "resource": [
-         "task"
-        ]
-       }
-      }
-     },
      {
       "type": "options",
       "displayOptions": {
@@ -170269,31 +168644,6 @@
       "type": "fixedCollection",
       "displayOptions": {
        "show": {
-        "@version": [
-         "map[_cnd:map[lt:2.5]]"
-        ],
-        "defineForm": [
-         "fields"
-        ],
-        "operation": [
-         "sendAndWait"
-        ],
-        "resource": [
-         "message"
-        ],
-        "responseType": [
-         "customForm"
-        ]
-       }
-      }
-     },
-     {
-      "type": "fixedCollection",
-      "displayOptions": {
-       "show": {
-        "@version": [
-         "map[_cnd:map[gte:2.5]]"
-        ],
         "defineForm": [
          "fields"
         ],

@@ -33,3 +33,35 @@ func TestTemplateAPI(t *testing.T) {
 	assert.Equal(t, "Slack thing", d.Name)
 	assert.Contains(t, string(d.Definition), "\"nodes\"")
 }
+
+func TestNewTemplateAPIDefault(t *testing.T) {
+	ta := NewTemplateAPI()
+	if ta.BaseURL != TemplateAPIBase {
+		t.Fatalf("default base = %q, want %q", ta.BaseURL, TemplateAPIBase)
+	}
+	if ta.HTTP == nil {
+		t.Fatal("HTTP client must be set")
+	}
+}
+
+func TestTemplateAPIErrors(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	t.Cleanup(srv.Close)
+	ta := &TemplateAPI{BaseURL: srv.URL, HTTP: srv.Client()}
+	_, err := ta.Get(t.Context(), "999")
+	require.Error(t, err) // non-200 -> error
+	_, err = ta.Search(t.Context(), "x", 0)
+	require.Error(t, err)
+}
+
+func TestTemplateGetMissingDefinition(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"workflow":{"id":1,"name":"x"}}`)) // no inner workflow
+	}))
+	t.Cleanup(srv.Close)
+	ta := &TemplateAPI{BaseURL: srv.URL, HTTP: srv.Client()}
+	_, err := ta.Get(t.Context(), "1")
+	require.Error(t, err)
+}

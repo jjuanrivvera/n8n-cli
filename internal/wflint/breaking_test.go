@@ -21,8 +21,8 @@ func TestBreakingChanges(t *testing.T) {
 	assert.Equal(t, "Old", issues[0].Node)
 	assert.Equal(t, 1, issues[0].CurrentVersion)
 	assert.GreaterOrEqual(t, issues[0].LatestVersion, 4)
-	assert.Contains(t, issues[0].RemovedParams, "goneParam")
-	assert.NotContains(t, issues[0].RemovedParams, "url", "a still-valid param is not 'removed'")
+	assert.Contains(t, issues[0].UnknownParams, "goneParam")
+	assert.NotContains(t, issues[0].UnknownParams, "url", "a still-valid param is not 'removed'")
 }
 
 func TestBreakingChangesEmptyWhenCurrent(t *testing.T) {

@@ -10,8 +10,8 @@ Find nodes pinned to an outdated typeVersion (upgrade risk)
 
 Compare each workflow's nodes against the embedded node catalog and report
 those pinned to an older typeVersion than the latest known one, along with any
-parameters they use that the latest schema no longer defines (renamed/removed).
-Community/custom nodes are skipped. Informational — exits 0.
+parameters they use that the catalog does not recognize for the node (renamed,
+removed, or typos). Community/custom nodes are skipped. Informational — exits 0.
 
 ```
 n8nctl workflows breaking-changes [--dir <dir> | -f <file>... | --remote | <id>] [flags]
