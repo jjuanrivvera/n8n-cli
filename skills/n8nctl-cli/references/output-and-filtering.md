@@ -5,8 +5,8 @@ Authoritative docs: https://github.com/jjuanrivvera/n8n-cli
 
 ## Output formats
 
-Every command takes `-o/--output` with one of `table`, `json`, `yaml`, `csv`.
-The default is `table` (human-readable). Set a session default with
+Every command takes `-o/--output` with one of `table`, `json`, `yaml`, `csv`,
+`id`. The default is `table` (human-readable). Set a session default with
 `N8NCTL_OUTPUT` or a persistent one with `n8nctl config set output_format json`.
 
 ```bash
@@ -14,14 +14,30 @@ n8nctl workflows list                 # table (default)
 n8nctl workflows list -o json         # machine-readable, for jq
 n8nctl workflows get 42 -o yaml       # full object as YAML
 n8nctl executions list -o csv         # spreadsheet-friendly
+n8nctl workflows list -o id           # one id per line, for xargs
+n8nctl workflows list --no-header     # table without the header row
 ```
 
 - **table** - curated columns, aligned, colorized on a TTY (disable with
-  `--no-color` or `NO_COLOR`).
+  `--no-color` or `NO_COLOR`); `--no-header` drops the header row.
 - **json** - the full object/array exactly as the API returns it; the right
   choice whenever you pipe to `jq` or another tool.
 - **yaml** - same data as JSON, easier to eyeball for nested structures.
 - **csv** - flat rows; pair with `--columns` to control the header order.
+- **id** (`-o id`, alias `id-only`) - just the `id` of each record, one per line,
+  for piping into `xargs`.
+
+### Built-in `--jq`
+
+You don't need an external `jq`: `--jq '<program>'` runs a full jq program
+(gojq) over the result and prints each output, bare strings unquoted (like
+`jq -r`).
+
+```bash
+n8nctl workflows list --jq '.[] | select(.active) | .id'
+n8nctl executions list --workflow 42 --jq '[.[] | select(.status=="error")] | length'
+n8nctl workflows get 42 --jq '.name'
+```
 
 ## Columns (`--columns`)
 

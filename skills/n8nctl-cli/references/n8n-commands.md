@@ -244,6 +244,47 @@ n8nctl api DELETE /executions/9001 --dry-run
 Flags: `-d/--data '<json>'`, `--file <path|->`, `-q/--query key=value`
 (repeatable). The method arg is upper-cased for you.
 
+## data-tables  (aliases: data-table, dt)
+
+Standard CRUD plus row operations. Rows are filtered with an n8n filter object.
+
+```bash
+n8nctl data-tables list
+n8nctl data-tables create --set name=orders --set 'columns=[{"name":"sku","type":"string"}]'
+n8nctl data-tables rows <id> --filter '{"type":"and","filters":[]}' --limit 50
+n8nctl data-tables add-rows <id> --data '[{"sku":"A-1"}]'        # or --file rows.json / --stdin
+n8nctl data-tables update-rows <id> --data '{"filter":{...},"data":{"sku":"A-2"}}'
+n8nctl data-tables upsert-rows <id> --data '{"filter":{...},"data":{...}}'
+n8nctl data-tables delete-rows <id> --filter '{"type":"and","filters":[...]}'
+```
+
+Data tables may be unlicensed on some editions (the API returns 403).
+
+## packages - export / import (.n8np, beta)
+
+Bundle workflows into a portable `.n8np` archive and import them elsewhere. Beta;
+disabled unless the instance sets `N8N_PUBLIC_API_PACKAGES_ENABLED=true` (else 404).
+
+```bash
+n8nctl packages export --workflow 42 --workflow 43 --out bundle.n8np
+n8nctl packages import --file bundle.n8np --conflict-policy fail --project <id>
+```
+
+`import` flags: `--conflict-policy` (required), `--project`, `--folder`,
+`--workflow-id-policy`, `--credential-matching-mode`, `--credential-missing-mode`.
+
+## skills - install this skill into an agent
+
+```bash
+n8nctl skills install                 # ./.claude/skills (this project)
+n8nctl skills install --global        # ~/.claude/skills
+n8nctl skills install --agent cursor --global
+n8nctl skills path --agent windsurf   # print where it would install
+```
+
+Agents: claude, cursor, windsurf, codex, gemini, copilot, opencode. Or install
+across every agent at once with `npx skills add jjuanrivvera/n8n-cli`.
+
 ## Beyond the API
 
 These commands compose the public API into operations the n8n UI cannot do.

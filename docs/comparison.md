@@ -8,12 +8,12 @@ There are two command-line clients for the n8n public API:
 - **`n8nctl`** (this project) — an independent, single-binary Go client focused
   on multi-instance use, production resilience, and fleet operations.
 
-A side-by-side comparison. The official CLI is a capable, well-designed tool
-maintained by the people who build the API itself; several nice ideas here (a
-built-in `--jq`, an `id-only` output mode, a `skill install` command) were theirs
-first, and we matched or extended them. Pick whichever fits your workflow — and if
-you live in a Node project and work with a single instance, the official tool is
-an excellent choice.
+The official CLI is a capable, well-designed tool maintained by the people who
+build the API itself; several ideas here (a built-in `--jq`, an `id-only` output
+mode, a `skill install` command) originated there, and `n8nctl` matches or
+extends them. For a single instance inside a Node project, the official tool is
+an excellent choice; `n8nctl` is aimed at operating several instances from one
+static binary.
 
 _Comparison as of `@n8n/cli` 0.7.0 and `n8nctl` 0.2.0 (June 2026). Both track the
 same public API, so coverage converges over time._
@@ -74,7 +74,7 @@ These are not in the official CLI today:
 
 ## Where the official CLI is genuinely better
 
-Giving credit where it is due — reasons to prefer `@n8n/cli`:
+Reasons to prefer `@n8n/cli`:
 
 - **First-party.** Built and maintained by the n8n team alongside the API, so it
   tracks new endpoints and changes immediately. A third-party CLI can lag.
@@ -89,9 +89,8 @@ Giving credit where it is due — reasons to prefer `@n8n/cli`:
 
 ## Performance
 
-You were right to be skeptical of benchmarks here: **a single API call is
-network-bound**, so per-request time is dominated by your instance's latency, not
-the CLI. Our own processing is in the microseconds:
+A single API call is **network-bound**: per-request time is dominated by the
+instance's latency, not the CLI. The CLI's own processing is in the microseconds:
 
 | Operation (50-record page, no network) | n8nctl |
 |---|---|

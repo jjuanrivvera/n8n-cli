@@ -133,12 +133,21 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `users change-role <id> --role global:admin` | Change a user's global role | `n8nctl users change-role 3 --role global:admin` |
 | `audit` | Run the built-in security audit (`--categories`, `--days`) | `n8nctl audit --categories credentials,nodes -o json` |
 | `source-control pull` | Pull from the connected Git repo (`--force`, `--variables`) | `n8nctl source-control pull --dry-run` |
+| `data-tables ...` | CRUD for data tables + rows (`rows`, `add-rows`, `update-rows`, `upsert-rows`, `delete-rows`) | `n8nctl data-tables rows <id> --filter '{"type":"and","filters":[]}'` |
+| `packages export\|import` | Bundle/restore workflows as a `.n8np` archive (beta; needs `N8N_PUBLIC_API_PACKAGES_ENABLED`) | `n8nctl packages export --workflow 42 --out wf.n8np` |
+| `skills install\|path\|print` | Install this skill into an AI agent (claude/cursor/windsurf/codex/gemini/copilot/opencode) | `n8nctl skills install --global` |
 | `backup --out <dir>` | Snapshot the instance (workflows + tags + variables + credential metadata + manifest) to JSON for git | `n8nctl --profile prod backup --out ./backups/prod` |
 | `restore --in <dir>` | Re-apply a backup directory (`--update-by-name`, `--activate`); credential secrets are NOT in the backup | `n8nctl --profile staging restore --in ./backups/prod --update-by-name` |
 | `api <METHOD> <PATH>` | Raw authenticated request (escape hatch) | `n8nctl api GET /workflows -q limit=5` |
 | `auth login\|logout\|status` | Manage the active profile's key | `n8nctl auth status` |
 | `config path\|view\|set\|use\|list-profiles` | Inspect/edit config and profiles | `n8nctl config use cloud` |
 | `init` · `doctor` · `version` · `completion` · `alias` | Setup, diagnostics, version, shell completion, command shortcuts | `n8nctl doctor` |
+| `login` / `logout` · `config set-url\|set-api-key\|show` | Aliases matching the official CLI's surface | `n8nctl config set-url https://n8n.lan` |
+
+**Output flags (every command):** `-o table\|json\|yaml\|csv\|id`, `--columns a,b`,
+`--no-header`, and `--jq '<program>'` for full jq filtering. Prefer `-o json`
+(or `--jq`) when you need to parse output programmatically; use `-o id` to pipe
+ids into `xargs`.
 
 ### Beyond the API (standout operations)
 

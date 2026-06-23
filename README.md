@@ -46,8 +46,9 @@ one instance or script against n8n in CI:
 - **A single binary, no Node.** Install one file, or `go install`, or `brew
   install`. Nothing to `npm install`, no lockfile, no global Node version to
   keep happy on your CI runners.
-- **Real output formats.** `table` (default), `json`, `yaml`, and `csv`, with
-  `--columns` to pick fields. Pipe `csv` into a spreadsheet, `json` into `jq`.
+- **Table, JSON, YAML, and CSV output**, with `--columns` to pick fields, `-o id`
+  to pipe ids into `xargs`, and a built-in `--jq` filter. Pipe CSV into a
+  spreadsheet, JSON into `jq`, or filter in place.
 - **Dry-run before you touch anything.** `--dry-run` prints the equivalent
   `curl` and sends no request, so destructive commands are easy to review.
 
