@@ -39,10 +39,10 @@ These tools are not all trying to be the same thing. The useful question is not
 | Vendor | 3rd-party | **first-party** | 3rd-party | 3rd-party | 3rd-party |
 | Runtime | **Go static binary** | Node + npm | Bun binary | Node + npm | Go binary |
 | Primary lane | **ops + GitOps + agent mgmt** | first-party general | **authoring quality** | **workflow intelligence** | GitOps sync |
-| CRUD breadth | full + data-tables + packages | full + data-tables + packages (`+ shared`) | full + data-tables | full + `nodes` + `templates` | workflows only |
+| CRUD breadth | full + data-tables + packages + `nodes` + `templates` | full + data-tables + packages | full + data-tables | full + `nodes` + `templates` | workflows only |
 | Multi-instance | **profiles + keyring** | single, plaintext | single, env | multi-profile, plaintext | single, `.env` |
 | Apply from files | **`apply`** (prune, cross-instance) | — | `apply` (+ git-changes) | import / export | `sync` (+ prune) |
-| Validation | **node-schema lint** (type + params) + `proxy` gate | — | **node-schema lint + `proxy` gate** | **offline validate + autofix + breaking-changes** | — |
+| Validation | **node-schema lint (type + params + values) + autofix + breaking-changes + `proxy` gate** | — | **node-schema lint + `proxy` gate** | **offline validate + autofix + breaking-changes** | — |
 | Templates / node catalog | — | — | `node-schema` dump | **templates + node catalog (FTS5)** | — |
 | Agent tooling | **`mcp` + `agent guard`** | — | — | — | — |
 | backup / restore / sync / search | **all four** | — | — | export/import + version history | `sync` |
@@ -61,7 +61,6 @@ Node project. It is single-instance (one `{url, apiKey}` in a plaintext config,
 no keyring), issues a single `fetch` with no retry or rate limiting, and is
 labelled not-for-production. **Use it** if you want the first-party tool, work
 with one instance, already live in Node, or need brand-new endpoints on day one.
-It is the only tool here with the `package shared` command.
 
 ### Workflow authoring & quality — `ubie-oss/n8n-cli`
 
@@ -148,24 +147,25 @@ single binary, value **keyring** security and **production resilience**, keep
 
 ## Where the others are genuinely better than n8nctl
 
-- **`@n8n/cli`** — first-party and tracks new endpoints first (it already has
-  `package shared`, which `n8nctl` lacks); auto-JSON-on-pipe and auto-pagination
-  are nicer scripting defaults; npm-native for Node projects.
+- **`@n8n/cli`** — first-party and tracks new endpoints first; auto-JSON-on-pipe
+  and auto-pagination are nicer scripting defaults; npm-native for Node projects.
 - **`ubie-oss/n8n-cli`** — schema-aware linting (`node-params` + `node-schema`),
-  `fmt`, and `trace` make it the better tool for authoring quality. `n8nctl` has
-  adopted ubie's server-side lint-enforcement `proxy` idea (`n8nctl proxy`), but
-  ubie's is more mature — more lint rules, schema-aware node validation, and
-  duplicate-name rejection.
-- **`yigitkonur/n8n-cli`** — the strongest validation engine of all five: besides
-  node-type and parameter checks (which `n8nctl` now also does), it offers
-  **autofix** (auto-repair), cross-version **breaking-change** detection, a
-  searchable node catalog, and template deployment. If workflow *repair* and
-  correctness are your priority, it goes further than anyone here.
-- `n8nctl` now does **node-schema-aware linting** too (`unknown-node-type` /
-  `unknown-parameter`, validated against an embedded catalog of n8n's real node
-  definitions). `ubie` and `yigitkonur` remain deeper on workflow quality —
-  ubie with its server-side `proxy` rule set, yigitkonur with autofix and
-  breaking-change detection — but the basic node-schema gap is closed.
+  `fmt`, and `trace` make it strong for authoring quality. `n8nctl` adopted
+  ubie's server-side lint-enforcement `proxy` idea (`n8nctl proxy`, now with
+  duplicate-name rejection); ubie still ships `fmt` and `trace`, which `n8nctl`
+  does not.
+- **`yigitkonur/n8n-cli`** — a deep validation engine: node-type and parameter
+  checks, **autofix**, cross-version **breaking-change** detection, a searchable
+  node catalog, and template deployment. `n8nctl` now matches each of these
+  (`workflows autofix`, `workflows breaking-changes`, `nodes`, `templates`); the
+  two are closely comparable on workflow intelligence.
+- `n8nctl` does **node-schema-aware linting** validated against an embedded
+  catalog of n8n's real node definitions: `unknown-node-type` and
+  `unknown-parameter`, plus `invalid-parameter-value` (option values resolved
+  through each node's `displayOptions`). Combined with `autofix`,
+  `breaking-changes`, `nodes`, and `templates`, the workflow-intelligence gap
+  that `ubie` and `yigitkonur` once held is largely closed; ubie's remaining edge
+  is `fmt`/`trace`.
 - **`edenreich/n8n-cli`** — if you want *only* GitOps sync and nothing else, it is
   smaller and has less to learn.
 

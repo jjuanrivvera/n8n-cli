@@ -30,6 +30,7 @@ Auto-generated from the CLI. See [n8nctl](n8nctl.md) for the root command.
 - [source-control](n8nctl_source-control.md) — Interact with the Source Control (Git) integration
 - [stats](n8nctl_stats.md) — One-shot instance health summary
 - [tags](n8nctl_tags.md) — Manage workflow tags
+- [templates](n8nctl_templates.md) — Browse and deploy workflows from the n8n template gallery
 - [users](n8nctl_users.md) — Manage users (instance owner only)
 - [variables](n8nctl_variables.md) — Manage instance variables
 - [version](n8nctl_version.md) — Print version, commit, and build date
