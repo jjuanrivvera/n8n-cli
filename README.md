@@ -78,7 +78,8 @@ command) and adds the above; the one thing it lacks is the official's newer
 **first-party** tool, work with a single instance, or already live in Node — it
 is maintained by the n8n team and tracks new endpoints first.
 
-See the full side-by-side, including performance benchmarks, in the
+See the full side-by-side — including the other community CLIs
+(`ubie-oss`, `edenreich`) and performance benchmarks — in the
 [comparison guide](https://jjuanrivvera.github.io/n8n-cli/comparison/).
 
 If you only ever touch one instance from one laptop, the official CLI may be all

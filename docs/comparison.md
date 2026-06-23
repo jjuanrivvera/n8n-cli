@@ -1,131 +1,142 @@
-# n8nctl vs. the official n8n CLI
+# n8nctl vs other n8n CLIs
 
-There are two command-line clients for the n8n public API:
+Several command-line clients exist for n8n, built by different people for
+different jobs. This page maps the landscape honestly and shows where each tool
+fits — including where the others are a better choice than `n8nctl`.
+
+_As of June 2026: `n8nctl` 0.3.0, `@n8n/cli` 0.8.0, `ubie-oss/n8n-cli` 2.2.1,
+`edenreich/n8n-cli` 0.7.1. All four talk to the same n8n public API, so the CRUD
+surface converges over time; the real differences are in focus, runtime, and the
+layers each tool adds on top._
+
+## The cast
 
 - **`@n8n/cli`** (binary `n8n-cli`) — the **official, first-party** CLI from the
-  n8n team. Node.js/oclif, distributed on npm. Currently labelled **beta**
-  ("use it only for experimenting, local development, and personal projects").
-- **`n8nctl`** (this project) — an independent, single-binary Go client focused
-  on multi-instance use, production resilience, and fleet operations.
+  n8n team. Node.js/oclif, distributed on npm, currently **beta** ("for
+  experimenting, local development, and personal projects"). The reference client
+  for the public API; tracks new endpoints first.
+- **`n8nctl`** (this project) — an independent, single-binary **Go** client
+  focused on **multi-instance operation, workflows-as-code, and driving n8n from
+  AI agents**.
+- **`ubie-oss/n8n-cli`** — an independent **Bun** binary focused on **workflow
+  authoring quality**: deep linting, node-schema inspection, formatting, data-flow
+  tracing, and a server-side lint-enforcement proxy.
+- **`edenreich/n8n-cli`** — an independent **Go** binary focused on one job:
+  **GitOps sync** of workflows from a directory to an instance.
 
-The official CLI is a capable, well-designed tool maintained by the people who
-build the API itself; several ideas here (a built-in `--jq`, an `id-only` output
-mode, a `skill install` command) originated there, and `n8nctl` matches or
-extends them. For a single instance inside a Node project, the official tool is
-an excellent choice; `n8nctl` is aimed at operating several instances from one
-static binary, treating workflows as code, and driving n8n from AI agents safely.
-
-_Comparison as of `@n8n/cli` 0.8.0 and `n8nctl` 0.3.0 (June 2026). Both track the
-same public API, so the CRUD surface converges over time; the differences are in
-multi-instance operation, workflows-as-code, agent tooling, and runtime model._
+These tools are not all trying to be the same thing. The useful question is not
+"which is best" but "which lane is yours."
 
 ## At a glance
 
-| | n8nctl | @n8n/cli (official) |
-|---|---|---|
-| Vendor | Independent (third-party) | **First-party (n8n team)** |
-| Runtime | **Single static Go binary, no deps** | Node.js + npm |
-| Install | Homebrew, Scoop, `go install`, deb/rpm/apk, raw binary | `npm i -g @n8n/cli` / `npx` |
-| Maturity | New, but versioned + released | **Official**, but **beta / not for production** |
-| Tracks API changes | Community pace | **Day one (same team)** |
-| Multi-instance | **Named profiles + keyring** | Single instance, plaintext config |
-| Workflows as code | **apply / lint / diff / convert (GitOps)** | — |
-| Manage instances via MCP | **MCP server (mgmt API) + agent guard** | — |
+| | n8nctl | @n8n/cli (official) | ubie-oss | edenreich |
+|---|---|---|---|---|
+| Vendor | 3rd-party | **First-party (n8n team)** | 3rd-party | 3rd-party |
+| Runtime | **Go static binary** | Node.js + npm | Bun binary | Go binary |
+| Primary lane | multi-instance **ops + GitOps + agent mgmt** | first-party general client | **authoring + quality** | **GitOps sync** |
+| CRUD breadth | full + data-tables + packages | full + data-tables + packages (`+ shared`) | full + data-tables + `node-schema` | **workflows only** |
+| Multi-instance | **profiles + keyring** | single, plaintext config | single, env vars | single, `.env` |
+| Apply from files | **`apply`** (+ prune / dry-run, **cross-instance**) | — | **`apply`** (+ `--from-git-changes`) | **`sync`** (+ prune) |
+| Lint | 5 schema-grounded rules | — | **6 rules incl. `node-params` (schema-aware) + `node-schema` dump** | — |
+| Other authoring | convert, diff | — | **convert, fmt, trace, `proxy`** | refresh |
+| Management MCP | **`mcp` (73 tools)** | — | — | — |
+| Agent safety | **`agent guard`** | — | `proxy` (server-side lint gate) | — |
+| backup / restore / search | **yes** | — | — | — |
+| Secrets | **OS keyring** | plaintext config | plaintext env | plaintext `.env` |
+| Resilience (retry / rate-limit) | **adaptive** | single fetch | basic | basic |
+| Distribution | brew / scoop / deb-rpm-apk + cosign + SBOM | npm | source / cross-compile | curl / `go install` |
 
-_The "manage via MCP" row is the **management/control plane** — an agent
-administering instances. n8n the platform separately has first-party MCP at the
-**workflow** layer (MCP Server Trigger / MCP Client Tool nodes); the two are
-complementary, not competing — see [below](#where-n8nctl-is-different)._
+## Where each tool fits
 
-## Command coverage
+### First-party API client — `@n8n/cli`
 
-As of this writing, **n8nctl covers every command the official CLI exposes**,
-plus more. Parity across the shared surface:
+Built and maintained by the n8n team alongside the API, so it tracks new endpoints
+and changes immediately and is the tool the n8n docs point to. It has thoughtful
+scripting defaults — it **auto-selects JSON when stdout is piped** and
+**auto-paginates lists by default** — and `npx @n8n/cli` is zero-friction inside a
+Node project. It is single-instance (one `{url, apiKey}` in a plaintext config,
+no keyring), issues a single `fetch` with no retry or rate limiting, and is
+labelled not-for-production. **Use it** if you want the first-party tool, work
+with one instance, already live in Node, or need brand-new endpoints on day one.
+It is the only tool here with the `package shared` command.
 
-| Area | Both have | n8nctl also adds |
-|---|---|---|
-| workflows | list, get, create, update, delete, activate, deactivate, transfer, tags | **archive/unarchive, sync (cross-instance), search, apply/lint/diff/convert (GitOps)** |
-| executions | list, get, retry, stop, delete | — |
-| credentials | create, get, list, schema, transfer | **update** |
-| tags / variables | full CRUD | — |
-| projects | create, get, list, update, delete, members, add/remove-member | **set-member-role** |
-| users | get, list | **invite, change-role, delete** |
-| data-tables | list, get, create, delete, rows, add/update/upsert/delete-rows | update |
-| packages (beta) | export, import (official also has `shared`) | — |
-| audit | generate | **--days / --categories options** |
-| source-control | pull | — |
-| backup / restore | — | **whole-instance snapshot to git-friendly JSON/YAML** |
-| agent access (mgmt) | — | **`mcp` server over the management API (73 tools) + `agent guard`** |
-| config / auth | config set-url/set-api-key/show, login, logout | **profiles: use, list-profiles, view** |
-| skill | install (Claude/Cursor/Windsurf) | **+ codex/gemini/copilot/opencode, path, print** |
+### Workflow authoring & quality — `ubie-oss/n8n-cli`
 
-The official CLI's one command `n8nctl` does not have is `package shared` (sharing a
-workflow package); everything else in the shared CRUD surface, n8nctl matches or extends.
+The deepest authoring tool of the four, and genuinely ahead of `n8nctl` on
+workflow *quality*. Its `lint` ships rules including **`node-params`, which
+validates node parameters**, backed by a **`node-schema`** command that dumps the
+real node-type schemas — per-node validation that `n8nctl`'s five structural rules
+do not attempt. `fmt` tidies node layout, `trace` analyses data-flow cardinality,
+and **`proxy`** is a distinctive idea: an HTTP proxy in front of the n8n API that
+enforces lint **server-side**, so any push that fails lint — from a human or an AI
+agent — is rejected with a 422, making quality structural rather than a convention.
+It is single-instance (env vars, no keyring) and has no MCP or agent-management
+layer. **Use it** if your priority is keeping a team's workflow definitions clean,
+schema-valid, and consistently formatted.
 
-## Where n8nctl is different
+### GitOps sync — `edenreich/n8n-cli`
 
-These are not in the official CLI today:
+Does one job cleanly. `workflows sync --directory --prune --dry-run` reconciles a
+folder of workflow JSON into an instance; `refresh` pulls the other way; plus
+`activate`/`deactivate`. It is workflow-only (no executions, credentials, tags,
+projects, …), single-instance, and reads the key from a plaintext `.env`. **Use
+it** if all you need is "push this folder of workflows to this instance in CI" with
+the least surface to learn.
 
-- **Multi-instance profiles.** Named profiles with `config use` / `--profile` /
-  `N8NCTL_PROFILE`. The official CLI stores a single `{url, apiKey}`; switching
-  instances means overwriting it.
-- **OS keyring for secrets.** Keys live in the macOS Keychain / Linux Secret
-  Service / Windows Credential Manager, per profile. The official CLI writes the
-  key in plaintext to `~/.n8n-cli/config.json` (mode 0600).
+### Multi-instance operations, GitOps & agent management — `n8nctl`
+
+This project's lane. It is the only one of the four that combines:
+
+- **Multi-instance profiles + OS keyring.** Named profiles, one per instance,
+  switched with `--profile` / `N8NCTL_PROFILE` / `config use`; keys in the macOS
+  Keychain / Linux Secret Service / Windows Credential Manager. The others target a
+  single instance with the key in a plaintext file or env var.
 - **Production resilience.** Exponential backoff with jitter, idempotency-aware
   retries (never retries POST/PATCH), adaptive rate limiting, and 429 handling.
-  The official client issues a single `fetch` with no retry or rate limiting.
-- **`--dry-run`** prints a copy-pasteable, secret-redacted `curl` and sends
-  nothing.
-- **Richer output:** table / json / **yaml** / **csv** with `--columns`
-  (official: table / json / id-only).
-- **Fleet operations:** `workflows sync` (promote dev→prod across instances),
-  `backup` / `restore` (git-friendly snapshots), `workflows search`
-  (find by node type / credential / webhook path).
-- **Workflows as code (GitOps).** `workflows apply --dir` reconciles a directory of
-  workflow files into an instance (create / update / skip-unchanged / `--prune`,
-  with a `--dry-run` plan); `workflows lint` runs schema-grounded checks as a CI
-  gate; `workflows diff` and `workflows convert` (JSON↔YAML, with long code fields
-  externalized to sibling files) round out the loop. Combined with profiles, the
-  same directory promotes across instances.
-- **Manage instances from an AI agent (MCP).** `n8nctl mcp` runs the CLI as a
-  Model Context Protocol server — it auto-exposes the command tree as 73 tools
-  (each tagged read-only / write / destructive), reusing the same keyring auth and
-  active profile, and installs config for Claude/Cursor/VS Code. `n8nctl agent
-  guard` then generates host-level safety rules (Claude Code / Codex / OpenCode)
-  that hard-block destructive operations and gate writes.
+- **Workflows as code.** `workflows apply --dir` reconciles a directory into an
+  instance (create / update / skip-unchanged / `--prune`, with a `--dry-run`
+  plan); `workflows lint` (schema-grounded rules as a CI gate), `diff`, and
+  `convert` (JSON↔YAML with long code fields externalised to sibling files). Both
+  ubie and edenreich do declarative apply too; `n8nctl`'s differentiator is that,
+  combined with profiles, the **same directory promotes across instances**.
+- **Manage instances from an AI agent.** `n8nctl mcp` runs the CLI as a Model
+  Context Protocol server (73 annotated tools, reusing keyring auth and the active
+  profile) and `n8nctl agent guard` generates host rules that hard-block
+  destructive operations. See [the layer note](#a-note-on-mcp-and-agents).
+- **Fleet operations:** `backup`/`restore` (git-friendly snapshots), `workflows
+  search` (find by node type / credential / webhook path), cross-instance `sync`.
+- **Richer output** (table / json / yaml / csv, `--columns`, `--jq` via full
+  gojq, `-o id`), `--dry-run` that prints a redacted `curl`, and a signed,
+  multi-channel distribution (Homebrew/Scoop/deb/rpm/apk + cosign + SBOM).
 
-    This operates at a different layer than n8n's own MCP support, and is
-    complementary to it. **n8n the platform is already MCP-native at the workflow
-    layer** — the **MCP Server Trigger** node turns a workflow into an MCP server
-    (agents call your workflows as tools), and the **MCP Client Tool** node lets a
-    workflow consume external MCP tools. That is the *data plane*: automations as
-    tools. `n8nctl`'s MCP is the *control plane*: it exposes the n8n **management
-    API** (list / create / activate / delete workflows, manage credentials,
-    projects, executions, across instances) so an agent can **operate and
-    administer** your n8n fleet. The official `@n8n/cli` does not expose its
-    management surface over MCP, and given n8n's first-party workflow-level MCP it
-    likely never will — which is exactly the gap `n8nctl` fills.
-- **More meta tooling:** `doctor`, `init` wizard, `alias`, raw `api` escape hatch.
-- A **full jq** engine (gojq) behind `--jq`, vs the official's simpler path
-  filter; **7 skill targets** vs 3.
+**Use it** if you operate **several instances**, want **no Node** and a signed
+single binary, value **keyring** security and **production resilience**, keep
+**workflows as code** across environments, drive n8n from an **AI agent**, or want
+**backup / promote / search** across a fleet.
 
-## Where the official CLI is genuinely better
+## Where the others are genuinely better than n8nctl
 
-Reasons to prefer `@n8n/cli`:
+- **`@n8n/cli`** — first-party and tracks new endpoints first (it already has
+  `package shared`, which `n8nctl` lacks); auto-JSON-on-pipe and auto-pagination
+  are nicer scripting defaults; npm-native for Node projects.
+- **`ubie-oss/n8n-cli`** — schema-aware linting (`node-params` + `node-schema`),
+  `fmt`, `trace`, and the server-side `proxy` enforcement gateway make it the
+  better tool for authoring quality. `n8nctl`'s lint roadmap tracks node-schema
+  validation; the lint-enforcing proxy is a genuinely different idea worth knowing.
+- **`edenreich/n8n-cli`** — if you want *only* GitOps sync and nothing else, it is
+  smaller and has less to learn.
 
-- **First-party.** Built and maintained by the n8n team alongside the API, so it
-  tracks new endpoints and changes immediately. A third-party CLI can lag — for
-  example, `@n8n/cli` 0.8.0 added `package shared` (workflow-package sharing),
-  which `n8nctl` does not have yet.
-- **Thoughtful scripting defaults.** It **auto-selects JSON when stdout is piped**
-  (so `n8n-cli workflow list | jq` just works) and **auto-paginates lists by
-  default**. n8nctl defaults to a table and uses `--all` to walk pages, which is
-  more predictable but less convenient for piping. (Use `n8nctl ... -o json` or
-  set `N8NCTL_OUTPUT=json` when scripting.)
-- **npm-native.** If you already have Node and a JS toolchain, `npx @n8n/cli` is
-  zero-friction and fits naturally in package scripts.
-- **Official support and trust.** It is the tool the n8n docs point to.
+## A note on MCP and agents
+
+`n8nctl`'s MCP server operates at a different layer from n8n's own MCP support, and
+is complementary to it. **n8n the platform is already MCP-native at the workflow
+layer** — the **MCP Server Trigger** node turns a workflow into an MCP server
+(agents call your workflows as tools) and the **MCP Client Tool** node lets a
+workflow consume external MCP tools. That is the *data plane*: automations exposed
+as tools. `n8nctl mcp` is the *control plane*: it exposes the n8n **management
+API** (list / create / activate / delete workflows, manage credentials, projects,
+executions, **across instances**) so an agent can *operate and administer* a fleet.
+None of the other CLIs expose their management surface over MCP.
 
 ## Performance
 
@@ -139,38 +150,35 @@ instance's latency, not the CLI. The CLI's own processing is in the microseconds
 | Render JSON | ~80 µs |
 | Apply a `--jq` filter (full gojq) | ~90 µs |
 
-The one place a CLI's own cost is visible — and where being a single binary
-matters — is **process startup**, which you pay on every invocation:
+The one place a CLI's own cost is visible is **process startup**, paid on every
+invocation. The two Go binaries (`n8nctl`, edenreich) and the Bun binary (ubie)
+start in single-digit milliseconds; the Node-based official CLI pays the Node +
+oclif boot:
 
 | | Startup (warm, `--version`) | Footprint |
 |---|---|---|
 | **n8nctl** | **~6–8 ms** | one 14 MB static binary, no runtime |
 | @n8n/cli | ~150–160 ms | 5.6 MB package **+ a Node.js runtime** |
 
-That is roughly a **19× faster cold start** (Go binary vs Node + oclif boot).
+For a single command you will not notice it next to a network round-trip. It only
+adds up when the CLI is invoked **many times** — a loop over 200 ids, an `xargs`
+pipeline, or a CI job — where ~150 ms each becomes ~30 s of overhead versus ~1.5 s
+for a fast-starting binary.
 
-For a single command you will not notice it — 150 ms of startup disappears next
-to a network round-trip. It only adds up when
-the CLI is invoked **many times**: a loop over 200 workflow ids, an `xargs`
-pipeline, or a CI job spawns the process repeatedly, where ~150 ms each becomes
-~30 s of pure overhead versus ~1.5 s for n8nctl. If you invoke the CLI once
-interactively, both feel the same.
-
-_Measured on Apple Silicon with `hyperfine --warmup 3 --runs 40`; Node startup
-has high variance. Reproduce with `go test -bench=. ./internal/...` and
+_Measured on Apple Silicon with `hyperfine --warmup 3 --runs 40`; Node startup has
+high variance. Reproduce with `go test -bench=. ./internal/...` and
 `hyperfine -N 'n8nctl version' 'n8n-cli --version'`._
 
 ## Which should you use?
 
-- **Use `@n8n/cli`** if you want the official tool, work primarily with a single
-  instance, already live in Node, or need brand-new endpoints the moment they
-  ship.
-- **Use `n8nctl`** if you manage **multiple instances**, want **no Node** and a
-  signed single binary, value **keyring** security and **production resilience**,
-  keep **workflows as code** (apply / lint / diff in CI), drive n8n from an **AI
-  agent** (MCP + guard), or want **backup / promote / search** across a fleet — and
-  you are comfortable with a community tool that follows the API rather than
-  defining it.
+- **`@n8n/cli`** — the official tool; single instance, Node-native, newest endpoints.
+- **`ubie-oss/n8n-cli`** — authoring quality: schema-aware lint, formatting, and
+  server-side lint enforcement.
+- **`edenreich/n8n-cli`** — minimal GitOps sync, nothing else.
+- **`n8nctl`** — multiple instances, no Node + a signed binary, keyring security,
+  production resilience, workflows-as-code across environments, fleet
+  backup/promote/search, and agent management (MCP + guard).
 
-Many teams will reasonably use both: the official CLI inside Node projects, and
-n8nctl for ops, multi-instance promotion, GitOps, agent access, and backups.
+Many teams will reasonably use more than one — for example, `ubie` to lint and
+author workflows, and `n8nctl` to operate the fleet, promote across instances, and
+back it up.
