@@ -94,6 +94,16 @@ n8nctl workflows search --node slack
 n8nctl workflows search --credential githubApi -o json
 n8nctl workflows search --webhook /orders
 n8nctl workflows search --name '^prod-'
+
+# repair mechanical mistakes lint detects (report-only unless --write)
+n8nctl workflows autofix --dir ./workflows           # report what would change
+n8nctl workflows autofix --dir ./workflows --write   # apply the fixes
+n8nctl workflows autofix -f wf.json --write
+
+# flip every workflow carrying a tag in one call (maintenance windows)
+n8nctl workflows bulk deactivate --tag prod --dry-run   # preview
+n8nctl workflows bulk deactivate --tag prod --yes       # deactivate the set
+n8nctl workflows bulk activate --tag prod --yes         # bring it back
 ```
 
 ## executions  (aliases: execution, exec)
@@ -114,7 +124,20 @@ n8nctl executions retry 9001               # re-run a failed execution
 n8nctl executions retry 9001 --load-workflow   # use the current workflow definition
 n8nctl executions stop 9001                # stop a running execution
 n8nctl executions delete 9001 -y
+
+# bulk-delete by age and/or status to reclaim DB space (previews count first)
+n8nctl executions prune --older-than 30d --status error --dry-run   # only count
+n8nctl executions prune --older-than 30d --status error --yes       # delete, no prompt
+n8nctl executions prune --older-than 7d --workflow 42 --yes         # scope to one workflow
+
+# live-tail new executions, coloring failures, until Ctrl-C
+n8nctl executions watch
+n8nctl executions watch --status error --interval 10s
 ```
+
+`prune` flags: `--older-than <30d|720h|90m>`, `--status <s>`, `--workflow <id>`,
+`-y/--yes` (skip confirm), plus global `--dry-run` (only count). `watch` flags:
+`--status <s>`, `--workflow <id>`, `--interval <duration>` (default `5s`).
 
 ## credentials  (aliases: credential, cred, creds)
 
@@ -222,6 +245,37 @@ n8nctl audit --categories credentials,nodes --days 30
 `--categories` restricts to any of: `credentials`, `database`, `nodes`,
 `filesystem`, `instance`. `--days` sets the inactivity window before a workflow
 counts as abandoned.
+
+## nodes  (alias: node)
+
+Browse the embedded catalog of n8n node definitions (`n8n-nodes-base` plus the
+langchain nodes) **offline** — no API call. Use it to find the exact `type`
+string for a node and the parameter names it accepts. It is the same catalog the
+`lint` and `autofix` rules check against.
+
+```bash
+n8nctl nodes list                          # every node type
+n8nctl nodes search slack                  # filter by type or display name
+n8nctl nodes search "http request" --limit 5
+n8nctl nodes show n8n-nodes-base.webhook   # display name + parameter names
+n8nctl nodes show n8n-nodes-base.slack -o json --jq '.params'
+```
+
+`search` flag: `--limit N` (0 = all). `show` takes a node `type` string.
+
+## stats
+
+One-shot instance summary: total/active/inactive/archived workflows and the
+status mix of the most recent executions. Degrades gracefully when a Community
+edition returns `403` for a piece it cannot read.
+
+```bash
+n8nctl stats
+n8nctl stats --recent 250          # summarize the last 250 executions
+n8nctl --profile prod stats -o json
+```
+
+Flag: `--recent N` (number of recent executions to summarize, default `100`).
 
 ## source-control  (alias: sc)
 
@@ -419,6 +473,39 @@ The 5 rules and their grounding (shown by `--list-rules`):
 > They are structural/graph-level. **Node-schema param validation** (validating a
 > node's parameters against that node type's schema) is **planned, not yet
 > implemented**.
+
+### workflows autofix — repair what lint detects
+
+The repair counterpart to lint. It fixes the mechanical mistakes lint reports —
+typo'd node types (corrected against the embedded node catalog), expression
+strings missing the leading `=`, and webhook/form-trigger nodes missing a
+`webhookId`. It **reports by default** and writes only with `--write`. Run
+autofix, then lint again to see the judgment-level findings (orphaned nodes,
+dangling connections, unknown parameters) that a machine should not auto-edit.
+
+```bash
+n8nctl workflows autofix --dir ./workflows           # report only (nothing written)
+n8nctl workflows autofix --dir ./workflows --write   # apply in place
+n8nctl workflows autofix -f a.json -f b.yaml --write # specific files (repeatable)
+n8nctl workflows autofix --dir ./workflows --write && n8nctl workflows lint --dir ./workflows
+```
+
+Flags: `--dir <dir>` or `--file/-f <file>` (repeatable), `--write` (apply;
+default report-only).
+
+### workflows bulk — flip a tagged set in one call
+
+Activate or deactivate every workflow carrying a tag, for maintenance windows.
+Previews the affected workflows first; pass `--yes` to skip confirmation or
+`--dry-run` to only list.
+
+```bash
+n8nctl workflows bulk deactivate --tag prod --dry-run   # preview
+n8nctl workflows bulk deactivate --tag prod --yes       # deactivate the set
+n8nctl workflows bulk activate --tag prod --yes         # reactivate after maintenance
+```
+
+Flags: `--tag <name>` (required), `-y/--yes`, plus global `--dry-run`.
 
 ### workflows convert — JSON ↔ YAML (+ code externalization)
 

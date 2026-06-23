@@ -158,12 +158,52 @@ desired state. See [Workflows as Code](workflows-as-code.md).
 |---|---|
 | `workflows apply --dir <dir>` | Reconcile a directory of workflow files into the instance (`--prune`, `--activate`, `--dry-run`) |
 | `workflows lint` | Lint workflow definitions for common mistakes (`--dir`, `-f`, `--remote`, `--disable-rule`) |
+| `workflows autofix` | Repair mechanical mistakes lint detects: typo'd node types, expressions missing the leading `=`, absent webhook ids (`--dir`, `-f`, `--write`) |
 | `workflows diff <id>` | Diff a workflow against another instance (`--to`) or a local file (`--file`) |
 | `workflows convert <file...>` | Convert workflow files between JSON and YAML, optionally `--externalize` |
 
 `apply` matches workflows by name, reconciles nodes, connections and settings,
 and with `--prune` deletes instance workflows absent from the directory. Always
 preview with `--dry-run` first.
+
+`lint` and `autofix` are a pair: lint reports the mechanical mistakes, autofix
+repairs the ones a machine can fix safely. Both read the same embedded node
+catalog. `autofix` reports its changes by default and writes them only with
+`--write`.
+
+## Node catalog
+
+Browse the embedded catalog of n8n node definitions (`n8n-nodes-base` plus the
+langchain nodes) without an API call. The catalog is compiled into the binary,
+so these commands work offline, and it is the same catalog the
+[lint](workflows-as-code.md#lint-static-checks-on-workflow-files) and
+[autofix](workflows-as-code.md#autofix-repair-what-lint-detects) rules check
+against.
+
+| Command | Description |
+|---|---|
+| `nodes list` | List every node type |
+| `nodes search <query>` | Filter node types by `type` or display name (`--limit`) |
+| `nodes show <type>` | Print a node's display name and its parameter names |
+
+Use `nodes search` to find the exact `type` string for a node, then `nodes show`
+to see which parameters it accepts before hand-authoring a workflow file.
+
+## Maintenance and ops
+
+Bulk and live operations for running an instance: summarize it, watch it,
+reclaim execution-table space, and flip a tagged set of workflows in one call.
+
+| Command | Description |
+|---|---|
+| `stats` | One-shot instance summary: total/active/inactive/archived workflows and the status mix of recent executions (`--recent`); degrades gracefully on Community-edition `403`s |
+| `executions prune` | Bulk-delete executions by age and/or status to reclaim DB space (`--older-than`, `--status`, `--workflow`, `--yes`, `--dry-run`) |
+| `executions watch` | Live-tail new executions, coloring failures, until Ctrl-C (`--status`, `--workflow`, `--interval`) |
+| `workflows bulk activate\|deactivate --tag <name>` | Activate or deactivate every workflow carrying a tag in one command (`--yes`, `--dry-run`) |
+
+`prune` and `bulk` always preview the affected count first; pass `--yes` to skip
+the confirmation, or `--dry-run` to only count. `--older-than` accepts a
+duration like `30d`, `720h`, or `90m`.
 
 ## AI agents
 
@@ -177,14 +217,16 @@ agents are allowed to do.
 | `mcp tools` | Export the tool list as JSON (no server started) |
 | `mcp claude` / `mcp cursor` / `mcp vscode` | Register, enable, disable, and list the server in each host |
 | `agent guard --host <host>` | Generate agent-safety config that blocks destructive n8n operations |
-| `proxy` | Run a local n8n API proxy that lint-gates workflow writes |
+| `proxy` | Run a local n8n API proxy that lint-gates workflow writes (`--reject-duplicate-names` also blocks a create whose name already exists) |
 | `skills install` | Install this CLI's AI-agent skill into Claude, Cursor, and other agents |
 
 The MCP server exposes the safe CLI command tree as typed tools, reusing the
 same keyring auth and active profile. `agent guard` derives its allow/deny rules
 from that same tree, so the safety list stays correct across upgrades. The
 `proxy` enforces linting at the HTTP layer, rejecting invalid workflow writes
-with `422` no matter which client sends them. See [MCP server](mcp.md),
+with `422` no matter which client sends them; `--reject-duplicate-names` extends
+the gate to reject creating a workflow whose name already exists. See
+[MCP server](mcp.md),
 [Agent guard](agent-guard.md), and [Lint-enforcing proxy](proxy.md).
 
 ## Output and scripting

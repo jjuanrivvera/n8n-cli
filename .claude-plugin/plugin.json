@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "n8nctl-cli",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Manage n8n workflows, executions, credentials, and more across one or many instances from the terminal with the n8nctl CLI.",
   "author": {
     "name": "Juan Rivera",

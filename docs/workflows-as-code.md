@@ -12,9 +12,10 @@ missing, updates what changed, leaves untouched what already matches, and (on
 request) deletes what no longer belongs. Because every command takes
 `--profile`, the same directory promotes cleanly across instances.
 
-This page covers the four commands that make up the loop —
+This page covers the commands that make up the loop —
 [`workflows apply`](#apply-reconcile-a-directory-into-an-instance),
 [`workflows lint`](#lint-static-checks-on-workflow-files),
+[`workflows autofix`](#autofix-repair-what-lint-detects),
 [`workflows convert`](#convert-between-json-and-yaml), and
 [`workflows diff`](#diff-a-workflow-against-another-source) — plus the YAML and
 code-externalization support shared with [`backup`](#backups-as-yaml-with-externalized-code).
@@ -255,6 +256,54 @@ typo'd node types (with a "did you mean …?" suggestion) and parameters a node 
 not define. They check node *types* and parameter *names*; validating parameter
 *values* against each type's full schema is a deeper check that tools like
 `ubie-oss` and `yigitkonur` specialize in.
+
+## autofix: repair what lint detects
+
+`workflows lint` reports mistakes; `workflows autofix` repairs the ones a machine
+can fix safely. It is the natural follow-up to a failing lint run: rather than
+hand-editing each file, let autofix apply the mechanical corrections, then lint
+again to confirm only judgment-level findings remain.
+
+It fixes three classes of mistake, all mechanical:
+
+- **Typo'd node types.** A node `type` from a known package (`n8n-nodes-base`,
+  langchain) that is not in the embedded catalog is corrected to the nearest real
+  type — the same catalog the `unknown-node-type` lint rule checks against, so
+  `n8n-nodes-base.slak` becomes `n8n-nodes-base.slack`.
+- **Expressions missing the leading `=`.** A string that looks like an expression
+  (`{{ … }}`) but lacks the leading `=` is a literal, not an expression. autofix
+  adds the prefix, clearing the `expression-prefix` finding.
+- **Missing webhook ids.** A `webhook` or `formTrigger` node without a `webhookId`
+  cannot register. autofix generates one, clearing `webhook-id-required`.
+
+By default it **reports** what it would change and writes nothing. Pass `--write`
+to apply the fixes in place.
+
+```bash
+# Report the fixes for a directory (nothing is written)
+n8nctl workflows autofix --dir ./workflows
+
+# Apply them in place
+n8nctl workflows autofix --dir ./workflows --write
+
+# Fix specific files (repeatable)
+n8nctl workflows autofix -f order-intake.json -f slack-alerts.yaml --write
+
+# The repair → verify loop
+n8nctl workflows autofix --dir ./workflows --write
+n8nctl workflows lint --dir ./workflows
+```
+
+| Flag | Meaning |
+|---|---|
+| `--dir <dir>` | Fix every workflow file in a directory |
+| `--file`, `-f <file>` | Fix specific files (repeatable) |
+| `--write` | Write the fixes back (default: report only) |
+
+autofix only touches mechanical mistakes with a single safe correction. Findings
+that need a judgment call — an orphaned node, a connection pointing at a node that
+no longer exists, an unknown parameter — are left for a human; run `lint` after
+autofix to see what remains.
 
 ## convert: between JSON and YAML
 

@@ -1,7 +1,7 @@
 ---
 name: n8nctl-cli
 description: Manage n8n (https://n8n.io) from the terminal with the `n8nctl` CLI - workflows, executions, credentials, tags, variables, projects, users, audit, and source control. Use this whenever the user wants to list/activate/transfer workflows, inspect or retry executions, create credentials, set variables, manage projects and members, invite users, run a security audit, or pull from Git - on a single instance or across MANY instances (self-hosted and Cloud) via named profiles. n8nctl is one static binary that talks to the n8n public REST API (`<host>/api/v1`, `X-N8N-API-KEY` header) with table/json/yaml/csv output. Detect the connected instance with `n8nctl auth status` before any write.
-version: 0.3.0
+version: 0.4.0
 homepage: https://github.com/jjuanrivvera/n8n-cli
 license: MIT
 allowed-tools: Bash(n8nctl:*)
@@ -117,14 +117,19 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `workflows sync <id> --to <profile>` | Promote a workflow to another instance (dev→prod); credentials NOT copied | `n8nctl workflows sync 2tUt1wbLX592XDdX --from dev --to prod --update-by-name --activate` |
 | `workflows apply --dir <dir>` | GitOps reconcile: create/update/skip workflows from a dir (`--prune` deletes absent, `--activate`); always `--dry-run` first | `n8nctl workflows apply --dir ./workflows --dry-run` |
 | `workflows lint [--dir\|-f\|--remote]` | Static checks (7 grounded rules incl. node-schema typo/param checks); exits non-zero on errors, so it gates CI (`--list-rules`, `--disable-rule`, `-o json`) | `n8nctl workflows lint --dir ./workflows` |
+| `workflows autofix [--dir\|-f]` | Repair mechanical mistakes lint detects: typo'd node types (vs catalog), expressions missing leading `=`, missing webhook ids. Report-only unless `--write` | `n8nctl workflows autofix --dir ./workflows --write` |
+| `workflows bulk activate\|deactivate --tag <name>` | Flip every workflow carrying a tag in one call (maintenance windows); previews then needs `--yes` (or `--dry-run`) | `n8nctl workflows bulk deactivate --tag prod --yes` |
 | `workflows convert <file…> --to json\|yaml` | Convert workflow files between JSON/YAML; `--externalize N` splits long code fields to sibling files | `n8nctl workflows convert wf.json --to yaml --externalize 5` |
 | `workflows diff <id> [--to <profile>\|--file <path>]` | Unified diff of a workflow's writable content vs another profile or a local file | `n8nctl workflows diff 2tUt1wbLX592XDdX --to prod` |
 | `workflows search [--node\|--credential\|--webhook\|--name]` | Scan all workflows' node graphs for matches (impossible in the UI) | `n8nctl workflows search --node slack` |
+| `nodes list\|search <query>\|show <type>` | Browse the embedded n8n node catalog OFFLINE (no API call) — find the exact `type` string and a node's parameter names; same catalog powers lint/autofix | `n8nctl nodes show n8n-nodes-base.webhook` |
 | `executions list` | List runs (filters `--status`, `--workflow`, `--project`, `--include-data`) | `n8nctl executions list --status error --workflow 42` |
 | `executions get <id>` | Inspect one run (`--include-data` for payloads) | `n8nctl executions get 9001 --include-data` |
 | `executions retry <id>` | Re-run a failed execution (`--load-workflow`) | `n8nctl executions retry 9001` |
 | `executions stop <id>` | Stop a running execution | `n8nctl executions stop 9001` |
 | `executions delete <id>` | Delete an execution record | `n8nctl executions delete 9001 -y` |
+| `executions prune [--older-than\|--status\|--workflow]` | Bulk-delete executions by age and/or status to reclaim DB space; previews the count, needs `--yes` (or `--dry-run`). `--older-than` takes `30d`/`720h`/`90m` | `n8nctl executions prune --older-than 30d --status error --yes` |
+| `executions watch [--status\|--workflow\|--interval]` | Live-tail new executions, coloring failures, until Ctrl-C | `n8nctl executions watch --status error --interval 10s` |
 | `credentials schema <type>` | Show a credential type's required fields | `n8nctl credentials schema githubApi` |
 | `credentials create` | Create a credential | `n8nctl credentials create --set name='GH' --set type=githubApi --set 'data={"accessToken":"…"}'` |
 | `credentials transfer <id> --project <p>` | Move a credential to a project | `n8nctl credentials transfer 5 --project 7` |
@@ -136,6 +141,7 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `users invite --email a@x.com --role global:member` | Invite users | `n8nctl users invite --email a@x.com --email b@y.com` |
 | `users change-role <id> --role global:admin` | Change a user's global role | `n8nctl users change-role 3 --role global:admin` |
 | `audit` | Run the built-in security audit (`--categories`, `--days`) | `n8nctl audit --categories credentials,nodes -o json` |
+| `stats [--recent N]` | One-shot instance summary: total/active/inactive/archived workflows + status mix of recent executions; degrades gracefully on Community-edition 403s | `n8nctl stats --recent 100 -o json` |
 | `source-control pull` | Pull from the connected Git repo (`--force`, `--variables`) | `n8nctl source-control pull --dry-run` |
 | `data-tables ...` | CRUD for data tables + rows (`rows`, `add-rows`, `update-rows`, `upsert-rows`, `delete-rows`) | `n8nctl data-tables rows <id> --filter '{"type":"and","filters":[]}'` |
 | `packages export\|import` | Bundle/restore workflows as a `.n8np` archive (beta; needs `N8N_PUBLIC_API_PACKAGES_ENABLED`) | `n8nctl packages export --workflow 42 --out wf.n8np` |
@@ -143,7 +149,7 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `mcp start\|stream\|tools` | Run n8nctl as an MCP server (stdio / HTTP / export tool list) so an agent drives n8n via 73 annotated tools | `n8nctl mcp start` |
 | `mcp claude\|cursor\|vscode enable\|disable\|list` | Wire the MCP server into a host's config | `n8nctl mcp claude enable` |
 | `agent guard --host <h>` | Generate host-level rules that block destructive n8n ops for an agent (`--all-writes`, `--write`) | `n8nctl agent guard --host claude-code` |
-| `proxy` | Local reverse proxy that lint-gates workflow writes (422 on lint errors) before they reach n8n; reads pass through, key injected from keyring (`--disable-rule`, `--block-destructive`) | `n8nctl proxy --listen 127.0.0.1:8099` |
+| `proxy` | Local reverse proxy that lint-gates workflow writes (422 on lint errors) before they reach n8n; reads pass through, key injected from keyring (`--disable-rule`, `--block-destructive`, `--reject-duplicate-names`) | `n8nctl proxy --listen 127.0.0.1:8099` |
 | `backup --out <dir>` | Snapshot the instance (workflows + tags + variables + credential metadata + manifest) for git; `--format yaml` + `--externalize N` make it git-friendlier | `n8nctl --profile prod backup --out ./backups/prod --format yaml --externalize 5` |
 | `restore --in <dir>` | Re-apply a backup directory (reads JSON or YAML, re-inlines `$ref` code; `--update-by-name`, `--activate`); credential secrets are NOT in the backup | `n8nctl --profile staging restore --in ./backups/prod --update-by-name` |
 | `api <METHOD> <PATH>` | Raw authenticated request (escape hatch) | `n8nctl api GET /workflows -q limit=5` |
@@ -178,6 +184,12 @@ graph-wide search, or a full **workflows-as-code / GitOps** loop:
   errors**, so it gates CI. `--list-rules` shows each rule's canonical basis;
   `-o json` is machine-readable; `--disable-rule` turns a rule off. (Node-schema
   param validation is planned, not yet implemented.)
+- **`workflows autofix`** is the repair counterpart to lint: it fixes the
+  mechanical mistakes lint reports — typo'd node types (corrected against the same
+  embedded catalog), expression strings missing the leading `=`, and webhook/
+  form-trigger nodes missing a `webhookId`. It reports by default and writes only
+  with `--write`. Run autofix, then lint again to see the judgment-level findings
+  that remain. Operates on files (`--dir` / `-f`).
 - **`workflows convert <file…> --to json|yaml`** converts workflow files between
   JSON and YAML locally. `--externalize N` splits node code fields longer than N
   lines (jsCode, pythonCode, query/sqlQuery, jsonBody, content) into sibling files
@@ -239,8 +251,9 @@ VS Code) drives n8n through typed tools instead of shelling out — and it ships
 - **`proxy`** complements the guard at the API boundary: it fronts the instance
   and rejects any workflow create/update that fails lint with a `422` (reads pass
   through). Point a client (or agent) at it so bad definitions can't land,
-  regardless of who pushes them. `agent guard` blocks *destructive* ops; `proxy`
-  blocks *low-quality* ones.
+  regardless of who pushes them. `--reject-duplicate-names` adds a second gate:
+  reject creating a workflow whose name already exists on the instance.
+  `agent guard` blocks *destructive* ops; `proxy` blocks *low-quality* ones.
 
 ```bash
 n8nctl mcp start                          # expose n8n to an agent over stdio
@@ -248,6 +261,7 @@ n8nctl mcp claude enable                  # wire the server into Claude Desktop
 n8nctl agent guard --host claude-code     # print the safety config for review
 n8nctl agent guard --host claude-code --write   # install it (won't overwrite)
 n8nctl proxy                              # lint-gate every workflow write (127.0.0.1:8099)
+n8nctl proxy --reject-duplicate-names     # also reject a create whose name already exists
 ```
 
 See `docs/mcp.md` and `docs/agent-guard.md` for the full setup, manual JSON

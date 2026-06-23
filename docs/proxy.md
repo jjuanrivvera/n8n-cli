@@ -68,9 +68,28 @@ A rejected push looks like this:
 | `--listen` | `127.0.0.1:8099` | Address to bind. Keep it on localhost unless you understand the security note below. |
 | `--disable-rule` | — | Lint rules to skip (comma-separated), e.g. `--disable-rule expression-prefix`. |
 | `--block-destructive` | off | Also reject workflow `DELETE` requests with `403`. |
+| `--reject-duplicate-names` | off | Reject creating a workflow whose name already exists on the instance. |
 
 The rules and their grounding are the same as `workflows lint`; see
 `n8nctl workflows lint --list-rules`.
+
+## Reject duplicate names
+
+`--reject-duplicate-names` adds a second gate alongside the lint check. On a
+workflow create (`POST .../workflows`), the proxy first looks up the instance for
+an existing workflow with the same name; if one exists, it returns `422` and
+never forwards the create. This keeps an `apply`/`sync` that matches by name
+unambiguous — two workflows sharing a name make name-based reconciliation pick
+the wrong one — and stops a script or agent from silently creating a duplicate.
+The check applies to creates only; updates to an existing workflow are
+unaffected.
+
+```bash
+n8nctl proxy --reject-duplicate-names
+```
+
+A rejected create looks like the lint rejection, with a name-collision message in
+place of the lint findings.
 
 !!! warning "The proxy is an authenticated gateway"
     Because the proxy injects your API key, anything that can reach its listen

@@ -111,6 +111,72 @@ n8nctl --profile prod workflows apply --dir ./workflows --prune
 
 See [Workflows as Code](workflows-as-code.md) for a full CI example.
 
+## Find a node's type and parameters
+
+The lint and autofix rules need the exact node `type` string, and hand-authoring
+a workflow file needs the parameter names a node accepts. Both come from the
+embedded catalog, offline.
+
+```bash
+# Find the type string for a node by display name
+n8nctl nodes search slack
+
+# List the parameters the Webhook node accepts
+n8nctl nodes show n8n-nodes-base.webhook
+
+# Pull just the parameter names as JSON for scripting
+n8nctl nodes show n8n-nodes-base.slack -o json --jq '.params'
+```
+
+## Auto-fix a directory of workflows before committing
+
+`workflows autofix` repairs the mechanical mistakes `workflows lint` reports:
+typo'd node types, expression strings missing the leading `=`, and webhook nodes
+without a `webhookId`. Report first, then write.
+
+```bash
+# See what would change (report only — nothing is written)
+n8nctl workflows autofix --dir ./workflows
+
+# Apply the fixes in place
+n8nctl workflows autofix --dir ./workflows --write
+
+# Lint again to confirm the remaining findings are not mechanical
+n8nctl workflows lint --dir ./workflows
+```
+
+## Prune old failed executions in CI
+
+Reclaim database space by deleting stale execution records. Always count first;
+`--yes` skips the confirmation so it runs unattended.
+
+```bash
+# Count what would be deleted, without deleting (good for a CI report step)
+n8nctl executions prune --older-than 30d --status error --dry-run
+
+# Delete failed executions older than 30 days, no prompt
+n8nctl executions prune --older-than 30d --status error --yes
+
+# Scope to a single workflow
+n8nctl executions prune --older-than 7d --workflow 42 --yes
+```
+
+## Bulk-deactivate a tag for a maintenance window
+
+Flip every workflow carrying a tag in one command — deactivate the set, do the
+maintenance, reactivate it.
+
+```bash
+# Preview the affected workflows
+n8nctl workflows bulk deactivate --tag prod --dry-run
+
+# Deactivate them
+n8nctl workflows bulk deactivate --tag prod --yes
+
+# …run the maintenance, then bring them back
+n8nctl workflows bulk activate --tag prod --yes
+```
+
 ## Drop to the raw API
 
 When a capability is not yet a first-class command, call any endpoint directly.

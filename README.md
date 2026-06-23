@@ -95,8 +95,9 @@ Prefer to script it? `n8nctl init --profile homelab --base-url https://n8n.lan/a
 |---|---|---|
 | **Resources** | Full CRUD across workflows, executions, credentials, tags, variables, projects, users, data-tables, packages, audit, and source-control — plus verbs like `activate`, `transfer`, `retry`, `invite`, `schema`. | [Features](https://jjuanrivvera.github.io/n8n-cli/features/) |
 | **Multi-instance & secure** | Named profiles, OS keyring for secrets, precedence flag > env > config > default. | [Profiles](https://jjuanrivvera.github.io/n8n-cli/profiles/) |
-| **Workflows as code** | `apply --dir` (prune / dry-run), `lint`, `diff`, `convert` (JSON↔YAML + code externalization). | [Workflows as Code](https://jjuanrivvera.github.io/n8n-cli/workflows-as-code/) |
-| **Fleet operations** | `sync` (promote across instances), `backup` / `restore`, `search` by node/credential/webhook. | [Beyond the API](https://jjuanrivvera.github.io/n8n-cli/beyond-api/) |
+| **Workflows as code** | `apply --dir` (prune / dry-run), `lint`, `autofix`, `diff`, `convert` (JSON↔YAML + code externalization). | [Workflows as Code](https://jjuanrivvera.github.io/n8n-cli/workflows-as-code/) |
+| **Node catalog** | `nodes list / search / show` over an embedded catalog of 560+ real n8n nodes — the same data powering the `unknown-node-type` / `unknown-parameter` lint rules. | [Features](https://jjuanrivvera.github.io/n8n-cli/features/) |
+| **Fleet operations** | `sync` (promote across instances), `backup` / `restore`, `search`, `stats`, `executions prune` / `watch`, `workflows bulk --tag`. | [Beyond the API](https://jjuanrivvera.github.io/n8n-cli/beyond-api/) |
 | **AI agents** | `mcp` server, `agent guard`, lint-enforcing `proxy`. | [MCP](https://jjuanrivvera.github.io/n8n-cli/mcp/) · [Guard](https://jjuanrivvera.github.io/n8n-cli/agent-guard/) · [Proxy](https://jjuanrivvera.github.io/n8n-cli/proxy/) |
 | **Output & scripting** | table / json / yaml / csv / `-o id`, `--jq` (full gojq), `--columns`, `--dry-run`, raw `api`. | [Output](https://jjuanrivvera.github.io/n8n-cli/output/) |
 | **Resilience** | Idempotent retry + backoff, adaptive rate limiting, Ctrl-C cancellation, typed errors with hints. | [Features](https://jjuanrivvera.github.io/n8n-cli/features/) |

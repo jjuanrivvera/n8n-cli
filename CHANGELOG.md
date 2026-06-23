@@ -6,6 +6,39 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-23
+
+### Added
+- **`nodes` explorer** — `nodes list` / `search <query>` / `show <type>` browse the
+  embedded catalog of n8n node definitions offline (no API call), to find a node's
+  exact `type` string and its parameters.
+- **`workflows autofix`** — auto-repair the mechanical mistakes the linter detects:
+  correct typo'd node types against the catalog (e.g. `…slak` → `…slack`), add the
+  leading `=` to expression strings, and generate a webhookId for webhook/form
+  nodes that lack one. Report-only by default; `--write` applies. Works on `-f`
+  files or a `--dir`.
+- **`executions prune`** — bulk-delete executions by `--older-than 30d` and/or
+  `--status`, to reclaim database space; previews the count, `--yes` skips the
+  confirmation. Hard-blocked by `agent guard` (irreversible).
+- **`executions watch`** — live-tail new executions, coloring failures, until
+  Ctrl-C. Excluded from the MCP surface (a blocking poll).
+- **`workflows bulk activate|deactivate --tag <name>`** — flip every workflow
+  carrying a tag in one command (maintenance windows); dry-run + confirm.
+- **`stats`** — one-shot instance summary (workflow counts + recent-execution
+  status mix), degrading gracefully on Community-edition 403s.
+- **`proxy --reject-duplicate-names`** — also reject creating a workflow whose
+  name already exists on the instance.
+- cobra `Example:` blocks inherited by every generic resource command, and a
+  scheduled workflow that refreshes the embedded node catalog against the latest
+  n8n packages.
+
+### Changed
+- The embedded node catalog now keeps only top-level parameter names (cleaner
+  `nodes show` output and a smaller embed); the `unknown-parameter` rule is
+  unchanged in behavior.
+- A git pre-commit hook (`make setup-hooks`) runs gofmt/vet/lint/tests and is now
+  installed by default, skipping the Go gate on docs-only commits.
+
 ## [0.3.0] - 2026-06-23
 
 ### Added
@@ -111,7 +144,8 @@ All notable changes to this project are documented here. The format is based on
 - Initial release of `n8nctl`, a command-line interface for the n8n workflow
   automation API.
 
-[Unreleased]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jjuanrivvera/n8n-cli/releases/tag/v0.1.0
