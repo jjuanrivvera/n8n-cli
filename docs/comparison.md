@@ -194,18 +194,28 @@ instance's latency, not the CLI. The CLI's own processing is in the microseconds
 | Apply a `--jq` filter (full gojq) | ~90 µs |
 
 The one place a CLI's own cost is visible is **process startup**, paid on every
-invocation. The two Go binaries (`n8nctl`, edenreich) and the Bun binary (ubie)
-start in single-digit milliseconds; the Node-based CLIs (the official one,
-`yigitkonur`) pay the Node runtime boot:
+invocation. The numbers below are measured (`hyperfine`, warm, 40 runs of
+`--help` on an Apple-silicon Mac); the two Go binaries start ~20–40× faster than
+anything running a JavaScript runtime:
 
-| | Startup (warm, `--version`) | Footprint |
-|---|---|---|
-| **n8nctl** | **~6–8 ms** | one 14 MB static binary, no runtime |
-| @n8n/cli | ~150–160 ms | 5.6 MB package **+ a Node.js runtime** |
+| CLI | Runtime | Startup (warm) | Footprint |
+|---|---|---|---|
+| **n8nctl** | Go static | **5.5 ms** | one 15 MB binary, no runtime |
+| edenreich | Go static | 4.6 ms | one 11 MB binary, no runtime |
+| @n8n/cli | Node | 108 ms | 5.7 MB `node_modules` **+ a Node runtime** |
+| yigitkonur | Node | 136 ms | **514 MB `node_modules`** + a Node runtime |
+| ubie | Bun compiled | 197 ms | one 59 MB binary (Bun runtime embedded) |
 
-For a single command you will not notice it next to a network round-trip. It only
-adds up when the CLI is invoked **many times** — a loop over 200 ids, an `xargs`
-pipeline, or a CI job — where ~150 ms each becomes ~30 s of overhead versus ~1.5 s
+Two findings stand out. A **Bun-compiled binary is not a fast-start binary**: ubie
+is the slowest of the five, because the single file still boots the embedded Bun
+runtime and its bundled modules on every call. And `yigitkonur` depends on
+`isolated-vm` (a native V8 module, for sandboxed expression evaluation) which
+**fails to compile on current Node** and pulls a 514 MB `node_modules` — a
+portability cost a static Go binary does not have.
+
+For a single command none of this matters next to a network round-trip. It adds
+up when the CLI is invoked **many times** — a loop over 200 ids, an `xargs`
+pipeline, or a CI job — where ~150 ms each becomes ~30 s of overhead versus ~1 s
 for a fast-starting binary.
 
 _Measured on Apple Silicon with `hyperfine --warmup 3 --runs 40`; Node startup has
