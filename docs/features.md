@@ -157,8 +157,9 @@ desired state. See [Workflows as Code](workflows-as-code.md).
 | Command | Description |
 |---|---|
 | `workflows apply --dir <dir>` | Reconcile a directory of workflow files into the instance (`--prune`, `--activate`, `--dry-run`) |
-| `workflows lint` | Lint workflow definitions for common mistakes (`--dir`, `-f`, `--remote`, `--disable-rule`) |
+| `workflows lint` | Lint workflow definitions for common mistakes, including option values a node does not allow (`--dir`, `-f`, `--remote`, `--disable-rule`) |
 | `workflows autofix` | Repair mechanical mistakes lint detects: typo'd node types, expressions missing the leading `=`, absent webhook ids (`--dir`, `-f`, `--write`) |
+| `workflows breaking-changes` | Report nodes pinned to an older `typeVersion` than the catalog's latest, plus parameters the latest schema no longer defines (`--dir`, `-f`, `--remote`, `<id>`) |
 | `workflows diff <id>` | Diff a workflow against another instance (`--to`) or a local file (`--file`) |
 | `workflows convert <file...>` | Convert workflow files between JSON and YAML, optionally `--externalize` |
 
@@ -170,6 +171,13 @@ preview with `--dry-run` first.
 repairs the ones a machine can fix safely. Both read the same embedded node
 catalog. `autofix` reports its changes by default and writes them only with
 `--write`.
+
+`breaking-changes` reads that same catalog from the other direction: it flags
+nodes pinned to a `typeVersion` older than the catalog's latest and reports any
+parameters they use that the latest schema no longer defines (rename or removal
+candidates). It is informational and exits 0, so it is an upgrade-readiness
+report rather than a CI gate. Accepts the same inputs as `lint` (`--dir`, `-f`,
+`--remote`, or a single `<id>` for a live workflow); aliased as `breaking`.
 
 ## Node catalog
 
@@ -188,6 +196,26 @@ against.
 
 Use `nodes search` to find the exact `type` string for a node, then `nodes show`
 to see which parameters it accepts before hand-authoring a workflow file.
+`nodes show` reflects the full embedded catalog: it lists a node's parameters
+across every version of that node type, drawn from the same per-parameter schema
+the lint rules validate against.
+
+## Template gallery
+
+Browse and deploy workflows from the public n8n template gallery (api.n8n.io).
+The gallery needs no API key; `deploy` is the only command that writes, and it
+writes to the active instance, so it uses the profile's stored key. See
+[Template gallery](templates.md).
+
+| Command | Description |
+|---|---|
+| `templates search <query>` | Search the gallery by keyword (`--limit N`) |
+| `templates get <id>` | Print a template's workflow definition (pipe to a file) |
+| `templates deploy <id>` | Create the template as a new workflow on the active instance (`--name`, `--activate`, honors `--dry-run`) |
+
+`deploy` does not copy credentials. The created workflow references credential
+types but holds no secrets, so open it and connect credentials before
+activating.
 
 ## Maintenance and ops
 

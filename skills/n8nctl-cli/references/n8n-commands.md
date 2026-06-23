@@ -100,6 +100,14 @@ n8nctl workflows autofix --dir ./workflows           # report what would change
 n8nctl workflows autofix --dir ./workflows --write   # apply the fixes
 n8nctl workflows autofix -f wf.json --write
 
+# report nodes on an outdated typeVersion before an n8n upgrade (informational)
+n8nctl workflows breaking-changes --dir ./workflows
+n8nctl workflows breaking-changes --remote
+
+# browse + deploy from the public template gallery (search/get need NO key)
+n8nctl templates search slack --limit 5
+n8nctl templates deploy 1750 --profile dev --activate   # credentials NOT included
+
 # flip every workflow carrying a tag in one call (maintenance windows)
 n8nctl workflows bulk deactivate --tag prod --dry-run   # preview
 n8nctl workflows bulk deactivate --tag prod --yes       # deactivate the set
@@ -261,7 +269,35 @@ n8nctl nodes show n8n-nodes-base.webhook   # display name + parameter names
 n8nctl nodes show n8n-nodes-base.slack -o json --jq '.params'
 ```
 
-`search` flag: `--limit N` (0 = all). `show` takes a node `type` string.
+`search` flag: `--limit N` (0 = all). `show` takes a node `type` string. `show`
+reflects the full embedded catalog — a node's parameters across every version of
+that node type, from the same per-parameter schema the lint rules validate
+against.
+
+## templates  (alias: template)
+
+Browse and deploy workflows from the public n8n template gallery (api.n8n.io).
+`search` and `get` hit the gallery and **need no API key** — no profile, no
+instance. `deploy` is the only write: it creates the template as a new workflow
+on the **active instance**, using the profile's stored key.
+
+```bash
+n8nctl templates search slack                       # search the gallery (no key)
+n8nctl templates search "google sheets" --limit 5   # cap results (default 20)
+n8nctl templates get 1750 -o json                   # print a definition
+n8nctl templates get 1750 -o json > sheets.json     # save it to edit/lint
+n8nctl templates deploy 1750                         # create on the active instance
+n8nctl templates deploy 1750 --name "My bot"         # name the new workflow
+n8nctl --profile dev templates deploy 1750 --activate --dry-run  # preview into dev
+```
+
+`search` flag: `--limit N` (default 20). `deploy` flags: `--name <name>`
+(default: the template's name), `--activate`, plus the global `--dry-run`.
+
+> **Credentials are NOT included.** A deployed template references credential
+> types but holds no secrets — open the workflow and connect credentials before
+> activating. Safe pattern: deploy into a dev profile, adapt, then promote with
+> `apply`/`sync`.
 
 ## stats
 
@@ -459,7 +495,7 @@ n8nctl workflows lint --list-rules                   # rules + canonical basis
 n8nctl workflows lint --dir ./workflows --disable-rule expression-prefix
 ```
 
-The 5 rules and their grounding (shown by `--list-rules`):
+The 9 rules and their grounding (shown by `--list-rules`):
 
 | Rule | Severity | Basis |
 |---|---|---|
@@ -468,11 +504,24 @@ The 5 rules and their grounding (shown by `--list-rules`):
 | `orphaned-node` | warning | workflow connection graph model (node disconnected from the graph) |
 | `webhook-id-required` | error | n8n webhook registration behavior (webhook/formTrigger need a `webhookId`) |
 | `expression-prefix` | warning | n8n expression syntax (a `{{ }}` string is only evaluated if it starts with `=`) |
+| `unknown-node-type` | error | embedded node catalog — a node type from a known package not in the catalog is almost always a typo (with "did you mean …?"); community/custom skipped |
+| `unknown-parameter` | warning | embedded node catalog — a parameter the node type does not define |
+| `invalid-parameter-value` | warning | embedded node catalog (option values + `displayOptions` visibility) — an `options`/`multiOptions` value the node disallows |
+
+The last three are **node-schema-aware**: they validate against the embedded
+catalog of n8n's real node definitions (`n8n-nodes-base` + langchain).
+`invalid-parameter-value` validates option *values*, not just names — a Slack
+node with `operation: "psot"` is flagged with "did you mean post?". It is
+**`displayOptions`-aware** (it validates against the option set active for the
+node's other parameters; Slack's `operation` options differ by `resource`) and
+**conservative** — it skips dynamic option lists, expression values (`={{ }}`),
+and unknown/community nodes, so it never false-positives.
+
+```text
+✗ slack-bot.json · Slack: parameter "operation" = "psot" is not an allowed value — did you mean "post"? (invalid-parameter-value)
+```
 
 > Honest scope: there is **no official n8n linter**; these are `n8nctl`'s rules.
-> They are structural/graph-level. **Node-schema param validation** (validating a
-> node's parameters against that node type's schema) is **planned, not yet
-> implemented**.
 
 ### workflows autofix — repair what lint detects
 
@@ -492,6 +541,33 @@ n8nctl workflows autofix --dir ./workflows --write && n8nctl workflows lint --di
 
 Flags: `--dir <dir>` or `--file/-f <file>` (repeatable), `--write` (apply;
 default report-only).
+
+### workflows breaking-changes — spot outdated nodes (alias: breaking)
+
+Compare each workflow's nodes against the embedded catalog and report those
+pinned to an older `typeVersion` than the latest known one, plus any parameters
+they use that the latest schema no longer defines (rename/removal candidates).
+**Informational — exits 0**; an upgrade-readiness report, not a CI gate. Inputs
+mirror lint: a directory, files, the live instance, or a single live workflow by
+id. Community/custom nodes are skipped.
+
+```bash
+n8nctl workflows breaking-changes --dir ./workflows   # scan a directory
+n8nctl workflows breaking-changes -f a.json -f b.yaml # specific files
+n8nctl workflows breaking-changes --remote            # every live workflow
+n8nctl workflows breaking-changes 42                  # one live workflow by id
+```
+
+```text
+order-intake · Slack (n8n-nodes-base.slack): typeVersion 1 → latest 2
+slack-alerts · Webhook (n8n-nodes-base.webhook): typeVersion 1 → latest 2; params not in latest schema: value
+2 node(s) on an outdated typeVersion
+```
+
+The `typeVersion N → latest M` drift is the signal; "params not in latest schema"
+names a parameter the new node version dropped. Run it before upgrading an
+instance to a newer n8n. Flags: `--dir <dir>`, `--file/-f <file>` (repeatable),
+`--remote`, or a bare `<id>`.
 
 ### workflows bulk — flip a tagged set in one call
 

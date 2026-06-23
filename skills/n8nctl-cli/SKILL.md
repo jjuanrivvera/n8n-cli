@@ -116,13 +116,15 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `workflows tags <id> [--set id1,id2]` | Get or replace a workflow's tags | `n8nctl workflows tags 42 --set 3,8` |
 | `workflows sync <id> --to <profile>` | Promote a workflow to another instance (dev→prod); credentials NOT copied | `n8nctl workflows sync 2tUt1wbLX592XDdX --from dev --to prod --update-by-name --activate` |
 | `workflows apply --dir <dir>` | GitOps reconcile: create/update/skip workflows from a dir (`--prune` deletes absent, `--activate`); always `--dry-run` first | `n8nctl workflows apply --dir ./workflows --dry-run` |
-| `workflows lint [--dir\|-f\|--remote]` | Static checks (7 grounded rules incl. node-schema typo/param checks); exits non-zero on errors, so it gates CI (`--list-rules`, `--disable-rule`, `-o json`) | `n8nctl workflows lint --dir ./workflows` |
+| `workflows lint [--dir\|-f\|--remote]` | Static checks (9 grounded rules incl. node-schema typo/param/value checks — `invalid-parameter-value` flags an options value the node disallows); exits non-zero on errors, so it gates CI (`--list-rules`, `--disable-rule`, `-o json`) | `n8nctl workflows lint --dir ./workflows` |
 | `workflows autofix [--dir\|-f]` | Repair mechanical mistakes lint detects: typo'd node types (vs catalog), expressions missing leading `=`, missing webhook ids. Report-only unless `--write` | `n8nctl workflows autofix --dir ./workflows --write` |
+| `workflows breaking-changes [--dir\|-f\|--remote\|<id>]` | Report nodes pinned to an older `typeVersion` than the catalog's latest, plus params the latest schema dropped. Informational, exits 0. Alias `breaking` | `n8nctl workflows breaking-changes --dir ./workflows` |
 | `workflows bulk activate\|deactivate --tag <name>` | Flip every workflow carrying a tag in one call (maintenance windows); previews then needs `--yes` (or `--dry-run`) | `n8nctl workflows bulk deactivate --tag prod --yes` |
 | `workflows convert <file…> --to json\|yaml` | Convert workflow files between JSON/YAML; `--externalize N` splits long code fields to sibling files | `n8nctl workflows convert wf.json --to yaml --externalize 5` |
 | `workflows diff <id> [--to <profile>\|--file <path>]` | Unified diff of a workflow's writable content vs another profile or a local file | `n8nctl workflows diff 2tUt1wbLX592XDdX --to prod` |
 | `workflows search [--node\|--credential\|--webhook\|--name]` | Scan all workflows' node graphs for matches (impossible in the UI) | `n8nctl workflows search --node slack` |
 | `nodes list\|search <query>\|show <type>` | Browse the embedded n8n node catalog OFFLINE (no API call) — find the exact `type` string and a node's parameter names; same catalog powers lint/autofix | `n8nctl nodes show n8n-nodes-base.webhook` |
+| `templates search <query>\|get <id>\|deploy <id>` | Browse the public n8n template gallery (api.n8n.io, NO key); `get` prints a definition (pipe to a file), `deploy` creates it on the ACTIVE instance (credentials NOT included; `--name`, `--activate`, honors `--dry-run`) | `n8nctl templates search slack --limit 5` |
 | `executions list` | List runs (filters `--status`, `--workflow`, `--project`, `--include-data`) | `n8nctl executions list --status error --workflow 42` |
 | `executions get <id>` | Inspect one run (`--include-data` for payloads) | `n8nctl executions get 9001 --include-data` |
 | `executions retry <id>` | Re-run a failed execution (`--load-workflow`) | `n8nctl executions retry 9001` |
@@ -178,12 +180,26 @@ graph-wide search, or a full **workflows-as-code / GitOps** loop:
   dir across profiles: `n8nctl --profile staging workflows apply --dir ./workflows`
   then `n8nctl --profile prod workflows apply --dir ./workflows --prune`. The
   official single-instance tools can't do this.
-- **`workflows lint`** runs 7 grounded static rules (incl. node-type and parameter validation against an embedded n8n node catalog) over files (`--dir`/`-f`) or
+- **`workflows lint`** runs 9 grounded static rules over files (`--dir`/`-f`) or
   live workflows (`--remote`): required-fields, connection-reference,
-  orphaned-node, webhook-id-required, expression-prefix. It **exits non-zero on
-  errors**, so it gates CI. `--list-rules` shows each rule's canonical basis;
-  `-o json` is machine-readable; `--disable-rule` turns a rule off. (Node-schema
-  param validation is planned, not yet implemented.)
+  orphaned-node, webhook-id-required, expression-prefix, plus three
+  node-schema-aware rules that validate against the embedded n8n node catalog —
+  unknown-node-type (typo detection), unknown-parameter (a param the node does not
+  define), and **invalid-parameter-value** (an `options`/`multiOptions` value the
+  node disallows, e.g. Slack `operation: "psot"` → "did you mean post?"). The
+  value check is `displayOptions`-aware (it validates against the option set active
+  for the node's other parameters) and conservative — it skips dynamic option
+  lists, expression values (`={{ }}`), and unknown/community nodes, so it never
+  false-positives. It **exits non-zero on errors**, so it gates CI. `--list-rules`
+  shows each rule's canonical basis; `-o json` is machine-readable; `--disable-rule`
+  turns a rule off.
+- **`workflows breaking-changes`** (alias `breaking`) compares each workflow's
+  nodes against the embedded catalog and reports those pinned to an older
+  `typeVersion` than the latest known one, plus any parameters they use that the
+  latest schema no longer defines (rename/removal candidates). Inputs mirror lint:
+  `--dir`, `-f`, `--remote`, or a single live `<id>`. It is **informational and
+  exits 0** — an upgrade-readiness report, not a CI gate. Run it before bumping an
+  instance to a newer n8n to see which nodes will need attention.
 - **`workflows autofix`** is the repair counterpart to lint: it fixes the
   mechanical mistakes lint reports — typo'd node types (corrected against the same
   embedded catalog), expression strings missing the leading `=`, and webhook/
@@ -212,6 +228,14 @@ graph-wide search, or a full **workflows-as-code / GitOps** loop:
 - **`workflows search`** scans every workflow's node graph: `--node <type>`,
   `--credential <id|name>`, `--webhook <path>`, `--name <regex>`. Use it to answer
   "which workflows use the Slack node / reference credential X / own /orders".
+- **`templates search|get|deploy`** browses the public n8n template gallery
+  (api.n8n.io). `search` and `get` hit the gallery and **need no API key** (no
+  profile, no instance); `get <id>` prints a definition you can pipe to a file and
+  lint. `deploy <id>` is the only write: it creates the template as a new workflow
+  on the **active instance** (`--name`, `--activate`, honors `--dry-run`).
+  **Credentials are NOT included** — the workflow references credential types but
+  holds no secrets, so connect them before activating. A safe pattern is to deploy
+  into a dev profile, adapt, then promote with `apply`/`sync`.
 
 The full GitOps loop (backup → edit in git → lint in CI → apply with dry-run →
 apply with prune to a target) and the multi-instance promotion angle are

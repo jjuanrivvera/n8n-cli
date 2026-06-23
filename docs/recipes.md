@@ -145,6 +145,78 @@ n8nctl workflows autofix --dir ./workflows --write
 n8nctl workflows lint --dir ./workflows
 ```
 
+## Catch a typo'd option value before deploying
+
+`workflows lint`'s `invalid-parameter-value` rule flags an `options` or
+`multiOptions` parameter set to a value the node does not allow — the kind of
+typo that passes JSON validation but fails at runtime. It validates against the
+option set active for the node's other parameters, so it understands that a Slack
+node's `operation` choices depend on its `resource`.
+
+```bash
+# Lint a single file before pushing it
+n8nctl workflows lint -f slack-bot.json
+```
+
+```text
+✗ slack-bot.json · Slack: parameter "operation" = "psot" is not an allowed value — did you mean "post"? (invalid-parameter-value)
+Error: lint found 1 error(s)
+```
+
+The rule is conservative: it skips dynamic option lists, expression values
+(`={{ … }}`), and unknown or community nodes, so it never blocks a deploy over a
+value it cannot prove is wrong.
+
+## Check a directory for outdated nodes before an n8n upgrade
+
+Before bumping an instance to a newer n8n, scan your workflow files for nodes
+pinned to an older `typeVersion` than the catalog's latest, and for parameters
+the latest schema no longer defines. `breaking-changes` is informational and
+exits 0, so it is a report you read, not a gate.
+
+```bash
+# Scan a directory of workflow files
+n8nctl workflows breaking-changes --dir ./workflows
+
+# Or scan everything live on the instance you are about to upgrade
+n8nctl workflows breaking-changes --remote
+```
+
+```text
+order-intake · Slack (n8n-nodes-base.slack): typeVersion 1 → latest 2
+slack-alerts · Webhook (n8n-nodes-base.webhook): typeVersion 1 → latest 2; params not in latest schema: value
+2 node(s) on an outdated typeVersion
+```
+
+Each line names the workflow, the outdated node, and the version drift. A
+"params not in latest schema" note marks a parameter the new node version dropped
+— the first thing to reconcile when you move that node forward.
+
+## Deploy a gallery template into a dev instance
+
+Browse the public n8n template gallery (no API key needed), then deploy a
+template straight into a dev profile to try it out. The gallery carries node
+definitions but no credentials, so connect those after deploying.
+
+```bash
+# Find a template and note its id
+n8nctl templates search "google sheets" --limit 5
+
+# Preview the create call against the dev instance
+n8nctl --profile dev templates deploy 1750 --name "Sheets sync (dev)" --dry-run
+
+# Deploy it for real and activate it
+n8nctl --profile dev templates deploy 1750 --name "Sheets sync (dev)" --activate
+
+# Or save the definition as a file to edit and lint first
+n8nctl templates get 1750 -o json > sheets-sync.json
+n8nctl workflows lint -f sheets-sync.json
+```
+
+The deployed workflow references credential types but holds no secrets — open it
+in the n8n UI and connect credentials before relying on it. See
+[Template gallery](templates.md).
+
 ## Prune old failed executions in CI
 
 Reclaim database space by deleting stale execution records. Always count first;

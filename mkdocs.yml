@@ -59,6 +59,7 @@ nav:
   - Workflows:
       - Beyond the API: beyond-api.md
       - Workflows as Code: workflows-as-code.md
+      - Template Gallery: templates.md
   - AI Agents:
       - MCP Server: mcp.md
       - Agent Guard: agent-guard.md
