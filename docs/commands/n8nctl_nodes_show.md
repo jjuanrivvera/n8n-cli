@@ -1,26 +1,25 @@
 ---
-title: n8nctl executions delete
+title: n8nctl nodes show
 ---
 
-## n8nctl executions delete
+## n8nctl nodes show
 
-Delete a execution
+Show a node type's display name and parameters
 
 ```
-n8nctl executions delete <id> [flags]
+n8nctl nodes show <type> [flags]
 ```
 
 ### Examples
 
 ```
-  n8nctl executions delete 42 -y
+  n8nctl nodes show n8n-nodes-base.slack
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+  -h, --help   help for show
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +42,5 @@ n8nctl executions delete <id> [flags]
 
 ### SEE ALSO
 
-* [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
+* [n8nctl nodes](n8nctl_nodes.md)	 - Explore the catalog of n8n node types (offline)
 

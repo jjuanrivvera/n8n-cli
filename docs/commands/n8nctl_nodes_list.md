@@ -1,26 +1,26 @@
 ---
-title: n8nctl executions delete
+title: n8nctl nodes list
 ---
 
-## n8nctl executions delete
+## n8nctl nodes list
 
-Delete a execution
+List all node types
 
 ```
-n8nctl executions delete <id> [flags]
+n8nctl nodes list [flags]
 ```
 
 ### Examples
 
 ```
-  n8nctl executions delete 42 -y
+  n8nctl nodes list
+  n8nctl nodes list -o json
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+  -h, --help   help for list
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +43,5 @@ n8nctl executions delete <id> [flags]
 
 ### SEE ALSO
 
-* [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
+* [n8nctl nodes](n8nctl_nodes.md)	 - Explore the catalog of n8n node types (offline)
 

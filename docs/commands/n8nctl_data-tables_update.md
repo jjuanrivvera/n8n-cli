@@ -10,6 +10,12 @@ Update a data-table
 n8nctl data-tables update <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl data-tables update 42 --set name=renamed
+```
+
 ### Options
 
 ```

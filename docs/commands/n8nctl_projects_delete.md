@@ -10,6 +10,12 @@ Delete a project
 n8nctl projects delete <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl projects delete 42 -y
+```
+
 ### Options
 
 ```

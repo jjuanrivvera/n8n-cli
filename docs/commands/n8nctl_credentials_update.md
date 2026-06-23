@@ -10,6 +10,12 @@ Update a credential
 n8nctl credentials update <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl credentials update 42 --set name=renamed
+```
+
 ### Options
 
 ```

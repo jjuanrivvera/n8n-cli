@@ -10,6 +10,13 @@ List users
 n8nctl users list [flags]
 ```
 
+### Examples
+
+```
+  n8nctl users list
+  n8nctl users list -o json --all
+```
+
 ### Options
 
 ```

@@ -10,6 +10,13 @@ List variables
 n8nctl variables list [flags]
 ```
 
+### Examples
+
+```
+  n8nctl variables list
+  n8nctl variables list -o json --all
+```
+
 ### Options
 
 ```

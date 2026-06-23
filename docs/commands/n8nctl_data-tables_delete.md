@@ -10,6 +10,12 @@ Delete a data-table
 n8nctl data-tables delete <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl data-tables delete 42 -y
+```
+
 ### Options
 
 ```

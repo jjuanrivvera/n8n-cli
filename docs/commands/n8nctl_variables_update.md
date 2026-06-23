@@ -10,6 +10,12 @@ Update a variable
 n8nctl variables update <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl variables update 42 --set name=renamed
+```
+
 ### Options
 
 ```

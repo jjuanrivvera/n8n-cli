@@ -10,6 +10,12 @@ Get a single user by id
 n8nctl users get <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl users get 42 -o json
+```
+
 ### Options
 
 ```

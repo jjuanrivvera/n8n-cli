@@ -1,0 +1,51 @@
+name: Refresh node catalog
+
+# Regenerate the embedded n8n node catalog (internal/wflint/node_catalog.json)
+# against the latest n8n node packages and open a PR when it changes, so the
+# node-schema lint rules stay current without a manual bump.
+
+on:
+  schedule:
+    - cron: "0 6 1 * *" # monthly, 06:00 UTC on the 1st
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Resolve latest n8n node package versions
+        id: ver
+        run: |
+          echo "base=$(npm view n8n-nodes-base version)" >> "$GITHUB_OUTPUT"
+          echo "lc=$(npm view @n8n/n8n-nodes-langchain version)" >> "$GITHUB_OUTPUT"
+      - name: Regenerate catalog
+        env:
+          N8N_NODES_BASE_VER: ${{ steps.ver.outputs.base }}
+          N8N_LANGCHAIN_VER: ${{ steps.ver.outputs.lc }}
+        run: make gen-node-schemas
+      - name: Verify it still builds and lints
+        run: go build ./... && go test ./internal/wflint/...
+      - name: Open a PR if the catalog changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          add-paths: internal/wflint/node_catalog.json
+          branch: chore/refresh-node-catalog
+          commit-message: "chore: refresh embedded n8n node catalog"
+          title: "chore: refresh embedded n8n node catalog"
+          body: |
+            Automated refresh of the embedded node catalog from the latest n8n packages:
+            - `n8n-nodes-base@${{ steps.ver.outputs.base }}`
+            - `@n8n/n8n-nodes-langchain@${{ steps.ver.outputs.lc }}`
+
+            This keeps the `unknown-node-type` / `unknown-parameter` lint rules and the
+            `nodes` command current. Merge after CI passes.
+          labels: dependencies

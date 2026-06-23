@@ -10,6 +10,12 @@ Get a single tag by id
 n8nctl tags get <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl tags get 42 -o json
+```
+
 ### Options
 
 ```

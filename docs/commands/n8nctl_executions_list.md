@@ -10,6 +10,13 @@ List executions
 n8nctl executions list [flags]
 ```
 
+### Examples
+
+```
+  n8nctl executions list
+  n8nctl executions list -o json --all
+```
+
 ### Options
 
 ```

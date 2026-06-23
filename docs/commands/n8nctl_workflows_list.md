@@ -10,6 +10,13 @@ List workflows
 n8nctl workflows list [flags]
 ```
 
+### Examples
+
+```
+  n8nctl workflows list
+  n8nctl workflows list -o json --all
+```
+
 ### Options
 
 ```

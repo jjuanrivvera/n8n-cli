@@ -10,6 +10,13 @@ Create a data-table
 n8nctl data-tables create [flags]
 ```
 
+### Examples
+
+```
+  n8nctl data-tables create --set name=example
+  n8nctl data-tables create --file body.json
+```
+
 ### Options
 
 ```

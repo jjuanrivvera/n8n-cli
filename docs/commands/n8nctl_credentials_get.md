@@ -10,6 +10,12 @@ Get a single credential by id
 n8nctl credentials get <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl credentials get 42 -o json
+```
+
 ### Options
 
 ```

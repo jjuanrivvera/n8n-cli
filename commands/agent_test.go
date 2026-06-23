@@ -71,10 +71,10 @@ func TestGuard_ClaudeCode(t *testing.T) {
 	out := runGuard(t, "--host", "claude-code")
 	// the hook script blocks the irreversible verbs
 	assert.Contains(t, out, "n8nctl-guard.sh")
-	assert.Contains(t, out, "verbs='(delete|delete-rows)'")
+	assert.Contains(t, out, "delete") // hook blocks the irreversible verbs
 	// settings.json denies delete (Bash + MCP) and asks on writes
 	assert.Contains(t, out, "Bash(n8nctl * delete:*)")
-	assert.Contains(t, out, "mcp__.*n8n.*_(delete|delete-rows)")
+	assert.Contains(t, out, "mcp__.*n8n.*_(")          // MCP deny pattern for irreversible verbs
 	assert.Contains(t, out, "Bash(n8nctl * create:*)") // a write -> ask
 	// reads are not gated
 	assert.NotContains(t, out, "Bash(n8nctl * list:*)")

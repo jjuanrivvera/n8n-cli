@@ -10,6 +10,12 @@ Update a workflow
 n8nctl workflows update <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl workflows update 42 --set name=renamed
+```
+
 ### Options
 
 ```

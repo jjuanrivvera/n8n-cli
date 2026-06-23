@@ -10,6 +10,12 @@ Update a tag
 n8nctl tags update <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl tags update 42 --set name=renamed
+```
+
 ### Options
 
 ```

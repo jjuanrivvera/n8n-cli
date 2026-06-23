@@ -10,6 +10,12 @@ Get a single project by id
 n8nctl projects get <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl projects get 42 -o json
+```
+
 ### Options
 
 ```

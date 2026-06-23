@@ -10,6 +10,12 @@ Get a single variable by id
 n8nctl variables get <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl variables get 42 -o json
+```
+
 ### Options
 
 ```

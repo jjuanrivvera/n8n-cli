@@ -10,6 +10,13 @@ Create a project
 n8nctl projects create [flags]
 ```
 
+### Examples
+
+```
+  n8nctl projects create --set name=example
+  n8nctl projects create --file body.json
+```
+
 ### Options
 
 ```

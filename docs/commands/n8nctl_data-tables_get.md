@@ -10,6 +10,12 @@ Get a single data-table by id
 n8nctl data-tables get <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl data-tables get 42 -o json
+```
+
 ### Options
 
 ```

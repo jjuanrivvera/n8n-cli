@@ -10,6 +10,13 @@ Create a workflow
 n8nctl workflows create [flags]
 ```
 
+### Examples
+
+```
+  n8nctl workflows create --set name=example
+  n8nctl workflows create --file body.json
+```
+
 ### Options
 
 ```

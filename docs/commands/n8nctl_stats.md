@@ -1,26 +1,31 @@
 ---
-title: n8nctl executions delete
+title: n8nctl stats
 ---
 
-## n8nctl executions delete
+## n8nctl stats
 
-Delete a execution
+One-shot instance health summary
+
+### Synopsis
+
+Summarize an instance: total/active/archived workflows, and the status mix of the most recent executions.
 
 ```
-n8nctl executions delete <id> [flags]
+n8nctl stats [flags]
 ```
 
 ### Examples
 
 ```
-  n8nctl executions delete 42 -y
+  n8nctl stats
+  n8nctl --profile prod stats -o json
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+  -h, --help         help for stats
+      --recent int   number of recent executions to summarize (default 100)
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +48,5 @@ n8nctl executions delete <id> [flags]
 
 ### SEE ALSO
 
-* [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
+* [n8nctl](n8nctl.md)	 - Control any n8n instance from the terminal via its public API
 

@@ -10,6 +10,13 @@ List data-tables
 n8nctl data-tables list [flags]
 ```
 
+### Examples
+
+```
+  n8nctl data-tables list
+  n8nctl data-tables list -o json --all
+```
+
 ### Options
 
 ```

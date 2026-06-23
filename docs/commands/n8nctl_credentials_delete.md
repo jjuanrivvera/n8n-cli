@@ -10,6 +10,12 @@ Delete a credential
 n8nctl credentials delete <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl credentials delete 42 -y
+```
+
 ### Options
 
 ```

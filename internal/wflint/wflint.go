@@ -189,6 +189,14 @@ func isWebhookish(t string) bool {
 	return strings.Contains(l, "webhook") || strings.Contains(l, "formtrigger")
 }
 
+// IsWebhookNode reports whether a node type registers a webhook (needs webhookId).
+func IsWebhookNode(nodeType string) bool { return isWebhookish(nodeType) }
+
+// NeedsExpressionPrefix reports whether s is an n8n expression missing its '='.
+func NeedsExpressionPrefix(s string) bool {
+	return looksLikeExpression(s) && !strings.HasPrefix(s, "=")
+}
+
 // Errors reports how many findings are errors.
 func Errors(fs []Finding) int {
 	n := 0

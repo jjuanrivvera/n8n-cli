@@ -143,9 +143,10 @@ func newListCmd[T any](sp resourceSpec[T]) *cobra.Command {
 		rawParams  []string
 	)
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List " + sp.Use,
-		Args:  cobra.NoArgs,
+		Use:     "list",
+		Short:   "List " + sp.Use,
+		Example: "  n8nctl " + sp.Use + " list\n  n8nctl " + sp.Use + " list -o json --all",
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			client, err := getAPIClient(cmd)
 			if err != nil {
@@ -216,9 +217,10 @@ func newListCmd[T any](sp resourceSpec[T]) *cobra.Command {
 
 func newGetCmd[T any](sp resourceSpec[T]) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get <id>",
-		Short: "Get a single " + singular(sp.Use) + " by id",
-		Args:  cobra.ExactArgs(1),
+		Use:     "get <id>",
+		Short:   "Get a single " + singular(sp.Use) + " by id",
+		Example: "  n8nctl " + sp.Use + " get 42 -o json",
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := getAPIClient(cmd)
 			if err != nil {
@@ -271,9 +273,10 @@ func getViaList[T any](cmd *cobra.Command, sp resourceSpec[T], res *api.Resource
 func newCreateCmd[T any](sp resourceSpec[T]) *cobra.Command {
 	var bf bodyFlags
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a " + singular(sp.Use),
-		Args:  cobra.NoArgs,
+		Use:     "create",
+		Short:   "Create a " + singular(sp.Use),
+		Example: "  n8nctl " + sp.Use + " create --set name=example\n  n8nctl " + sp.Use + " create --file body.json",
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			body, err := bf.build()
 			if err != nil {
@@ -303,9 +306,10 @@ func newCreateCmd[T any](sp resourceSpec[T]) *cobra.Command {
 func newUpdateCmd[T any](sp resourceSpec[T]) *cobra.Command {
 	var bf bodyFlags
 	cmd := &cobra.Command{
-		Use:   "update <id>",
-		Short: "Update a " + singular(sp.Use),
-		Args:  cobra.ExactArgs(1),
+		Use:     "update <id>",
+		Short:   "Update a " + singular(sp.Use),
+		Example: "  n8nctl " + sp.Use + " update 42 --set name=renamed",
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			body, err := bf.build()
 			if err != nil {
@@ -335,9 +339,10 @@ func newUpdateCmd[T any](sp resourceSpec[T]) *cobra.Command {
 func newDeleteCmd[T any](sp resourceSpec[T]) *cobra.Command {
 	var yes bool
 	cmd := &cobra.Command{
-		Use:   "delete <id>",
-		Short: "Delete a " + singular(sp.Use),
-		Args:  cobra.ExactArgs(1),
+		Use:     "delete <id>",
+		Short:   "Delete a " + singular(sp.Use),
+		Example: "  n8nctl " + sp.Use + " delete 42 -y",
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !yes && !flagDryRun {
 				if !confirm(cmd, fmt.Sprintf("Delete %s %q?", singular(sp.Use), args[0])) {

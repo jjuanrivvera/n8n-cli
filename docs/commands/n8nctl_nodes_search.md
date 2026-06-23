@@ -1,26 +1,27 @@
 ---
-title: n8nctl executions delete
+title: n8nctl nodes search
 ---
 
-## n8nctl executions delete
+## n8nctl nodes search
 
-Delete a execution
+Search node types by type or display name
 
 ```
-n8nctl executions delete <id> [flags]
+n8nctl nodes search <query> [flags]
 ```
 
 ### Examples
 
 ```
-  n8nctl executions delete 42 -y
+  n8nctl nodes search slack
+  n8nctl nodes search "http request"
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+  -h, --help        help for search
+      --limit int   max results (0 = all)
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +44,5 @@ n8nctl executions delete <id> [flags]
 
 ### SEE ALSO
 
-* [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
+* [n8nctl nodes](n8nctl_nodes.md)	 - Explore the catalog of n8n node types (offline)
 

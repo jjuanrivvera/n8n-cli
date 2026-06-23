@@ -10,6 +10,12 @@ Delete a workflow
 n8nctl workflows delete <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl workflows delete 42 -y
+```
+
 ### Options
 
 ```

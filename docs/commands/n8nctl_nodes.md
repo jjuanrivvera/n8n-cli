@@ -1,26 +1,21 @@
 ---
-title: n8nctl executions delete
+title: n8nctl nodes
 ---
 
-## n8nctl executions delete
+## n8nctl nodes
 
-Delete a execution
+Explore the catalog of n8n node types (offline)
 
-```
-n8nctl executions delete <id> [flags]
-```
+### Synopsis
 
-### Examples
-
-```
-  n8nctl executions delete 42 -y
-```
+Browse the built-in catalog of n8n node definitions (n8n-nodes-base plus the
+langchain nodes). Useful for finding the exact `type` string for a node and the
+parameters it accepts. The catalog is embedded, so this works offline.
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+  -h, --help   help for nodes
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +38,8 @@ n8nctl executions delete <id> [flags]
 
 ### SEE ALSO
 
-* [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
+* [n8nctl](n8nctl.md)	 - Control any n8n instance from the terminal via its public API
+* [n8nctl nodes list](n8nctl_nodes_list.md)	 - List all node types
+* [n8nctl nodes search](n8nctl_nodes_search.md)	 - Search node types by type or display name
+* [n8nctl nodes show](n8nctl_nodes_show.md)	 - Show a node type's display name and parameters
 

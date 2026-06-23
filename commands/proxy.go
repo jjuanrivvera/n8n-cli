@@ -26,6 +26,7 @@ func proxyCmd() *cobra.Command {
 	var listen string
 	var disable []string
 	var blockDestructive bool
+	var rejectDupNames bool
 
 	cmd := &cobra.Command{
 		Use:   "proxy",
@@ -61,7 +62,7 @@ func proxyCmd() *cobra.Command {
 				disabled[d] = true
 			}
 
-			handler := newLintProxy(target, apiKey, disabled, blockDestructive, cmd.ErrOrStderr())
+			handler := newLintProxy(target, apiKey, disabled, blockDestructive, rejectDupNames, cmd.ErrOrStderr())
 			srv := &http.Server{Addr: listen, Handler: handler, ReadHeaderTimeout: 10 * time.Second}
 
 			// Shut down cleanly on Ctrl-C (cmd.Context() is signal-cancelled).
@@ -84,13 +85,14 @@ func proxyCmd() *cobra.Command {
 	cmd.Flags().StringVar(&listen, "listen", "127.0.0.1:8099", "address to listen on")
 	cmd.Flags().StringSliceVar(&disable, "disable-rule", nil, "lint rules to disable (comma-separated)")
 	cmd.Flags().BoolVar(&blockDestructive, "block-destructive", false, "also reject workflow DELETE requests")
+	cmd.Flags().BoolVar(&rejectDupNames, "reject-duplicate-names", false, "reject creating a workflow whose name already exists")
 	return cmd
 }
 
 // newLintProxy returns a reverse proxy to target that lints workflow create/update
 // bodies and rejects errors with 422, optionally blocking workflow DELETEs. It
 // injects apiKey as X-N8N-API-KEY so clients forward without the secret.
-func newLintProxy(target *url.URL, apiKey string, disabled map[string]bool, blockDestructive bool, logw io.Writer) http.Handler {
+func newLintProxy(target *url.URL, apiKey string, disabled map[string]bool, blockDestructive, rejectDupNames bool, logw io.Writer) http.Handler {
 	rp := httputil.NewSingleHostReverseProxy(target)
 	director := rp.Director
 	rp.Director = func(req *http.Request) {
@@ -98,6 +100,7 @@ func newLintProxy(target *url.URL, apiKey string, disabled map[string]bool, bloc
 		req.Host = target.Host
 		req.Header.Set("X-N8N-API-KEY", apiKey)
 	}
+	httpc := &http.Client{Timeout: 15 * time.Second}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
@@ -113,6 +116,16 @@ func newLintProxy(target *url.URL, apiKey string, disabled map[string]bool, bloc
 				writeProxyError(w, http.StatusUnprocessableEntity,
 					"n8nctl proxy: workflow rejected by lint", findings)
 				return
+			}
+			// On create only, optionally reject a name that already exists (n8n does
+			// not enforce unique names, which makes later reconcile/prune ambiguous).
+			if rejectDupNames && r.Method == http.MethodPost {
+				if name := workflowName(body); name != "" && nameExists(httpc, target, r.URL.Path, apiKey, name) {
+					fmt.Fprintf(logw, "✗ %s %s → 409 (duplicate name %q)\n", r.Method, r.URL.Path, name)
+					writeProxyError(w, http.StatusConflict,
+						"n8nctl proxy: a workflow named "+name+" already exists", nil)
+					return
+				}
 			}
 			fmt.Fprintf(logw, "✓ %s %s → forwarded (lint clean)\n", r.Method, r.URL.Path)
 			r.Body = io.NopCloser(bytes.NewReader(body))
@@ -189,4 +202,46 @@ func writeProxyError(w http.ResponseWriter, code int, message string, findings [
 		payload["lint"] = findings
 	}
 	_ = json.NewEncoder(w).Encode(payload)
+}
+
+// workflowName extracts the "name" from a workflow create body.
+func workflowName(body []byte) string {
+	var w struct {
+		Name string `json:"name"`
+	}
+	_ = json.Unmarshal(body, &w)
+	return w.Name
+}
+
+// nameExists reports whether the instance already has a workflow with this name.
+// Best-effort: on any error it returns false (fail open) so the proxy never blocks
+// a legitimate create because of a transient lookup failure.
+func nameExists(c *http.Client, target *url.URL, path, apiKey, name string) bool {
+	u := *target
+	u.Path = path
+	u.RawQuery = "limit=250"
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return false
+	}
+	req.Header.Set("X-N8N-API-KEY", apiKey)
+	resp, err := c.Do(req)
+	if err != nil {
+		return false
+	}
+	defer func() { _ = resp.Body.Close() }()
+	var env struct {
+		Data []struct {
+			Name string `json:"name"`
+		} `json:"data"`
+	}
+	if json.NewDecoder(resp.Body).Decode(&env) != nil {
+		return false
+	}
+	for _, wf := range env.Data {
+		if wf.Name == name {
+			return true
+		}
+	}
+	return false
 }

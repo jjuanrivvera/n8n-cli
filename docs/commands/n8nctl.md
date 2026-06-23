@@ -53,12 +53,14 @@ key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
 * [n8nctl login](n8nctl_login.md)	 - Authenticate the active profile (alias for `auth login`)
 * [n8nctl logout](n8nctl_logout.md)	 - Remove the active profile's API key (alias for `auth logout`)
 * [n8nctl mcp](n8nctl_mcp.md)	 - MCP server management
+* [n8nctl nodes](n8nctl_nodes.md)	 - Explore the catalog of n8n node types (offline)
 * [n8nctl packages](n8nctl_packages.md)	 - Export and import workflows as .n8np packages (beta)
 * [n8nctl projects](n8nctl_projects.md)	 - Manage projects and their members
 * [n8nctl proxy](n8nctl_proxy.md)	 - Run a local n8n API proxy that lint-gates workflow writes
 * [n8nctl restore](n8nctl_restore.md)	 - Recreate workflows from a backup directory
 * [n8nctl skills](n8nctl_skills.md)	 - Install this CLI's AI-agent skill into Claude, Cursor, and other agents
 * [n8nctl source-control](n8nctl_source-control.md)	 - Interact with the Source Control (Git) integration
+* [n8nctl stats](n8nctl_stats.md)	 - One-shot instance health summary
 * [n8nctl tags](n8nctl_tags.md)	 - Manage workflow tags
 * [n8nctl users](n8nctl_users.md)	 - Manage users (instance owner only)
 * [n8nctl variables](n8nctl_variables.md)	 - Manage instance variables

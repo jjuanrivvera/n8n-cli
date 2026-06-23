@@ -30,10 +30,11 @@ n8nctl proxy [flags]
 ### Options
 
 ```
-      --block-destructive      also reject workflow DELETE requests
-      --disable-rule strings   lint rules to disable (comma-separated)
-  -h, --help                   help for proxy
-      --listen string          address to listen on (default "127.0.0.1:8099")
+      --block-destructive        also reject workflow DELETE requests
+      --disable-rule strings     lint rules to disable (comma-separated)
+  -h, --help                     help for proxy
+      --listen string            address to listen on (default "127.0.0.1:8099")
+      --reject-duplicate-names   reject creating a workflow whose name already exists
 ```
 
 ### Options inherited from parent commands

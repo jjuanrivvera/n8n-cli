@@ -10,6 +10,13 @@ Create a tag
 n8nctl tags create [flags]
 ```
 
+### Examples
+
+```
+  n8nctl tags create --set name=example
+  n8nctl tags create --file body.json
+```
+
 ### Options
 
 ```

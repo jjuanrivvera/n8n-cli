@@ -40,6 +40,8 @@ Executions are read-only with retry/stop actions — n8n creates them by running
 * [n8nctl executions delete](n8nctl_executions_delete.md)	 - Delete a execution
 * [n8nctl executions get](n8nctl_executions_get.md)	 - Get a single execution by id
 * [n8nctl executions list](n8nctl_executions_list.md)	 - List executions
+* [n8nctl executions prune](n8nctl_executions_prune.md)	 - Bulk-delete executions by age and/or status
 * [n8nctl executions retry](n8nctl_executions_retry.md)	 - Retry a failed execution
 * [n8nctl executions stop](n8nctl_executions_stop.md)	 - Stop a running execution
+* [n8nctl executions watch](n8nctl_executions_watch.md)	 - Live-tail new executions, highlighting failures
 

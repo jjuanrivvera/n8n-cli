@@ -1,26 +1,34 @@
 ---
-title: n8nctl executions delete
+title: n8nctl executions watch
 ---
 
-## n8nctl executions delete
+## n8nctl executions watch
 
-Delete a execution
+Live-tail new executions, highlighting failures
+
+### Synopsis
+
+Poll the executions endpoint and print each new run as it appears, coloring
+failures. Runs until interrupted (Ctrl-C).
 
 ```
-n8nctl executions delete <id> [flags]
+n8nctl executions watch [flags]
 ```
 
 ### Examples
 
 ```
-  n8nctl executions delete 42 -y
+  n8nctl executions watch
+  n8nctl executions watch --status error --interval 10s
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+  -h, --help                help for watch
+      --interval duration   poll interval (default 5s)
+      --status string       only watch this status
+      --workflow string     only watch executions of this workflow id
 ```
 
 ### Options inherited from parent commands

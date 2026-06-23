@@ -110,4 +110,6 @@ func executionExtra(parent *cobra.Command, _ resourceSpec[api.Execution]) {
 		}
 	}
 	parent.AddCommand(readOnlyHints(get))
+
+	parent.AddCommand(destructiveHints(executionPruneCmd()), readOnlyHints(executionWatchCmd()))
 }

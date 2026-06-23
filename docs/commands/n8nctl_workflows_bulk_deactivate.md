@@ -1,26 +1,27 @@
 ---
-title: n8nctl executions delete
+title: n8nctl workflows bulk deactivate
 ---
 
-## n8nctl executions delete
+## n8nctl workflows bulk deactivate
 
-Delete a execution
+deactivate every workflow carrying a tag
 
 ```
-n8nctl executions delete <id> [flags]
+n8nctl workflows bulk deactivate --tag <name> [flags]
 ```
 
 ### Examples
 
 ```
-  n8nctl executions delete 42 -y
+  n8nctl workflows bulk deactivate --tag prod
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+  -h, --help         help for deactivate
+      --tag string   tag name selecting the workflows (required)
+  -y, --yes          skip the confirmation prompt
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +44,5 @@ n8nctl executions delete <id> [flags]
 
 ### SEE ALSO
 
-* [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
+* [n8nctl workflows bulk](n8nctl_workflows_bulk.md)	 - Bulk activate/deactivate workflows by tag
 

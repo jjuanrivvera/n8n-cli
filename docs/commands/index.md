@@ -21,12 +21,14 @@ Auto-generated from the CLI. See [n8nctl](n8nctl.md) for the root command.
 - [login](n8nctl_login.md) — Authenticate the active profile (alias for `auth login`)
 - [logout](n8nctl_logout.md) — Remove the active profile's API key (alias for `auth logout`)
 - [mcp](n8nctl_mcp.md) — MCP server management
+- [nodes](n8nctl_nodes.md) — Explore the catalog of n8n node types (offline)
 - [packages](n8nctl_packages.md) — Export and import workflows as .n8np packages (beta)
 - [projects](n8nctl_projects.md) — Manage projects and their members
 - [proxy](n8nctl_proxy.md) — Run a local n8n API proxy that lint-gates workflow writes
 - [restore](n8nctl_restore.md) — Recreate workflows from a backup directory
 - [skills](n8nctl_skills.md) — Install this CLI's AI-agent skill into Claude, Cursor, and other agents
 - [source-control](n8nctl_source-control.md) — Interact with the Source Control (Git) integration
+- [stats](n8nctl_stats.md) — One-shot instance health summary
 - [tags](n8nctl_tags.md) — Manage workflow tags
 - [users](n8nctl_users.md) — Manage users (instance owner only)
 - [variables](n8nctl_variables.md) — Manage instance variables

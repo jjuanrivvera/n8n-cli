@@ -10,6 +10,13 @@ Create a variable
 n8nctl variables create [flags]
 ```
 
+### Examples
+
+```
+  n8nctl variables create --set name=example
+  n8nctl variables create --file body.json
+```
+
 ### Options
 
 ```

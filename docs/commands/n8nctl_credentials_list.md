@@ -10,6 +10,13 @@ List credentials
 n8nctl credentials list [flags]
 ```
 
+### Examples
+
+```
+  n8nctl credentials list
+  n8nctl credentials list -o json --all
+```
+
 ### Options
 
 ```

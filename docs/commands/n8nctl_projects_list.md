@@ -10,6 +10,13 @@ List projects
 n8nctl projects list [flags]
 ```
 
+### Examples
+
+```
+  n8nctl projects list
+  n8nctl projects list -o json --all
+```
+
 ### Options
 
 ```

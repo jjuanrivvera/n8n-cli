@@ -25,6 +25,7 @@ const (
 // ordinary writes require approval.
 var irreversibleVerbs = map[string]bool{
 	"delete": true,
+	"prune":  true, // bulk-deletes execution records
 }
 
 // isIrreversibleVerb reports whether a subcommand name is an irreversible action,

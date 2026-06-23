@@ -29,6 +29,14 @@ type nodeCatalog struct {
 	versions map[string]string
 	types    []string                   // sorted type names, for suggestions
 	params   map[string]map[string]bool // type -> set of valid parameter names
+	display  map[string]string          // type -> display name
+}
+
+// NodeInfo is a public view of one catalogued node type, for the `nodes` command.
+type NodeInfo struct {
+	Type        string   `json:"type"`
+	DisplayName string   `json:"displayName"`
+	Params      []string `json:"params"`
 }
 
 var (
@@ -45,6 +53,7 @@ func loadCatalog() *nodeCatalog {
 		_ = json.Unmarshal(catalogJSON, &raw)
 		catalog.versions = raw.GeneratedFrom
 		catalog.params = make(map[string]map[string]bool, len(raw.Nodes))
+		catalog.display = make(map[string]string, len(raw.Nodes))
 		catalog.types = make([]string, 0, len(raw.Nodes))
 		for t, e := range raw.Nodes {
 			set := make(map[string]bool, len(e.Params))
@@ -52,11 +61,55 @@ func loadCatalog() *nodeCatalog {
 				set[p] = true
 			}
 			catalog.params[t] = set
+			catalog.display[t] = e.DisplayName
 			catalog.types = append(catalog.types, t)
 		}
 		sort.Strings(catalog.types)
 	})
 	return &catalog
+}
+
+// Nodes returns every catalogued node type, sorted by type. Used by `n8nctl nodes`.
+func Nodes() []NodeInfo {
+	c := loadCatalog()
+	out := make([]NodeInfo, 0, len(c.types))
+	for _, t := range c.types {
+		out = append(out, nodeInfo(c, t))
+	}
+	return out
+}
+
+// Node returns one node's info, if catalogued.
+func Node(nodeType string) (NodeInfo, bool) {
+	c := loadCatalog()
+	if _, ok := c.params[nodeType]; !ok {
+		return NodeInfo{}, false
+	}
+	return nodeInfo(c, nodeType), true
+}
+
+// SuggestNodeType returns the closest known type to a (likely mistyped) one.
+func SuggestNodeType(nodeType string) (string, bool) { return suggestNode(nodeType) }
+
+// NodeTypeCorrection returns a corrected node type when nodeType is from a known
+// package, is not in the catalog, and has a close match — i.e. a fixable typo.
+func NodeTypeCorrection(nodeType string) (string, bool) {
+	if hasKnownPrefix(nodeType) && !nodeKnown(nodeType) {
+		return suggestNode(nodeType)
+	}
+	return "", false
+}
+
+// CatalogBasis exposes the catalog provenance string.
+func CatalogBasis() string { return catalogBasis() }
+
+func nodeInfo(c *nodeCatalog, t string) NodeInfo {
+	params := make([]string, 0, len(c.params[t]))
+	for p := range c.params[t] {
+		params = append(params, p)
+	}
+	sort.Strings(params)
+	return NodeInfo{Type: t, DisplayName: c.display[t], Params: params}
 }
 
 // catalogBasis describes the catalog provenance for the rule listing.
@@ -154,20 +207,9 @@ func levenshtein(a, b string) int {
 			if a[i-1] == b[j-1] {
 				cost = 0
 			}
-			cur[j] = min3(cur[j-1]+1, prev[j]+1, prev[j-1]+cost)
+			cur[j] = min(cur[j-1]+1, prev[j]+1, prev[j-1]+cost)
 		}
 		prev = cur
 	}
 	return prev[lb]
-}
-
-func min3(a, b, c int) int {
-	m := a
-	if b < m {
-		m = b
-	}
-	if c < m {
-		m = c
-	}
-	return m
 }

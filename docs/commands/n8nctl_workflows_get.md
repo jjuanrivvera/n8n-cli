@@ -10,6 +10,12 @@ Get a single workflow by id
 n8nctl workflows get <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl workflows get 42 -o json
+```
+
 ### Options
 
 ```

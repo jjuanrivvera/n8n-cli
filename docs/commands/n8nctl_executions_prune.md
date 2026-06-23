@@ -1,26 +1,36 @@
 ---
-title: n8nctl executions delete
+title: n8nctl executions prune
 ---
 
-## n8nctl executions delete
+## n8nctl executions prune
 
-Delete a execution
+Bulk-delete executions by age and/or status
+
+### Synopsis
+
+Delete execution records older than a cutoff and/or matching a status, to
+reclaim database space. Always previews the count first; pass --yes to skip the
+confirmation, or --dry-run to only count.
 
 ```
-n8nctl executions delete <id> [flags]
+n8nctl executions prune [flags]
 ```
 
 ### Examples
 
 ```
-  n8nctl executions delete 42 -y
+  n8nctl executions prune --older-than 30d
+  n8nctl executions prune --older-than 7d --status error --yes
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+  -h, --help                help for prune
+      --older-than string   delete executions older than this (e.g. 30d, 720h, 90m)
+      --status string       only delete this status (error, success, ...)
+      --workflow string     only delete executions of this workflow id
+  -y, --yes                 skip the confirmation prompt
 ```
 
 ### Options inherited from parent commands

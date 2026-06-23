@@ -10,6 +10,12 @@ Update a project
 n8nctl projects update <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl projects update 42 --set name=renamed
+```
+
 ### Options
 
 ```

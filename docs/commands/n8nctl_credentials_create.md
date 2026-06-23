@@ -10,6 +10,13 @@ Create a credential
 n8nctl credentials create [flags]
 ```
 
+### Examples
+
+```
+  n8nctl credentials create --set name=example
+  n8nctl credentials create --file body.json
+```
+
 ### Options
 
 ```

@@ -29,7 +29,7 @@ func proxyTo(t *testing.T, blockDestructive bool) (*httptest.Server, *httptest.S
 	}))
 	t.Cleanup(backend.Close)
 	tu, _ := url.Parse(backend.URL)
-	proxy := httptest.NewServer(newLintProxy(&url.URL{Scheme: tu.Scheme, Host: tu.Host}, "secret", nil, blockDestructive, io.Discard))
+	proxy := httptest.NewServer(newLintProxy(&url.URL{Scheme: tu.Scheme, Host: tu.Host}, "secret", nil, blockDestructive, false, io.Discard))
 	t.Cleanup(proxy.Close)
 	return proxy, backend, &hits
 }
@@ -101,7 +101,7 @@ func TestProxy_DisableRule(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte(`{}`)) }))
 	t.Cleanup(backend.Close)
 	b, _ := url.Parse(backend.URL)
-	h := newLintProxy(&url.URL{Scheme: b.Scheme, Host: b.Host}, "secret", map[string]bool{"webhook-id-required": true}, false, io.Discard)
+	h := newLintProxy(&url.URL{Scheme: b.Scheme, Host: b.Host}, "secret", map[string]bool{"webhook-id-required": true}, false, false, io.Discard)
 	srv := httptest.NewServer(h)
 	t.Cleanup(srv.Close)
 	resp, _ := do(t, http.MethodPost, srv.URL+"/api/v1/workflows", badWF)

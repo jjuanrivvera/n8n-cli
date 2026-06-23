@@ -1,26 +1,21 @@
 ---
-title: n8nctl executions delete
+title: n8nctl workflows bulk
 ---
 
-## n8nctl executions delete
+## n8nctl workflows bulk
 
-Delete a execution
+Bulk activate/deactivate workflows by tag
 
-```
-n8nctl executions delete <id> [flags]
-```
+### Synopsis
 
-### Examples
-
-```
-  n8nctl executions delete 42 -y
-```
+Flip every workflow carrying a tag in one command — useful for maintenance
+windows (deactivate the `prod` set, do the work, reactivate). Always previews;
+pass --yes to skip the confirmation or --dry-run to only list.
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+  -h, --help   help for bulk
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +38,7 @@ n8nctl executions delete <id> [flags]
 
 ### SEE ALSO
 
-* [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
+* [n8nctl workflows](n8nctl_workflows.md)	 - Manage workflows
+* [n8nctl workflows bulk activate](n8nctl_workflows_bulk_activate.md)	 - activate every workflow carrying a tag
+* [n8nctl workflows bulk deactivate](n8nctl_workflows_bulk_deactivate.md)	 - deactivate every workflow carrying a tag
 

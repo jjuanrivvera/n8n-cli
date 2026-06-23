@@ -45,12 +45,14 @@ type catalog struct {
 }
 
 func main() {
+	// Versions default to the pinned constants but can be overridden, so the
+	// scheduled refresh job (.github/workflows/node-catalog.yml) can track latest.
 	sources := []source{
-		{basePkg, baseVer, "n8n-nodes-base."},
-		{lcPkg, lcVer, "@n8n/n8n-nodes-langchain."},
+		{basePkg, envOr("N8N_NODES_BASE_VER", baseVer), "n8n-nodes-base."},
+		{lcPkg, envOr("N8N_LANGCHAIN_VER", lcVer), "@n8n/n8n-nodes-langchain."},
 	}
 	out := catalog{
-		GeneratedFrom: map[string]string{basePkg: baseVer, lcPkg: lcVer},
+		GeneratedFrom: map[string]string{},
 		Nodes:         map[string]nodeEntry{},
 	}
 
@@ -66,13 +68,12 @@ func main() {
 				continue
 			}
 			fullType := s.prefix + name
-			names := map[string]bool{}
-			collectNames(n["properties"], names)
 			out.Nodes[fullType] = nodeEntry{
 				DisplayName: stringOr(n["displayName"], name),
-				Params:      sortedKeys(names),
+				Params:      topLevelParamNames(n["properties"]),
 			}
 		}
+		out.GeneratedFrom[s.pkg] = s.ver
 		fmt.Fprintf(os.Stderr, "%s@%s: %d nodes\n", s.pkg, s.ver, len(nodes))
 	}
 
@@ -107,23 +108,24 @@ func fetch(c *http.Client, url string) ([]map[string]any, error) {
 	return nodes, nil
 }
 
-// collectNames walks a node's properties tree and records every string under a
-// "name" key. This is a deliberate superset (it also picks up option-value names),
-// which keeps the unknown-parameter check conservative (fewer false positives).
-func collectNames(v any, into map[string]bool) {
-	switch t := v.(type) {
-	case map[string]any:
-		if n, ok := t["name"].(string); ok && n != "" {
-			into[n] = true
-		}
-		for _, vv := range t {
-			collectNames(vv, into)
-		}
-	case []any:
-		for _, vv := range t {
-			collectNames(vv, into)
+// topLevelParamNames returns the names of a node's top-level properties — which
+// are exactly the keys a workflow node's `parameters` object uses. Nested
+// collection/option entries are deliberately excluded (they are values under a
+// top-level key, not parameter keys), keeping the catalog precise and clean.
+func topLevelParamNames(properties any) []string {
+	props, ok := properties.([]any)
+	if !ok {
+		return nil
+	}
+	set := map[string]bool{}
+	for _, p := range props {
+		if pm, ok := p.(map[string]any); ok {
+			if n, ok := pm["name"].(string); ok && n != "" {
+				set[n] = true
+			}
 		}
 	}
+	return sortedKeys(set)
 }
 
 func stringOr(v any, fallback string) string {
@@ -145,4 +147,11 @@ func sortedKeys(m map[string]bool) []string {
 func fatalf(format string, a ...any) {
 	fmt.Fprintf(os.Stderr, "gen-node-schemas: "+format+"\n", a...)
 	os.Exit(1)
+}
+
+func envOr(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }

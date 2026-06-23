@@ -10,6 +10,12 @@ Delete a tag
 n8nctl tags delete <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl tags delete 42 -y
+```
+
 ### Options
 
 ```

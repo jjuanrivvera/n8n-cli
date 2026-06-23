@@ -18,7 +18,11 @@ import (
 
 // addWorkflowGitopsCmds wires the workflows-as-code subcommands onto `workflows`.
 func addWorkflowGitopsCmds(parent *cobra.Command) {
-	parent.AddCommand(readOnlyHints(workflowConvertCmd()), readOnlyHints(workflowLintCmd()), writeHints(workflowApplyCmd()), readOnlyHints(workflowDiffCmd()))
+	parent.AddCommand(
+		readOnlyHints(workflowConvertCmd()), readOnlyHints(workflowLintCmd()),
+		writeHints(workflowApplyCmd()), readOnlyHints(workflowDiffCmd()),
+		writeHints(workflowAutofixCmd()),
+	)
 }
 
 // --- helpers shared by apply/diff ---

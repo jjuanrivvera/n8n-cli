@@ -10,6 +10,12 @@ Delete a user
 n8nctl users delete <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl users delete 42 -y
+```
+
 ### Options
 
 ```

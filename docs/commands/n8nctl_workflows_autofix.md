@@ -1,26 +1,37 @@
 ---
-title: n8nctl executions delete
+title: n8nctl workflows autofix
 ---
 
-## n8nctl executions delete
+## n8nctl workflows autofix
 
-Delete a execution
+Auto-repair common workflow mistakes in files
+
+### Synopsis
+
+Apply mechanical fixes to workflow files: correct typo'd node types (against
+the embedded node catalog), add the leading '=' to expression strings that are
+missing it, and generate a webhookId for webhook/form-trigger nodes that lack one.
+
+By default it reports what it would change; pass --write to apply the fixes.
 
 ```
-n8nctl executions delete <id> [flags]
+n8nctl workflows autofix [-f <file>... | --dir <dir>] [flags]
 ```
 
 ### Examples
 
 ```
-  n8nctl executions delete 42 -y
+  n8nctl workflows autofix --dir ./workflows
+  n8nctl workflows autofix -f wf.json --write
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
-  -y, --yes    skip the confirmation prompt
+      --dir string     fix all workflow files in a directory
+  -f, --file strings   workflow files to fix
+  -h, --help           help for autofix
+      --write          write the fixes back (default: report only)
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +54,5 @@ n8nctl executions delete <id> [flags]
 
 ### SEE ALSO
 
-* [n8nctl executions](n8nctl_executions.md)	 - Inspect and control workflow executions
+* [n8nctl workflows](n8nctl_workflows.md)	 - Manage workflows
 

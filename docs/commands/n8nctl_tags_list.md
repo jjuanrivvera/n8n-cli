@@ -10,6 +10,13 @@ List tags
 n8nctl tags list [flags]
 ```
 
+### Examples
+
+```
+  n8nctl tags list
+  n8nctl tags list -o json --all
+```
+
 ### Options
 
 ```

@@ -10,6 +10,12 @@ Delete a variable
 n8nctl variables delete <id> [flags]
 ```
 
+### Examples
+
+```
+  n8nctl variables delete 42 -y
+```
+
 ### Options
 
 ```
