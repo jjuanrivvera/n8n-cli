@@ -109,5 +109,5 @@ func executionExtra(parent *cobra.Command, _ resourceSpec[api.Execution]) {
 			parent.RemoveCommand(c)
 		}
 	}
-	parent.AddCommand(get)
+	parent.AddCommand(readOnlyHints(get))
 }

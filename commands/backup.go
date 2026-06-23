@@ -21,7 +21,7 @@ import (
 // versioned, diffed, code-reviewed, and re-applied to another instance.
 
 func init() {
-	rootCmd.AddCommand(backupCmd(), restoreCmd())
+	rootCmd.AddCommand(readOnlyHints(backupCmd()), writeHints(restoreCmd()))
 }
 
 func backupCmd() *cobra.Command {

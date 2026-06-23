@@ -451,6 +451,55 @@ n8nctl workflows diff 2tUt1wbLX592XDdX --file ./workflows/intake.json
 
 Flags: `--to <profile>` or `--file <path>`.
 
+## MCP server & agent safety
+
+Run `n8nctl` as an MCP server so an AI host (Claude Code/Desktop, Cursor, VS Code)
+drives n8n through typed tools, and fence those operations with `agent guard`.
+
+```bash
+n8nctl mcp start                       # MCP server over stdio (what a host spawns)
+n8nctl mcp stream --host 127.0.0.1 --port 8080   # same tools over HTTP
+n8nctl mcp tools                       # export the tool catalog to mcp-tools.json
+n8nctl mcp claude enable               # wire into Claude Desktop (also: list | disable)
+n8nctl mcp cursor enable               # wire into Cursor
+n8nctl mcp vscode enable               # wire into VS Code
+```
+
+The server auto-exposes the CLI as **73 MCP tools** named with an `n8n` prefix
+(`n8n_workflows_list`, `n8n_workflows_create`, `n8n_workflows_delete`,
+`n8n_data-tables_delete-rows`). Each tool replays the matching cobra command,
+reusing the same keyring auth, active profile, and `--dry-run`. Tools are
+annotated **read-only** (list/get/search/lint/diff/schema/members/backup/audit),
+**write** (create/update/activate/transfer/restore/sync/…), or **destructive**
+(delete/delete-rows), so a host can gate writes automatically.
+
+The server uses **whatever profile is active at startup**. `--profile`/`--base-url`
+and the secret flags (`--api-key`, `--show-token`) are never exposed to the model;
+setup commands (`auth`, `config`, `alias`, `init`, `skills`, `agent`, `doctor`) are
+excluded. `mcp ... enable` accepts `--server-name`, `--config-path`, and
+`--env KEY=value`; set `N8NCTL_PROFILE` in the host config to pin a server to one
+instance. Built on `github.com/njayp/ophis` (wrapping the official
+`modelcontextprotocol/go-sdk`).
+
+```bash
+n8nctl agent guard --host claude-code           # print safety config for review
+n8nctl agent guard --host codex                 # ~/.codex/config.toml (read-only sandbox)
+n8nctl agent guard --host opencode --all-writes # opencode.json; block writes too
+n8nctl agent guard --host claude-code --write   # install (never overwrites existing)
+```
+
+`agent guard` generates host-level rules **derived from the live command tree** (so
+they stay correct across upgrades): hard-block `delete`/`delete-rows`, make ordinary
+writes require approval, leave reads free. `--all-writes` blocks writes too; `--write`
+installs the files (never overwriting), else prints for review. Claude Code gets a
+`.claude/hooks/n8nctl-guard.sh` PreToolUse hook + `.claude/settings.json` deny/ask
+rules; Codex gets a read-only-sandbox `~/.codex/config.toml`; OpenCode gets
+`opencode.json` rules. The guard is excluded from the MCP surface so an agent can't
+disable its own rails. **MCP-only operation is the strongest guarantee** — the
+MCP-tool branch is a hard block; the Bash hook is best-effort (defeats quote/backslash
+obfuscation, not variable indirection). Full setup: `docs/mcp.md`,
+`docs/agent-guard.md`.
+
 ## Meta commands
 
 ```bash

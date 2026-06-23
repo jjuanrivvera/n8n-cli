@@ -106,7 +106,7 @@ func addWorkflowSyncCmd(parent *cobra.Command) {
 	_ = cmd.RegisterFlagCompletionFunc("from", func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 		return profileNames(), cobra.ShellCompDirectiveNoFileComp
 	})
-	parent.AddCommand(cmd)
+	parent.AddCommand(writeHints(cmd))
 }
 
 // findWorkflowByName returns the first workflow whose name matches, or nil.

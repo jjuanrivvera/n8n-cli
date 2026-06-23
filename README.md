@@ -433,6 +433,30 @@ source <(n8nctl completion bash)
 n8nctl completion zsh > "${fpath[1]}/_n8nctl"
 ```
 
+## MCP server & agent safety
+
+Drive n8n straight from an AI agent. `n8nctl mcp` runs the CLI as an
+[MCP](https://modelcontextprotocol.io) server, auto-exposing the command tree as
+73 annotated tools (read-only / write / destructive) that reuse the same keyring
+auth, active profile, and `--dry-run`:
+
+```bash
+n8nctl mcp start            # MCP server over stdio (Claude Code/Desktop, Cursor, VS Code)
+n8nctl mcp claude enable    # wire it into Claude Desktop in one step
+```
+
+Fence those operations with `agent guard` — it hard-blocks destructive ops
+(`delete`, `delete-rows`), makes writes require approval, and leaves reads free,
+generating host-level rules for Claude Code, Codex, or OpenCode:
+
+```bash
+n8nctl agent guard --host claude-code           # print the safety config for review
+n8nctl agent guard --host claude-code --write   # install it (won't overwrite existing files)
+```
+
+See [MCP server](docs/mcp.md) and [Agent guard](docs/agent-guard.md) for the full
+setup, manual config, and the MCP-only-is-strongest security model.
+
 ## Documentation
 
 The [documentation site](https://jjuanrivvera.github.io/n8n-cli/) covers:
@@ -442,6 +466,8 @@ The [documentation site](https://jjuanrivvera.github.io/n8n-cli/) covers:
 - [Authentication](https://jjuanrivvera.github.io/n8n-cli/authentication/)
 - [Output and filtering](https://jjuanrivvera.github.io/n8n-cli/output/)
 - [Beyond the API](https://jjuanrivvera.github.io/n8n-cli/beyond-api/)
+- [MCP server](https://jjuanrivvera.github.io/n8n-cli/mcp/)
+- [Agent guard](https://jjuanrivvera.github.io/n8n-cli/agent-guard/)
 - [Command reference](https://jjuanrivvera.github.io/n8n-cli/commands/)
 
 ## Development

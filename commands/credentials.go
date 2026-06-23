@@ -26,7 +26,7 @@ func init() {
 
 func credentialExtra(parent *cobra.Command, _ resourceSpec[api.Credential]) {
 	// schema <credentialTypeName> — show the JSON schema of a credential type.
-	parent.AddCommand(&cobra.Command{
+	parent.AddCommand(readOnlyHints(&cobra.Command{
 		Use:   "schema <credentialTypeName>",
 		Short: "Show the field schema for a credential type",
 		Args:  cobra.ExactArgs(1),
@@ -44,7 +44,7 @@ func credentialExtra(parent *cobra.Command, _ resourceSpec[api.Credential]) {
 			}
 			return render(cmd, raw)
 		},
-	})
+	}))
 
 	// transfer <id> --project <projectId>
 	var project string

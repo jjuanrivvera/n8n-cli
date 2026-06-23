@@ -22,7 +22,7 @@ func init() {
 
 func projectExtra(parent *cobra.Command, _ resourceSpec[api.Project]) {
 	// members <projectId>
-	parent.AddCommand(&cobra.Command{
+	parent.AddCommand(readOnlyHints(&cobra.Command{
 		Use:   "members <projectId>",
 		Short: "List the members of a project",
 		Args:  cobra.ExactArgs(1),
@@ -40,7 +40,7 @@ func projectExtra(parent *cobra.Command, _ resourceSpec[api.Project]) {
 			}
 			return render(cmd, members)
 		},
-	})
+	}))
 
 	// add-member <projectId> --user <id> --role <role>
 	var addUser, addRole string

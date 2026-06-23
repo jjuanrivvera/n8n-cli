@@ -40,5 +40,5 @@ func init() {
 		"restrict to categories: credentials,database,nodes,filesystem,instance")
 	_ = cmd.RegisterFlagCompletionFunc("categories",
 		fixedCompletions([]string{"credentials", "database", "nodes", "filesystem", "instance"}))
-	rootCmd.AddCommand(cmd)
+	rootCmd.AddCommand(readOnlyHints(cmd))
 }

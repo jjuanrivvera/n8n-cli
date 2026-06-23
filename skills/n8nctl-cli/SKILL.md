@@ -140,6 +140,9 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `data-tables ...` | CRUD for data tables + rows (`rows`, `add-rows`, `update-rows`, `upsert-rows`, `delete-rows`) | `n8nctl data-tables rows <id> --filter '{"type":"and","filters":[]}'` |
 | `packages export\|import` | Bundle/restore workflows as a `.n8np` archive (beta; needs `N8N_PUBLIC_API_PACKAGES_ENABLED`) | `n8nctl packages export --workflow 42 --out wf.n8np` |
 | `skills install\|path\|print` | Install this skill into an AI agent (claude/cursor/windsurf/codex/gemini/copilot/opencode) | `n8nctl skills install --global` |
+| `mcp start\|stream\|tools` | Run n8nctl as an MCP server (stdio / HTTP / export tool list) so an agent drives n8n via 73 annotated tools | `n8nctl mcp start` |
+| `mcp claude\|cursor\|vscode enable\|disable\|list` | Wire the MCP server into a host's config | `n8nctl mcp claude enable` |
+| `agent guard --host <h>` | Generate host-level rules that block destructive n8n ops for an agent (`--all-writes`, `--write`) | `n8nctl agent guard --host claude-code` |
 | `backup --out <dir>` | Snapshot the instance (workflows + tags + variables + credential metadata + manifest) for git; `--format yaml` + `--externalize N` make it git-friendlier | `n8nctl --profile prod backup --out ./backups/prod --format yaml --externalize 5` |
 | `restore --in <dir>` | Re-apply a backup directory (reads JSON or YAML, re-inlines `$ref` code; `--update-by-name`, `--activate`); credential secrets are NOT in the backup | `n8nctl --profile staging restore --in ./backups/prod --update-by-name` |
 | `api <METHOD> <PATH>` | Raw authenticated request (escape hatch) | `n8nctl api GET /workflows -q limit=5` |
@@ -200,6 +203,48 @@ graph-wide search, or a full **workflows-as-code / GitOps** loop:
 The full GitOps loop (backup → edit in git → lint in CI → apply with dry-run →
 apply with prune to a target) and the multi-instance promotion angle are
 documented in the project's `docs/workflows-as-code.md`.
+
+### MCP & agent safety
+
+`n8nctl` can run as an MCP server so an AI agent (Claude Code/Desktop, Cursor,
+VS Code) drives n8n through typed tools instead of shelling out — and it ships an
+`agent guard` that fences those operations.
+
+- **`mcp start`** runs an MCP server over stdio (use `mcp stream --host H --port N`
+  for HTTP, `mcp tools` to export the catalog to `mcp-tools.json`). It auto-exposes
+  the CLI as **73 MCP tools** named with an `n8n` prefix (`n8n_workflows_list`,
+  `n8n_workflows_create`, `n8n_workflows_delete`, `n8n_data-tables_delete-rows`).
+  Each tool replays the matching cobra command, reusing the same keyring auth,
+  active profile, and `--dry-run`. Tools carry annotations — **read-only**
+  (list/get/search/lint/diff/schema/members/backup/audit), **write**
+  (create/update/activate/transfer/restore/sync/…), **destructive**
+  (delete/delete-rows) — so hosts gate writes automatically.
+- **Wire it in** per host: `n8nctl mcp claude enable` (also `cursor`, `vscode`),
+  with `disable`/`list` to match. The server uses **whatever profile is active at
+  startup**; `--profile`/`--base-url` and the secret flags (`--api-key`,
+  `--show-token`) are never exposed to the model, and setup commands (`auth`,
+  `config`, `alias`, `init`, `skills`, `agent`, `doctor`) are excluded.
+- **`agent guard --host <claude-code|codex|opencode>`** generates host-level
+  safety config (derived from the live command tree, so it stays correct across
+  upgrades): hard-block `delete`/`delete-rows`, make ordinary writes require
+  approval, leave reads free. `--all-writes` blocks writes too; `--write` installs
+  the files (never overwriting existing ones), else it prints for review. For
+  Claude Code it emits a `.claude/hooks/n8nctl-guard.sh` PreToolUse hook +
+  `.claude/settings.json` deny/ask rules; Codex gets a read-only-sandbox
+  `~/.codex/config.toml`; OpenCode gets `opencode.json` rules. The guard is
+  excluded from the MCP surface so an agent can't disable its own rails. **MCP-only
+  operation is the strongest guarantee** — the MCP-tool block is hard, the Bash
+  hook is best-effort (defeats quote/backslash tricks, not variable indirection).
+
+```bash
+n8nctl mcp start                          # expose n8n to an agent over stdio
+n8nctl mcp claude enable                  # wire the server into Claude Desktop
+n8nctl agent guard --host claude-code     # print the safety config for review
+n8nctl agent guard --host claude-code --write   # install it (won't overwrite)
+```
+
+See `docs/mcp.md` and `docs/agent-guard.md` for the full setup, manual JSON
+config, and a worked list-then-create example.
 
 Deeper, per-resource examples are in
 [references/n8n-commands.md](references/n8n-commands.md); output formats,

@@ -37,6 +37,7 @@ key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
 
 ### SEE ALSO
 
+* [n8nctl agent](n8nctl_agent.md)	 - Helpers for running n8nctl under an AI agent
 * [n8nctl alias](n8nctl_alias.md)	 - Define command shortcuts expanded before parsing
 * [n8nctl api](n8nctl_api.md)	 - Make a raw authenticated API request (escape hatch)
 * [n8nctl audit](n8nctl_audit.md)	 - Generate a security audit of the instance
@@ -51,6 +52,7 @@ key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
 * [n8nctl init](n8nctl_init.md)	 - Interactive first-run setup for an instance/profile
 * [n8nctl login](n8nctl_login.md)	 - Authenticate the active profile (alias for `auth login`)
 * [n8nctl logout](n8nctl_logout.md)	 - Remove the active profile's API key (alias for `auth logout`)
+* [n8nctl mcp](n8nctl_mcp.md)	 - MCP server management
 * [n8nctl packages](n8nctl_packages.md)	 - Export and import workflows as .n8np packages (beta)
 * [n8nctl projects](n8nctl_projects.md)	 - Manage projects and their members
 * [n8nctl restore](n8nctl_restore.md)	 - Recreate workflows from a backup directory

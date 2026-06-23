@@ -48,6 +48,6 @@ func init() {
 	}
 	pull.Flags().BoolVar(&force, "force", false, "discard local changes / resolve conflicts in favor of remote")
 	pull.Flags().StringVar(&variablesJSON, "variables", "", "JSON object of variable overrides to apply during pull")
-	sc.AddCommand(pull)
+	sc.AddCommand(writeHints(pull))
 	rootCmd.AddCommand(sc)
 }

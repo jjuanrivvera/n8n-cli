@@ -6,6 +6,28 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+- **MCP server**: `n8nctl mcp` runs the CLI as a Model Context Protocol server so
+  AI agents (Claude Code/Desktop, Cursor, VS Code) drive any n8n instance.
+  `mcp start` (stdio), `mcp stream` (HTTP), `mcp tools` (export the catalog), and
+  installers `mcp claude` / `mcp cursor` / `mcp vscode` (each `enable`/`disable`/
+  `list`). It auto-exposes the command tree as **73 MCP tools** prefixed `n8n_`
+  (e.g. `n8n_workflows_list`), each replaying the matching cobra command with the
+  same keyring auth, active profile, and `--dry-run`. Tools carry read-only /
+  write / destructive annotations so hosts gate writes; setup and secret commands
+  (`auth`, `config`, `alias`, `init`, `skills`, `agent`, `doctor`) and the
+  `--api-key` / `--show-token` / `--profile` / `--base-url` flags are never
+  exposed. Built on `github.com/njayp/ophis` (wrapping the official
+  `modelcontextprotocol/go-sdk`).
+- **Agent guard**: `n8nctl agent guard --host <claude-code|codex|opencode>`
+  generates host-level safety config — derived from the live command tree and MCP
+  annotations — that hard-blocks destructive operations (`delete`, `delete-rows`),
+  makes ordinary writes require approval, and lets reads run free. `--all-writes`
+  blocks writes too; `--write` installs the files without overwriting existing
+  ones. Emits a `.claude/hooks` PreToolUse hook + `.claude/settings.json` for
+  Claude Code, a read-only-sandbox `~/.codex/config.toml` for Codex, and
+  `opencode.json` rules for OpenCode.
+
 ### Security
 - **Path traversal in externalized code files.** A crafted workflow file's `$ref`
   could point outside its directory (e.g. `../../../etc/passwd`), making `restore`,

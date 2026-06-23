@@ -97,7 +97,7 @@ func addWorkflowSearchCmd(parent *cobra.Command) {
 	cmd.Flags().StringVar(&nodeType, "node", "", "match a node type substring (e.g. slack, httpRequest)")
 	cmd.Flags().StringVar(&credential, "credential", "", "match workflows referencing this credential id or name")
 	cmd.Flags().StringVar(&webhook, "webhook", "", "match workflows with a webhook node on this path")
-	parent.AddCommand(cmd)
+	parent.AddCommand(readOnlyHints(cmd))
 }
 
 // node mirrors the subset of an n8n node we inspect during search.

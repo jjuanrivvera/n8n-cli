@@ -6,6 +6,7 @@ title: Command Reference
 
 Auto-generated from the CLI. See [n8nctl](n8nctl.md) for the root command.
 
+- [agent](n8nctl_agent.md) — Helpers for running n8nctl under an AI agent
 - [alias](n8nctl_alias.md) — Define command shortcuts expanded before parsing
 - [api](n8nctl_api.md) — Make a raw authenticated API request (escape hatch)
 - [audit](n8nctl_audit.md) — Generate a security audit of the instance
@@ -19,6 +20,7 @@ Auto-generated from the CLI. See [n8nctl](n8nctl.md) for the root command.
 - [init](n8nctl_init.md) — Interactive first-run setup for an instance/profile
 - [login](n8nctl_login.md) — Authenticate the active profile (alias for `auth login`)
 - [logout](n8nctl_logout.md) — Remove the active profile's API key (alias for `auth logout`)
+- [mcp](n8nctl_mcp.md) — MCP server management
 - [packages](n8nctl_packages.md) — Export and import workflows as .n8np packages (beta)
 - [projects](n8nctl_projects.md) — Manage projects and their members
 - [restore](n8nctl_restore.md) — Recreate workflows from a backup directory

@@ -63,7 +63,7 @@ func dataTableExtra(parent *cobra.Command, _ resourceSpec[api.DataTable]) {
 	rows.Flags().StringVar(&search, "search", "", "full-text search across string columns")
 	rows.Flags().StringVar(&filter, "filter", "", "filter as a JSON string")
 	rows.Flags().IntVar(&limit, "limit", 0, "max rows to return")
-	parent.AddCommand(rows)
+	parent.AddCommand(readOnlyHints(rows))
 
 	// add-rows <tableId> --data/--file/--stdin (a JSON array of row objects)
 	parent.AddCommand(rowMutationCmd("add-rows", "Add rows (body: a JSON array of row objects)",
