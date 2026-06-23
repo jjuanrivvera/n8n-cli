@@ -1,31 +1,34 @@
 ---
-title: n8nctl backup
+title: n8nctl workflows apply
 ---
 
-## n8nctl backup
+## n8nctl workflows apply
 
-Export workflows, tags, and variables to a directory (JSON or YAML)
+Reconcile a directory of workflow files into the instance (GitOps)
 
 ### Synopsis
 
-Snapshot the active instance to disk for git-based versioning and backup.
-Writes one file per workflow plus tags.json, variables.json, a credentials
-inventory (metadata only — secrets are never exported), and a manifest.
+Treat a directory of workflow files (JSON/YAML) as the desired state and
+apply it: create new workflows, update existing ones (matched by name), and
+with --prune, delete instance workflows not present in the directory.
 
-  n8nctl backup --out ./n8n-backup
-  n8nctl --profile prod backup --out ./backups/prod --format yaml --externalize 5
+Combine with profiles to promote the same desired state across instances:
+  n8nctl --profile staging workflows apply --dir ./workflows
+  n8nctl --profile prod    workflows apply --dir ./workflows --prune
+
+Always preview with --dry-run first, especially with --prune.
 
 ```
-n8nctl backup --out <dir> [flags]
+n8nctl workflows apply --dir <dir> [flags]
 ```
 
 ### Options
 
 ```
-      --externalize int   externalize code fields longer than N lines (0 = off)
-      --format string     workflow file format: json or yaml (default "json")
-  -h, --help              help for backup
-      --out string        output directory (required)
+      --activate     activate newly created workflows
+  -d, --dir string   directory of workflow files (required)
+  -h, --help         help for apply
+      --prune        delete instance workflows not present in the directory
 ```
 
 ### Options inherited from parent commands
@@ -48,5 +51,5 @@ n8nctl backup --out <dir> [flags]
 
 ### SEE ALSO
 
-* [n8nctl](n8nctl.md)	 - Control any n8n instance from the terminal via its public API
+* [n8nctl workflows](n8nctl_workflows.md)	 - Manage workflows
 

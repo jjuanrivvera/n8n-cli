@@ -1,31 +1,27 @@
 ---
-title: n8nctl backup
+title: n8nctl workflows diff
 ---
 
-## n8nctl backup
+## n8nctl workflows diff
 
-Export workflows, tags, and variables to a directory (JSON or YAML)
+Diff a workflow against another instance or a local file
 
 ### Synopsis
 
-Snapshot the active instance to disk for git-based versioning and backup.
-Writes one file per workflow plus tags.json, variables.json, a credentials
-inventory (metadata only — secrets are never exported), and a manifest.
-
-  n8nctl backup --out ./n8n-backup
-  n8nctl --profile prod backup --out ./backups/prod --format yaml --externalize 5
+Show a unified diff of a workflow's writable content (read-only fields are
+ignored). Compare the active instance's workflow against the same id on
+another --profile, or against a local --file.
 
 ```
-n8nctl backup --out <dir> [flags]
+n8nctl workflows diff <id> [--to <profile> | --file <path>] [flags]
 ```
 
 ### Options
 
 ```
-      --externalize int   externalize code fields longer than N lines (0 = off)
-      --format string     workflow file format: json or yaml (default "json")
-  -h, --help              help for backup
-      --out string        output directory (required)
+      --file string   compare against a local workflow file
+  -h, --help          help for diff
+      --to string     compare against the same workflow name on another profile
 ```
 
 ### Options inherited from parent commands
@@ -48,5 +44,5 @@ n8nctl backup --out <dir> [flags]
 
 ### SEE ALSO
 
-* [n8nctl](n8nctl.md)	 - Control any n8n instance from the terminal via its public API
+* [n8nctl workflows](n8nctl_workflows.md)	 - Manage workflows
 

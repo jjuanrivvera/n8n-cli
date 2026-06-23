@@ -12,6 +12,10 @@ Control any n8n instance from your terminal. One static binary, many instances.
 [![Go version](https://img.shields.io/github/go-mod/go-version/jjuanrivvera/n8n-cli)](go.mod)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+<br>
+
+<img src="assets/demo.gif" alt="n8nctl in action: list, lint, GitOps apply, search, and YAML backup" width="900">
+
 </div>
 
 `n8nctl` is a fast, scriptable command-line client for the
@@ -200,6 +204,44 @@ Flags: `--node <type>` (substring match on node type), `--credential <id|name>`,
 
 See [docs › Beyond the API](https://jjuanrivvera.github.io/n8n-cli/beyond-api/)
 for worked examples and the roadmap of further beyond-API features.
+
+## Workflows as code (GitOps)
+
+`n8nctl` can treat a directory of workflow files (JSON or YAML) as the desired
+state of an instance and reconcile it, so workflows live in Git and ship through
+CI like any other code.
+
+```bash
+# Lint workflow files before they ship (5 rules grounded in n8n's own schema;
+# exits non-zero on errors, so it gates CI). --remote lints live workflows.
+n8nctl workflows lint --dir ./workflows
+n8nctl workflows lint --list-rules        # each rule shows its canonical basis
+
+# Preview a reconcile, then apply. --prune deletes instance workflows that are
+# no longer in the directory; always --dry-run first.
+n8nctl workflows apply --dir ./workflows --dry-run
+n8nctl workflows apply --dir ./workflows --prune
+
+# Convert between JSON and YAML, splitting long code fields into sibling files
+n8nctl workflows convert workflow.json --to yaml --externalize 5
+
+# Diff a workflow against another instance, or a local file
+n8nctl workflows diff 2tUt1wbLX592XDdX --to prod
+n8nctl workflows diff 2tUt1wbLX592XDdX --file ./workflows/orders.yaml
+```
+
+Because profiles are first class, the same directory promotes across instances —
+something the single-instance n8n CLIs cannot do:
+
+```bash
+n8nctl --profile staging workflows apply --dir ./workflows
+n8nctl --profile prod    workflows apply --dir ./workflows --prune
+```
+
+`backup` writes this directory for you (`--format yaml --externalize 5`), and
+`restore` re-applies it. See
+[docs › Workflows as Code](https://jjuanrivvera.github.io/n8n-cli/workflows-as-code/)
+for the full GitOps loop and the linting provenance.
 
 ## Multi-instance and profiles
 

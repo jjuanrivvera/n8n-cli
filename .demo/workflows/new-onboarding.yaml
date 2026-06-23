@@ -1,0 +1,5 @@
+name: new-onboarding
+nodes:
+  - {id: t, name: Schedule, type: n8n-nodes-base.scheduleTrigger, parameters: {}}
+connections: {}
+settings: {}

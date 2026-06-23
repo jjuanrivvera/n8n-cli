@@ -1,31 +1,30 @@
 ---
-title: n8nctl backup
+title: n8nctl workflows lint
 ---
 
-## n8nctl backup
+## n8nctl workflows lint
 
-Export workflows, tags, and variables to a directory (JSON or YAML)
+Lint workflow definitions for common mistakes
 
 ### Synopsis
 
-Snapshot the active instance to disk for git-based versioning and backup.
-Writes one file per workflow plus tags.json, variables.json, a credentials
-inventory (metadata only — secrets are never exported), and a manifest.
-
-  n8nctl backup --out ./n8n-backup
-  n8nctl --profile prod backup --out ./backups/prod --format yaml --externalize 5
+Static checks over workflow files (or live workflows with --remote):
+required fields, dangling connections, orphaned nodes, missing webhookId,
+and expression strings missing the leading '='. Exits non-zero on errors.
 
 ```
-n8nctl backup --out <dir> [flags]
+n8nctl workflows lint [--dir <dir> | -f <file>... | --remote] [flags]
 ```
 
 ### Options
 
 ```
-      --externalize int   externalize code fields longer than N lines (0 = off)
-      --format string     workflow file format: json or yaml (default "json")
-  -h, --help              help for backup
-      --out string        output directory (required)
+      --dir string             lint all workflow files in a directory
+      --disable-rule strings   rules to disable (comma-separated)
+  -f, --file strings           lint specific files
+  -h, --help                   help for lint
+      --list-rules             list available rules and exit
+      --remote                 lint live workflows from the instance
 ```
 
 ### Options inherited from parent commands
@@ -48,5 +47,5 @@ n8nctl backup --out <dir> [flags]
 
 ### SEE ALSO
 
-* [n8nctl](n8nctl.md)	 - Control any n8n instance from the terminal via its public API
+* [n8nctl workflows](n8nctl_workflows.md)	 - Manage workflows
 

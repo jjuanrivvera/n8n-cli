@@ -82,6 +82,13 @@ n8nctl workflows tags 42 --set ""
 # promote a workflow to another instance (dev -> staging -> prod)
 n8nctl workflows sync 2tUt1wbLX592XDdX --from dev --to prod --update-by-name --activate
 
+# workflows as code / GitOps (see the "Workflows as code" section below)
+n8nctl workflows apply --dir ./workflows --dry-run        # preview a reconcile
+n8nctl workflows apply --dir ./workflows --prune          # reconcile + delete drift
+n8nctl workflows lint --dir ./workflows                   # static checks (CI gate)
+n8nctl workflows convert wf.json --to yaml --externalize 5
+n8nctl workflows diff 2tUt1wbLX592XDdX --to prod          # diff vs another profile
+
 # search every workflow's node graph (impossible in the UI)
 n8nctl workflows search --node slack
 n8nctl workflows search --credential githubApi -o json
@@ -313,16 +320,21 @@ name), `--activate`.
 
 ### backup / restore — snapshot an instance for git
 
-`backup` exports the active instance to a directory of pretty JSON: one file per
-workflow plus `tags.json`, `variables.json`, a credentials inventory (metadata
-only) and a manifest. `restore` re-applies a backup directory.
+`backup` exports the active instance to a directory: one file per workflow plus
+`tags.json`, `variables.json`, a credentials inventory (metadata only) and a
+manifest. `restore` re-applies a backup directory. Workflow files default to JSON;
+`--format yaml` and `--externalize N` make the snapshot git-friendlier (YAML +
+long code fields split into sibling files). `restore` reads either format and
+re-inlines externalized `$ref` code automatically.
 
 ```bash
 n8nctl --profile prod backup --out ./backups/prod
+n8nctl --profile prod backup --out ./n8n-state --format yaml --externalize 5
 n8nctl --profile staging restore --in ./backups/prod --update-by-name --activate
 ```
 
-Flags: `backup --out <dir>` (required); `restore --in <dir>` (required),
+Flags: `backup --out <dir>` (required), `--format json|yaml` (default json),
+`--externalize <N>` (0 = off); `restore --in <dir>` (required),
 `--update-by-name`, `--activate`.
 
 > **Credential secrets are never exported** (the n8n API is write-only for them);
@@ -343,6 +355,101 @@ n8nctl workflows search --name '^prod-'                    # by name regex
 
 Flags: `--node <type>`, `--credential <id|name>`, `--webhook <path>`,
 `--name <regex>`. Read-only.
+
+## Workflows as code (GitOps)
+
+A directory of workflow files (JSON or YAML) is the **desired state**; `apply`
+reconciles it into an instance. The loop is: `backup` (seed) → edit in git → `lint`
+in CI → `apply --dry-run` (preview) → `apply --prune` (reconcile a target).
+Full guide: the project's `docs/workflows-as-code.md`.
+
+### workflows apply — reconcile a directory into an instance
+
+Treat `--dir` as the desired state for the active instance. Workflows match by
+**name**: missing names are created, changed ones updated, already-matching ones
+skipped (canonical compare of writable fields), and with `--prune`, instance
+workflows whose name is absent from the dir are deleted. `--activate` turns on the
+newly created. **Always preview with `--dry-run`**, especially with `--prune`.
+
+```bash
+n8nctl workflows apply --dir ./workflows --dry-run   # plan: N created, N updated, N unchanged, N pruned
+n8nctl workflows apply --dir ./workflows             # create + update only
+n8nctl workflows apply --dir ./workflows --prune     # also delete drift
+n8nctl workflows apply --dir ./workflows --activate  # activate newly created
+
+# Multi-instance promotion — the same dir across profiles (single-instance tools can't):
+n8nctl --profile staging workflows apply --dir ./workflows
+n8nctl --profile prod    workflows apply --dir ./workflows --prune
+```
+
+Output is one line per change (`+ create <name>`, `~ update <name>`,
+`- prune <name>`) then a summary; a dry run labels it `plan:`, a real run
+`applied:`. Flags: `--dir/-d <dir>` (required), `--prune`, `--activate`, plus the
+global `--dry-run`.
+
+> **Credentials are referenced by id, not copied.** Matching credentials must
+> already exist on the target instance (same as `sync` / `restore`).
+
+### workflows lint — static checks (CI gate)
+
+Static checks over files (`--dir` / `-f`, repeatable) or live workflows
+(`--remote`). **Exits non-zero on errors**, so it gates CI. Default output is a
+text report (`✗` error, `⚠` warning); `-o json` is machine-readable.
+
+```bash
+n8nctl workflows lint --dir ./workflows
+n8nctl workflows lint -f a.json -f b.yaml
+n8nctl workflows lint --remote                       # lint the live instance
+n8nctl workflows lint --dir ./workflows -o json      # structured findings
+n8nctl workflows lint --list-rules                   # rules + canonical basis
+n8nctl workflows lint --dir ./workflows --disable-rule expression-prefix
+```
+
+The 5 rules and their grounding (shown by `--list-rules`):
+
+| Rule | Severity | Basis |
+|---|---|---|
+| `required-fields` | error | n8n public-API OpenAPI workflow schema (name, nodes, connections, settings) |
+| `connection-reference` | error | workflow connection graph model (connection must target an existing node) |
+| `orphaned-node` | warning | workflow connection graph model (node disconnected from the graph) |
+| `webhook-id-required` | error | n8n webhook registration behavior (webhook/formTrigger need a `webhookId`) |
+| `expression-prefix` | warning | n8n expression syntax (a `{{ }}` string is only evaluated if it starts with `=`) |
+
+> Honest scope: there is **no official n8n linter**; these are `n8nctl`'s rules.
+> They are structural/graph-level. **Node-schema param validation** (validating a
+> node's parameters against that node type's schema) is **planned, not yet
+> implemented**.
+
+### workflows convert — JSON ↔ YAML (+ code externalization)
+
+Convert workflow files between JSON and YAML on disk. `--externalize N` splits node
+code fields longer than N lines (`jsCode`, `pythonCode`, `query`/`sqlQuery`,
+`jsonBody`, `content`) into sibling files under `_subfiles/<stem>/`, replacing the
+value with a `{$ref: <relpath>}` marker that `apply`/`lint`/`restore` re-inline on
+read.
+
+```bash
+n8nctl workflows convert good.json --to yaml                     # good.json -> good.yaml (alongside)
+n8nctl workflows convert *.yaml --to json --out ./json           # into a separate dir
+n8nctl workflows convert code.json --to yaml --externalize 5 --out ./out
+# -> ./out/code.yaml + ./out/_subfiles/code/Code-jsCode.js (jsCode replaced by {$ref: …})
+```
+
+Flags: `--to json|yaml` (required), `--out <dir>` (default: alongside input),
+`--externalize <N>` (0 = off).
+
+### workflows diff — review before promoting
+
+Unified diff of a workflow's **writable** content (read-only fields ignored)
+against the same name on another `--profile`, or a local `--file`. An empty diff
+means `apply` would skip the workflow.
+
+```bash
+n8nctl workflows diff 2tUt1wbLX592XDdX --to prod                 # vs another profile
+n8nctl workflows diff 2tUt1wbLX592XDdX --file ./workflows/intake.json
+```
+
+Flags: `--to <profile>` or `--file <path>`.
 
 ## Meta commands
 

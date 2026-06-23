@@ -115,6 +115,10 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `workflows transfer <id> --project <p>` | Move to another project | `n8nctl workflows transfer 42 --project 7` |
 | `workflows tags <id> [--set id1,id2]` | Get or replace a workflow's tags | `n8nctl workflows tags 42 --set 3,8` |
 | `workflows sync <id> --to <profile>` | Promote a workflow to another instance (dev→prod); credentials NOT copied | `n8nctl workflows sync 2tUt1wbLX592XDdX --from dev --to prod --update-by-name --activate` |
+| `workflows apply --dir <dir>` | GitOps reconcile: create/update/skip workflows from a dir (`--prune` deletes absent, `--activate`); always `--dry-run` first | `n8nctl workflows apply --dir ./workflows --dry-run` |
+| `workflows lint [--dir\|-f\|--remote]` | Static checks (5 grounded rules); exits non-zero on errors, so it gates CI (`--list-rules`, `--disable-rule`, `-o json`) | `n8nctl workflows lint --dir ./workflows` |
+| `workflows convert <file…> --to json\|yaml` | Convert workflow files between JSON/YAML; `--externalize N` splits long code fields to sibling files | `n8nctl workflows convert wf.json --to yaml --externalize 5` |
+| `workflows diff <id> [--to <profile>\|--file <path>]` | Unified diff of a workflow's writable content vs another profile or a local file | `n8nctl workflows diff 2tUt1wbLX592XDdX --to prod` |
 | `workflows search [--node\|--credential\|--webhook\|--name]` | Scan all workflows' node graphs for matches (impossible in the UI) | `n8nctl workflows search --node slack` |
 | `executions list` | List runs (filters `--status`, `--workflow`, `--project`, `--include-data`) | `n8nctl executions list --status error --workflow 42` |
 | `executions get <id>` | Inspect one run (`--include-data` for payloads) | `n8nctl executions get 9001 --include-data` |
@@ -136,8 +140,8 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `data-tables ...` | CRUD for data tables + rows (`rows`, `add-rows`, `update-rows`, `upsert-rows`, `delete-rows`) | `n8nctl data-tables rows <id> --filter '{"type":"and","filters":[]}'` |
 | `packages export\|import` | Bundle/restore workflows as a `.n8np` archive (beta; needs `N8N_PUBLIC_API_PACKAGES_ENABLED`) | `n8nctl packages export --workflow 42 --out wf.n8np` |
 | `skills install\|path\|print` | Install this skill into an AI agent (claude/cursor/windsurf/codex/gemini/copilot/opencode) | `n8nctl skills install --global` |
-| `backup --out <dir>` | Snapshot the instance (workflows + tags + variables + credential metadata + manifest) to JSON for git | `n8nctl --profile prod backup --out ./backups/prod` |
-| `restore --in <dir>` | Re-apply a backup directory (`--update-by-name`, `--activate`); credential secrets are NOT in the backup | `n8nctl --profile staging restore --in ./backups/prod --update-by-name` |
+| `backup --out <dir>` | Snapshot the instance (workflows + tags + variables + credential metadata + manifest) for git; `--format yaml` + `--externalize N` make it git-friendlier | `n8nctl --profile prod backup --out ./backups/prod --format yaml --externalize 5` |
+| `restore --in <dir>` | Re-apply a backup directory (reads JSON or YAML, re-inlines `$ref` code; `--update-by-name`, `--activate`); credential secrets are NOT in the backup | `n8nctl --profile staging restore --in ./backups/prod --update-by-name` |
 | `api <METHOD> <PATH>` | Raw authenticated request (escape hatch) | `n8nctl api GET /workflows -q limit=5` |
 | `auth login\|logout\|status` | Manage the active profile's key | `n8nctl auth status` |
 | `config path\|view\|set\|use\|list-profiles` | Inspect/edit config and profiles | `n8nctl config use cloud` |
@@ -152,21 +156,50 @@ ids into `xargs`.
 ### Beyond the API (standout operations)
 
 These commands compose the REST API into things the n8n UI cannot do — reach for
-them when the user wants cross-instance promotion, git-versioned snapshots, or a
-graph-wide search:
+them when the user wants cross-instance promotion, git-versioned snapshots, a
+graph-wide search, or a full **workflows-as-code / GitOps** loop:
 
-- **`workflows sync <id> --to <profile>`** promotes a workflow between instances
-  (dev → staging → prod) over the plain API — a Community-tier substitute for
-  Enterprise Git Source Control. Read-only fields are stripped; `--update-by-name`
-  overwrites by name, `--activate` turns it on. **Credentials are referenced by id
-  and are NOT copied** — ensure matching credentials exist on the destination.
-- **`backup --out <dir>` / `restore --in <dir>`** snapshot an instance to pretty
-  JSON (workflows + tags + variables + credential metadata + manifest) for git
-  versioning, and re-apply it. **Credential secrets are never exported** (the API
-  is write-only for them); referenced credentials must already exist on restore.
+- **`workflows apply --dir <dir>`** is the GitOps reconcile: a directory of
+  workflow files (JSON or YAML) is the desired state. It creates new workflows,
+  updates changed ones (matched by name), skips unchanged ones (canonical
+  compare), and with `--prune` deletes instance workflows absent from the dir;
+  `--activate` turns on the newly created. **Always preview with `--dry-run`**
+  (especially with `--prune`). The standout is multi-instance promotion — the same
+  dir across profiles: `n8nctl --profile staging workflows apply --dir ./workflows`
+  then `n8nctl --profile prod workflows apply --dir ./workflows --prune`. The
+  official single-instance tools can't do this.
+- **`workflows lint`** runs 5 grounded static rules over files (`--dir`/`-f`) or
+  live workflows (`--remote`): required-fields, connection-reference,
+  orphaned-node, webhook-id-required, expression-prefix. It **exits non-zero on
+  errors**, so it gates CI. `--list-rules` shows each rule's canonical basis;
+  `-o json` is machine-readable; `--disable-rule` turns a rule off. (Node-schema
+  param validation is planned, not yet implemented.)
+- **`workflows convert <file…> --to json|yaml`** converts workflow files between
+  JSON and YAML locally. `--externalize N` splits node code fields longer than N
+  lines (jsCode, pythonCode, query/sqlQuery, jsonBody, content) into sibling files
+  under `_subfiles/<stem>/`, replaced by a `{$ref: …}` marker re-inlined on read.
+- **`workflows diff <id>`** prints a unified diff of a workflow's writable content
+  (read-only fields ignored) against the same name on another `--profile` or a
+  local `--file` — the review step before a sync or apply.
+- **`workflows sync <id> --to <profile>`** promotes a single workflow between
+  instances (dev → staging → prod) over the plain API — a Community-tier substitute
+  for Enterprise Git Source Control. Read-only fields are stripped;
+  `--update-by-name` overwrites by name, `--activate` turns it on. **Credentials
+  are referenced by id and are NOT copied** — ensure matching credentials exist on
+  the destination.
+- **`backup --out <dir>` / `restore --in <dir>`** snapshot an instance (workflows +
+  tags + variables + credential metadata + manifest) for git versioning, and
+  re-apply it. `backup --format yaml --externalize N` makes the snapshot
+  git-friendlier; `restore` reads either format and re-inlines `$ref` code.
+  **Credential secrets are never exported** (the API is write-only for them);
+  referenced credentials must already exist on restore.
 - **`workflows search`** scans every workflow's node graph: `--node <type>`,
   `--credential <id|name>`, `--webhook <path>`, `--name <regex>`. Use it to answer
   "which workflows use the Slack node / reference credential X / own /orders".
+
+The full GitOps loop (backup → edit in git → lint in CI → apply with dry-run →
+apply with prune to a target) and the multi-instance promotion angle are
+documented in the project's `docs/workflows-as-code.md`.
 
 Deeper, per-resource examples are in
 [references/n8n-commands.md](references/n8n-commands.md); output formats,

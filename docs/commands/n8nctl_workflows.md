@@ -42,11 +42,15 @@ A workflow body requires name, nodes, connections and settings.
 
 * [n8nctl](n8nctl.md)	 - Control any n8n instance from the terminal via its public API
 * [n8nctl workflows activate](n8nctl_workflows_activate.md)	 - Activate a workflow
+* [n8nctl workflows apply](n8nctl_workflows_apply.md)	 - Reconcile a directory of workflow files into the instance (GitOps)
 * [n8nctl workflows archive](n8nctl_workflows_archive.md)	 - Archive a workflow
+* [n8nctl workflows convert](n8nctl_workflows_convert.md)	 - Convert workflow files between JSON and YAML (local)
 * [n8nctl workflows create](n8nctl_workflows_create.md)	 - Create a workflow
 * [n8nctl workflows deactivate](n8nctl_workflows_deactivate.md)	 - Deactivate a workflow
 * [n8nctl workflows delete](n8nctl_workflows_delete.md)	 - Delete a workflow
+* [n8nctl workflows diff](n8nctl_workflows_diff.md)	 - Diff a workflow against another instance or a local file
 * [n8nctl workflows get](n8nctl_workflows_get.md)	 - Get a single workflow by id
+* [n8nctl workflows lint](n8nctl_workflows_lint.md)	 - Lint workflow definitions for common mistakes
 * [n8nctl workflows list](n8nctl_workflows_list.md)	 - List workflows
 * [n8nctl workflows search](n8nctl_workflows_search.md)	 - Find workflows by node type, credential, webhook path, or name
 * [n8nctl workflows sync](n8nctl_workflows_sync.md)	 - Promote a workflow to another instance (profile)

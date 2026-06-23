@@ -1,0 +1,4 @@
+{"name":"needs-review","nodes":[
+ {"id":"w","name":"Webhook","type":"n8n-nodes-base.webhook","parameters":{"path":"hook"}},
+ {"id":"o","name":"Orphan","type":"n8n-nodes-base.set","parameters":{"value":"{{ $json.id }}"}}
+],"connections":{},"settings":{}}

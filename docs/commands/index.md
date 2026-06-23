@@ -10,7 +10,7 @@ Auto-generated from the CLI. See [n8nctl](n8nctl.md) for the root command.
 - [api](n8nctl_api.md) — Make a raw authenticated API request (escape hatch)
 - [audit](n8nctl_audit.md) — Generate a security audit of the instance
 - [auth](n8nctl_auth.md) — Authenticate against an n8n instance
-- [backup](n8nctl_backup.md) — Export workflows, tags, and variables to a directory of JSON
+- [backup](n8nctl_backup.md) — Export workflows, tags, and variables to a directory (JSON or YAML)
 - [config](n8nctl_config.md) — Inspect and edit configuration and profiles
 - [credentials](n8nctl_credentials.md) — Manage credentials
 - [data-tables](n8nctl_data-tables.md) — Manage data tables and their rows

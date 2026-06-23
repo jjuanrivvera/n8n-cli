@@ -23,6 +23,22 @@ All notable changes to this project are documented here. The format is based on
   failures.
 - HTTP request/response tracing at `-v`/debug level.
 - A `comparison` docs page (n8nctl vs. the official `@n8n/cli`) with benchmarks.
+- **Workflows as code / GitOps**:
+  - `workflows apply --dir <dir>` — declarative reconcile of a directory of
+    workflow files (JSON/YAML) into an instance: create, update, skip-unchanged,
+    and `--prune` to delete drift, with `--dry-run` preview and `--activate`.
+    Combine with profiles to promote the same directory across instances.
+  - `workflows lint` — static checks over files (`--dir`/`-f`) or live workflows
+    (`--remote`) with 5 grounded rules (`--list-rules`); exits non-zero on errors
+    as a CI gate, `--disable-rule` and `-o json` supported.
+  - `workflows convert <file…> --to json|yaml` — convert workflow files between
+    JSON and YAML, with `--externalize <N>` to split long node code fields into
+    sibling `$ref` files.
+  - `workflows diff <id>` — unified diff of a workflow's writable content against
+    another `--profile` or a local `--file`.
+  - YAML and code externalization in `backup` (`--format json|yaml`,
+    `--externalize <N>`); `restore` reads either format and re-inlines `$ref` code.
+  - A `workflows-as-code` docs page documenting the GitOps loop.
 
 ## [0.1.0]
 

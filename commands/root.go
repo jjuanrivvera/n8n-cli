@@ -211,6 +211,18 @@ func clientForProfile(cmd *cobra.Command, profileName string, dryRun bool) (*api
 	), nil
 }
 
+// getReadClient returns a client that always performs reads, even under
+// --dry-run. Commands that must read remote state to compute a plan or diff
+// (apply, diff, lint --remote) use this; apply then skips its writes itself when
+// --dry-run is set, printing the plan instead.
+func getReadClient(cmd *cobra.Command) (*api.Client, error) {
+	profile, _, err := activeProfile()
+	if err != nil {
+		return nil, err
+	}
+	return clientForProfile(cmd, profile, false)
+}
+
 // outputFormat resolves the output format: --output flag > config/env > table.
 func outputFormat() (output.Format, error) {
 	if flagOutput != "" {

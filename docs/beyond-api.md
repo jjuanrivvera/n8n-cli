@@ -9,6 +9,15 @@ further beyond-API ideas.
 Every command here honors the global flags, including `--dry-run`, `--profile`,
 and `-o json|yaml|csv`. Preview anything destructive with `--dry-run` first.
 
+!!! tip "Workflows as code"
+    For the full GitOps loop — reconciling a directory of workflow files into an
+    instance (`workflows apply`), linting them (`workflows lint`), converting
+    between JSON and YAML (`workflows convert`), and diffing a workflow against
+    another source (`workflows diff`) — see the dedicated
+    [Workflows as Code](workflows-as-code.md) guide. This page covers the
+    single-workflow promotion (`workflows sync`), instance snapshots
+    (`backup` / `restore`), and the graph search (`workflows search`).
+
 ## Promote a workflow between instances — `workflows sync`
 
 n8n's own Git Source Control is an **Enterprise** feature. `workflows sync` gives
@@ -46,18 +55,27 @@ n8nctl workflows sync 2tUt1wbLX592XDdX --from dev --to prod --dry-run
 
 ## Snapshot and restore an instance — `backup` / `restore`
 
-`backup` exports the active instance to a directory of pretty-printed JSON for
-git-based versioning. It writes one file per workflow plus `tags.json`,
-`variables.json`, a credentials **inventory** (metadata only), and a `manifest`.
-Commit that directory and you have versioned, diffable instance state. `restore`
-re-applies a backup directory to an instance.
+`backup` exports the active instance to a directory for git-based versioning. It
+writes one file per workflow plus `tags.json`, `variables.json`, a credentials
+**inventory** (metadata only), and a `manifest`. Commit that directory and you
+have versioned, diffable instance state. `restore` re-applies a backup directory
+to an instance.
+
+Workflow files default to pretty-printed JSON, but `--format yaml` and
+`--externalize <N>` make the backup far git-friendlier: YAML reviews better in a
+pull request, and `--externalize` splits long node code fields (`jsCode`,
+`pythonCode`, `query`/`sqlQuery`, `jsonBody`, `content`) into sibling `.js`/`.py`/
+`.sql` files referenced by a `{$ref: …}` marker. `restore` reads either format and
+re-inlines any externalized `$ref` fields automatically. See
+[Workflows as Code](workflows-as-code.md#backups-as-yaml-with-externalized-code)
+for the externalization layout.
 
 ```bash
 # Snapshot prod into a directory you can commit to git
 n8nctl --profile prod backup --out ./backups/prod
 
-# A typical git-versioning loop
-n8nctl --profile prod backup --out ./n8n-state
+# Git-friendlier: YAML with code split into sibling files
+n8nctl --profile prod backup --out ./n8n-state --format yaml --externalize 5
 git -C ./n8n-state add -A && git -C ./n8n-state commit -m "n8n snapshot $(date -u +%F)"
 
 # Restore that snapshot into staging, overwriting by name and activating
@@ -67,6 +85,8 @@ n8nctl --profile staging restore --in ./backups/prod --update-by-name --activate
 | Command | Flag | Meaning |
 |---|---|---|
 | `backup` | `--out <dir>` | Output directory (**required**) |
+| `backup` | `--format json\|yaml` | Workflow file format in the backup (default `json`) |
+| `backup` | `--externalize <N>` | Split code fields longer than N lines into sibling files (0 = off) |
 | `restore` | `--in <dir>` | Backup directory to restore from (**required**) |
 | `restore` | `--update-by-name` | Overwrite existing workflows with the same name |
 | `restore` | `--activate` | Activate each restored workflow |
@@ -107,7 +127,30 @@ n8nctl workflows search --name '^prod-'
 `search` reads from the active instance; combine it with `--profile` to audit a
 specific one. It is read-only — nothing is modified.
 
-## Roadmap / proposed
+## Roadmap
+
+### Implemented
+
+The "workflows as code" set shipped in **v0.2.0** and is documented in full on the
+[Workflows as Code](workflows-as-code.md) page:
+
+- **Declarative reconcile — `workflows apply`** *(implemented)*. Treat a directory
+  of workflow files as the desired state: create, update, skip-unchanged, and
+  with `--prune` delete instance workflows absent from the directory. The
+  multi-instance angle — promoting the same directory across profiles — is the
+  Community-tier answer to Enterprise Git Source Control.
+- **Static linting — `workflows lint`** *(implemented)*. Five grounded rules over
+  workflow files or live workflows (`--remote`), exiting non-zero on errors so it
+  works as a CI gate.
+- **Format conversion — `workflows convert`** *(implemented)*. Convert workflow
+  files between JSON and YAML, with `--externalize` to split long code fields into
+  reviewable sibling files.
+- **Cross-instance diff — `workflows diff`** *(implemented)*. Compare the same
+  workflow on two profiles (e.g. dev vs prod), or against a local file, and print
+  a unified diff of writable content before a promotion, so it is reviewable
+  rather than blind.
+
+### Proposed
 
 The following are **proposed, not yet implemented**. They are grounded in common
 n8n operational pain points and follow the same "compose the public API into
@@ -121,10 +164,11 @@ they may change or be dropped.
 - **Live failure watch — `executions watch`** *(proposed)*. Poll the executions
   endpoint and stream new `error`/`crashed` runs as they happen, so a terminal
   can tail an instance's failures during a deploy or incident.
-- **Cross-instance diff — `workflows diff`** *(proposed)*. Compare the same
-  workflow on two profiles (e.g. dev vs prod) and print a structured diff of
-  nodes, connections, and settings before a `workflows sync`, so a promotion is
-  reviewable rather than blind.
+- **Node-schema lint validation** *(proposed)*. Extend `workflows lint` to validate
+  each node's parameters against that node type's own schema (for example, a
+  missing required parameter or an invalid option value), beyond the current
+  structural and graph-level rules. This needs per-node-type schemas and is the
+  natural next step for the linter.
 - **Bulk activate/deactivate by tag — `workflows activate --tag <name>`**
   *(proposed)*. Toggle every workflow carrying a tag in one command, for
   maintenance windows (deactivate the `prod` set, do the work, reactivate),

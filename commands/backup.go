@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jjuanrivvera/n8n-cli/internal/api"
+	"github.com/jjuanrivvera/n8n-cli/internal/wffile"
 )
 
 // n8n stores workflows, tags, and variables in its database, with no built-in
@@ -25,19 +26,24 @@ func init() {
 }
 
 func backupCmd() *cobra.Command {
-	var outDir string
+	var outDir, format string
+	var externalize int
 	cmd := &cobra.Command{
 		Use:   "backup --out <dir>",
-		Short: "Export workflows, tags, and variables to a directory of JSON",
+		Short: "Export workflows, tags, and variables to a directory (JSON or YAML)",
 		Long: "Snapshot the active instance to disk for git-based versioning and backup.\n" +
 			"Writes one file per workflow plus tags.json, variables.json, a credentials\n" +
 			"inventory (metadata only — secrets are never exported), and a manifest.\n\n" +
 			"  n8nctl backup --out ./n8n-backup\n" +
-			"  n8nctl --profile prod backup --out ./backups/prod",
+			"  n8nctl --profile prod backup --out ./backups/prod --format yaml --externalize 5",
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if outDir == "" {
 				return fmt.Errorf("--out <dir> is required")
+			}
+			wfFormat := wffile.Format(strings.ToLower(format))
+			if wfFormat != wffile.JSON && wfFormat != wffile.YAML {
+				return fmt.Errorf("--format must be json or yaml")
 			}
 			client, err := getAPIClient(cmd)
 			if err != nil {
@@ -60,9 +66,22 @@ func backupCmd() *cobra.Command {
 				if gerr != nil {
 					return fmt.Errorf("fetching workflow %s: %w", wf.ID, gerr)
 				}
-				fname := slugify(wf.Name) + "." + wf.ID.String() + ".json"
-				if err := writeJSON(filepath.Join(wfDir, fname), full); err != nil {
+				stem := slugify(wf.Name) + "." + wf.ID.String()
+				main, subfiles, eerr := wffile.EncodeExternalized(full, wfFormat, stem, externalize)
+				if eerr != nil {
+					return eerr
+				}
+				if err := os.WriteFile(filepath.Join(wfDir, stem+"."+string(wfFormat)), main, 0o600); err != nil {
 					return err
+				}
+				for rel, content := range subfiles {
+					sub := filepath.Join(wfDir, filepath.FromSlash(rel))
+					if err := os.MkdirAll(filepath.Dir(sub), 0o755); err != nil { //nolint:gosec // backup dir
+						return err
+					}
+					if err := os.WriteFile(sub, content, 0o600); err != nil {
+						return err
+					}
 				}
 			}
 
@@ -125,6 +144,8 @@ func backupCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar(&outDir, "out", "", "output directory (required)")
+	cmd.Flags().StringVar(&format, "format", "json", "workflow file format: json or yaml")
+	cmd.Flags().IntVar(&externalize, "externalize", 0, "externalize code fields longer than N lines (0 = off)")
 	return cmd
 }
 
@@ -153,19 +174,23 @@ func restoreCmd() *cobra.Command {
 				return fmt.Errorf("reading %s: %w", wfDir, err)
 			}
 
+			loader := func(rel string) ([]byte, error) {
+				return os.ReadFile(filepath.Join(wfDir, filepath.FromSlash(rel))) //nolint:gosec // within backup dir
+			}
 			var created, updated int
 			for _, e := range entries {
-				if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
+				if e.IsDir() || !isWorkflowFile(e.Name()) {
 					continue
 				}
 				raw, rerr := os.ReadFile(filepath.Join(wfDir, e.Name())) //nolint:gosec // path within user-supplied backup dir
 				if rerr != nil {
 					return rerr
 				}
-				var wf api.Workflow
-				if jerr := json.Unmarshal(raw, &wf); jerr != nil {
+				wfp, jerr := wffile.DecodeWithFiles(raw, wffile.FormatFromPath(e.Name()), loader)
+				if jerr != nil {
 					return fmt.Errorf("parsing %s: %w", e.Name(), jerr)
 				}
+				wf := *wfp
 				body := workflowCreateBody(&wf)
 
 				var result *api.Workflow

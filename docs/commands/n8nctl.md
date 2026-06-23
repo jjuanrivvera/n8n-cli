@@ -41,7 +41,7 @@ key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
 * [n8nctl api](n8nctl_api.md)	 - Make a raw authenticated API request (escape hatch)
 * [n8nctl audit](n8nctl_audit.md)	 - Generate a security audit of the instance
 * [n8nctl auth](n8nctl_auth.md)	 - Authenticate against an n8n instance
-* [n8nctl backup](n8nctl_backup.md)	 - Export workflows, tags, and variables to a directory of JSON
+* [n8nctl backup](n8nctl_backup.md)	 - Export workflows, tags, and variables to a directory (JSON or YAML)
 * [n8nctl completion](n8nctl_completion.md)	 - Generate a shell completion script
 * [n8nctl config](n8nctl_config.md)	 - Inspect and edit configuration and profiles
 * [n8nctl credentials](n8nctl_credentials.md)	 - Manage credentials

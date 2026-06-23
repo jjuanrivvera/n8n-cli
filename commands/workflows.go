@@ -142,6 +142,8 @@ func workflowExtra(parent *cobra.Command, sp resourceSpec[api.Workflow]) {
 	// Beyond-the-API workflow features.
 	addWorkflowSyncCmd(parent)
 	addWorkflowSearchCmd(parent)
+	// Workflows-as-code (GitOps): convert, lint, apply, diff.
+	addWorkflowGitopsCmds(parent)
 }
 
 // workflowCreateBody builds a create/update payload from a fetched workflow,
