@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-23
+
 ### Added
 - **Node-schema-aware linting**: two new `workflows lint` rules grounded in an
   embedded catalog of n8n's real node definitions (n8n-nodes-base + langchain,
@@ -106,6 +108,7 @@ All notable changes to this project are documented here. The format is based on
 - Initial release of `n8nctl`, a command-line interface for the n8n workflow
   automation API.
 
-[Unreleased]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jjuanrivvera/n8n-cli/releases/tag/v0.1.0

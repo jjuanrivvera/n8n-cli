@@ -1,7 +1,7 @@
 ---
 name: n8nctl-cli
 description: Manage n8n (https://n8n.io) from the terminal with the `n8nctl` CLI - workflows, executions, credentials, tags, variables, projects, users, audit, and source control. Use this whenever the user wants to list/activate/transfer workflows, inspect or retry executions, create credentials, set variables, manage projects and members, invite users, run a security audit, or pull from Git - on a single instance or across MANY instances (self-hosted and Cloud) via named profiles. n8nctl is one static binary that talks to the n8n public REST API (`<host>/api/v1`, `X-N8N-API-KEY` header) with table/json/yaml/csv output. Detect the connected instance with `n8nctl auth status` before any write.
-version: 0.2.0
+version: 0.3.0
 homepage: https://github.com/jjuanrivvera/n8n-cli
 license: MIT
 allowed-tools: Bash(n8nctl:*)
