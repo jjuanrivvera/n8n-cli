@@ -410,4 +410,5 @@ git -C ./n8n-state commit -m "n8n snapshot $(date -u +%F)"
   `workflows search`, plus the roadmap of further beyond-API ideas.
 - [Multi-instance and profiles](profiles.md) — how named profiles make the
   multi-instance promotion above a single flag.
-- [vs. the official CLI](comparison.md) — where `n8nctl` and `@n8n/cli` diverge.
+- [vs. other n8n CLIs](comparison.md) — how `n8nctl`, the official `@n8n/cli`,
+  `ubie-oss`, and `edenreich` compare by lane.
