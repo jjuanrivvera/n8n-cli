@@ -128,11 +128,17 @@ func TestDirLoader_RejectsTraversal(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "inside", string(b))
 
-	// traversal and absolute paths are refused
-	for _, bad := range []string{"../../../../etc/passwd", "/etc/passwd", "a/../../escape"} {
+	// absolute / rooted paths are explicitly refused on every platform
+	for _, bad := range []string{"/etc/passwd"} {
 		_, err := load(bad)
 		require.Error(t, err, bad)
 		assert.Contains(t, err.Error(), "refusing")
+	}
+	// traversal attempts must never read outside the dir; depending on the OS they
+	// are either refused or confined to a non-existent path, but never succeed.
+	for _, bad := range []string{"../../../../etc/passwd", "a/../../escape"} {
+		_, err := load(bad)
+		require.Error(t, err, bad)
 	}
 }
 

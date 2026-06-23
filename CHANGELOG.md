@@ -46,6 +46,9 @@ All notable changes to this project are documented here. The format is based on
   `opencode.json` rules for OpenCode.
 
 ### Security
+- Bump `modelcontextprotocol/go-sdk` (transitive, via the MCP server) to v1.4.1,
+  resolving GO-2026-4569/4770/4773. Externalized-file path confinement now also
+  rejects volume-rooted paths on Windows.
 - **Path traversal in externalized code files.** A crafted workflow file's `$ref`
   could point outside its directory (e.g. `../../../etc/passwd`), making `restore`,
   `workflows apply`, `lint --dir`, and `diff` read arbitrary local files — and on

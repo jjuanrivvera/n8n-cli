@@ -60,7 +60,10 @@ func DirLoader(dir string) func(string) ([]byte, error) {
 	}
 	return func(rel string) ([]byte, error) {
 		clean := filepath.Clean(filepath.FromSlash(rel))
-		if filepath.IsAbs(clean) {
+		// Reject absolute and volume-rooted paths. On Windows a leading separator
+		// ("\etc") or a volume ("C:\") is rooted but not caught by IsAbs alone.
+		if filepath.IsAbs(clean) || filepath.VolumeName(clean) != "" ||
+			(len(clean) > 0 && os.IsPathSeparator(clean[0])) {
 			return nil, fmt.Errorf("refusing absolute externalized-file path %q", rel)
 		}
 		full := filepath.Join(dir, clean)
