@@ -33,6 +33,14 @@ jobs:
         run: |
           go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
           golangci-lint run
+      - name: Command reference is up to date
+        # Fail if the generated docs/commands tree drifts from the cobra tree.
+        run: |
+          make docs-gen
+          git diff --exit-code -- docs/commands || {
+            echo "::error::docs/commands is stale — run 'make docs-gen' and commit the result"
+            exit 1
+          }
 
   security:
     runs-on: ubuntu-latest
@@ -44,13 +52,15 @@ jobs:
           cache: true
       - name: govulncheck (blocking)
         run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
+          go install golang.org/x/vuln/cmd/govulncheck@v1.1.3
           govulncheck ./...
-      - name: gosec (report)
+      - name: gosec (gate on high severity)
         run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
-          gosec -no-fail -fmt sarif -out gosec.sarif ./... || true
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.21.4
+          # Fail the build on high-severity findings; still emit SARIF for the report.
+          gosec -severity high -confidence medium -fmt sarif -out gosec.sarif ./...
       - name: Upload gosec report
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: gosec-sarif
@@ -107,6 +117,13 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: GoReleaser check
+        # Fail on deprecated/invalid config so a release-time breakage is caught
+        # on PR, not at tag time.
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          version: '~> v2'
+          args: check
       - name: GoReleaser snapshot
         # Snapshot build to catch packaging regressions. Skip signing, SBOMs,
         # and any publishers — those only run on a tagged release.

@@ -32,12 +32,22 @@ func (i *ID) UnmarshalJSON(data []byte) error {
 		*i = ID(s)
 		return nil
 	}
-	// Bare number (possibly a float like 123.0): normalise to an integer string.
-	if f, err := strconv.ParseFloat(string(data), 64); err == nil && f == float64(int64(f)) {
+	// Bare number. Preserve integer ids exactly — n8n ids can exceed 2^53, so
+	// routing through float64 would silently corrupt them. An integer literal is
+	// already its own canonical string; only a float-looking value (e.g. 123.0)
+	// is normalised through float64.
+	s := string(data)
+	if !strings.ContainsAny(s, ".eE") {
+		if _, err := strconv.ParseInt(s, 10, 64); err == nil {
+			*i = ID(s)
+			return nil
+		}
+	}
+	if f, err := strconv.ParseFloat(s, 64); err == nil && f == float64(int64(f)) {
 		*i = ID(strconv.FormatInt(int64(f), 10))
 		return nil
 	}
-	*i = ID(strings.Trim(string(data), `"`))
+	*i = ID(strings.Trim(s, `"`))
 	return nil
 }
 

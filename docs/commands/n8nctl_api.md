@@ -11,7 +11,7 @@ Make a raw authenticated API request (escape hatch)
 Call any n8n API endpoint directly. PATH is relative to the instance base URL
 (the leading /api/v1 is added automatically).
 
-  n8nctl api GET /workflows -q limit=5
+  n8nctl api GET /workflows --query limit=5
   n8nctl api POST /tags -d '{"name":"Prod"}'
   n8nctl api DELETE /executions/42 --dry-run
 
@@ -38,7 +38,7 @@ n8nctl api <METHOD> <PATH> [flags]
       --jq string         apply a jq program to the result (e.g. '.[].id'); implies JSON input
       --no-color          disable colored output [env: NO_COLOR]
       --no-header         hide the table header row
-  -o, --output string     output format: table|json|yaml|csv [env: N8NCTL_OUTPUT]
+  -o, --output string     output format: table|json|yaml|csv|id [env: N8NCTL_OUTPUT]
       --profile string    config profile (instance) to use [env: N8NCTL_PROFILE]
   -q, --quiet             suppress non-essential chatter
       --rps float         client-side rate limit in requests/sec (0 = use config/default)

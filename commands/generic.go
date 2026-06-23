@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -119,7 +118,7 @@ func newListCmd[T any](sp resourceSpec[T]) *cobra.Command {
 
 			res := sp.New(client)
 			if all {
-				items, truncated, err := res.ListAllChecked(context.Background(), params, maxPages)
+				items, truncated, err := res.ListAllChecked(cmd.Context(), params, maxPages)
 				if err != nil {
 					if api.IsDryRun(err) {
 						return nil
@@ -135,7 +134,7 @@ func newListCmd[T any](sp resourceSpec[T]) *cobra.Command {
 				}
 				return render(cmd, items, sp.Columns...)
 			}
-			items, next, err := res.List(context.Background(), params)
+			items, next, err := res.List(cmd.Context(), params)
 			if err != nil {
 				if api.IsDryRun(err) {
 					return nil
@@ -180,7 +179,7 @@ func newGetCmd[T any](sp resourceSpec[T]) *cobra.Command {
 			if sp.NoGet {
 				return getViaList(cmd, sp, res, args[0])
 			}
-			item, err := res.Get(context.Background(), args[0], nil)
+			item, err := res.Get(cmd.Context(), args[0], nil)
 			if err != nil {
 				if api.IsDryRun(err) {
 					return nil
@@ -196,7 +195,7 @@ func newGetCmd[T any](sp resourceSpec[T]) *cobra.Command {
 // getViaList serves `get` for resources without a GET-by-id endpoint by scanning
 // the full list and matching one of IDFields.
 func getViaList[T any](cmd *cobra.Command, sp resourceSpec[T], res *api.Resource[T], id string) error {
-	items, err := res.ListAll(context.Background(), api.ListParams{}, 0)
+	items, err := res.ListAll(cmd.Context(), api.ListParams{}, 0)
 	if err != nil {
 		if api.IsDryRun(err) {
 			return nil
@@ -235,7 +234,7 @@ func newCreateCmd[T any](sp resourceSpec[T]) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			created, err := sp.New(client).Create(context.Background(), body)
+			created, err := sp.New(client).Create(cmd.Context(), body)
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
@@ -267,7 +266,7 @@ func newUpdateCmd[T any](sp resourceSpec[T]) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			updated, err := sp.New(client).Update(context.Background(), args[0], body)
+			updated, err := sp.New(client).Update(cmd.Context(), args[0], body)
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
@@ -301,7 +300,7 @@ func newDeleteCmd[T any](sp resourceSpec[T]) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if err := sp.New(client).Delete(context.Background(), args[0]); err != nil {
+			if err := sp.New(client).Delete(cmd.Context(), args[0]); err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
 					return nil

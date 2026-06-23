@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -67,7 +66,7 @@ func init() {
 				api.WithLogger(newLogger("warn")),
 			)
 			fmt.Fprintf(cmd.ErrOrStderr(), "verifying against %s ...\n", client.BaseURL())
-			if _, _, err := client.Workflows().List(context.Background(), api.ListParams{Limit: 1}); err != nil {
+			if _, _, err := client.Workflows().List(cmd.Context(), api.ListParams{Limit: 1}); err != nil {
 				return fmt.Errorf("verification failed: %w", err)
 			}
 

@@ -53,7 +53,7 @@ var releaseURL = "https://api.github.com/repos/jjuanrivvera/n8n-cli/releases/lat
 
 // checkLatest compares the current version against the latest GitHub release.
 func checkLatest(cmd *cobra.Command) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(cmd.Context(), 10*time.Second)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, releaseURL, nil)
 	if err != nil {

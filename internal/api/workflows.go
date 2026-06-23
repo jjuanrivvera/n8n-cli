@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 )
 
 // Workflow models an n8n workflow. Free-form structural fields (nodes, connections,
@@ -71,7 +72,7 @@ func (c *Client) TransferWorkflow(ctx context.Context, id, destinationProjectID 
 // GetWorkflowTags returns the tags attached to a workflow (GET /workflows/{id}/tags).
 func (c *Client) GetWorkflowTags(ctx context.Context, id string) ([]Tag, error) {
 	var out []Tag
-	err := c.Do(ctx, http.MethodGet, "workflows/"+id+"/tags", nil, nil, &out)
+	err := c.Do(ctx, http.MethodGet, "workflows/"+url.PathEscape(id)+"/tags", nil, nil, &out)
 	return out, err
 }
 
@@ -83,6 +84,6 @@ func (c *Client) SetWorkflowTags(ctx context.Context, id string, tagIDs []string
 		body = append(body, map[string]string{"id": t})
 	}
 	var out []Tag
-	err := c.Do(ctx, http.MethodPut, "workflows/"+id+"/tags", nil, body, &out)
+	err := c.Do(ctx, http.MethodPut, "workflows/"+url.PathEscape(id)+"/tags", nil, body, &out)
 	return out, err
 }

@@ -146,3 +146,16 @@ func TestDecode_Errors(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "empty workflow")
 }
+
+func TestDirLoader_RejectsSymlinkEscape(t *testing.T) {
+	dir := t.TempDir()
+	outside := filepath.Join(t.TempDir(), "secret")
+	require.NoError(t, os.WriteFile(outside, []byte("top-secret"), 0o600))
+	link := filepath.Join(dir, "link.js")
+	if err := os.Symlink(outside, link); err != nil {
+		t.Skip("symlinks unsupported")
+	}
+	_, err := DirLoader(dir)("link.js")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "resolves outside")
+}

@@ -153,3 +153,25 @@ func FuzzStringOrSlice(f *testing.F) {
 		_ = json.Unmarshal([]byte(in), &s) // must not panic
 	})
 }
+
+func TestID_PreservesLargeIntegerPrecision(t *testing.T) {
+	// an id beyond 2^53 must not be corrupted by a float64 round-trip
+	var v struct {
+		ID ID `json:"id"`
+	}
+	err := json.Unmarshal([]byte(`{"id": 9007199254740993}`), &v) // 2^53 + 1
+	require.NoError(t, err)
+	assert.Equal(t, "9007199254740993", v.ID.String())
+	// float-looking integer still normalises
+	var v2 struct {
+		ID ID `json:"id"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(`{"id": 123.0}`), &v2))
+	assert.Equal(t, "123", v2.ID.String())
+	// string id unchanged
+	var v3 struct {
+		ID ID `json:"id"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(`{"id":"abc123"}`), &v3))
+	assert.Equal(t, "abc123", v3.ID.String())
+}

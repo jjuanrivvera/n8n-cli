@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -35,6 +36,12 @@ func (e *APIError) IsUnauthorized() bool { return e.StatusCode == 401 }
 func (e *APIError) IsForbidden() bool    { return e.StatusCode == 403 }
 func (e *APIError) IsConflict() bool     { return e.StatusCode == 409 }
 func (e *APIError) IsRateLimited() bool  { return e.StatusCode == 429 }
+
+// IsForbidden reports whether err is an API 403 (unlicensed/forbidden feature).
+func IsForbidden(err error) bool {
+	var apiErr *APIError
+	return errors.As(err, &apiErr) && apiErr.IsForbidden()
+}
 
 // n8n error bodies look like {"message": "...", "code": "...", "description": "..."}.
 type wireError struct {

@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -36,7 +35,7 @@ func credentialExtra(parent *cobra.Command, _ resourceSpec[api.Credential]) {
 			if err != nil {
 				return err
 			}
-			raw, err := client.CredentialSchema(context.Background(), args[0])
+			raw, err := client.CredentialSchema(cmd.Context(), args[0])
 			if err != nil {
 				if api.IsDryRun(err) {
 					return nil
@@ -61,7 +60,7 @@ func credentialExtra(parent *cobra.Command, _ resourceSpec[api.Credential]) {
 			if err != nil {
 				return err
 			}
-			if err := client.TransferCredential(context.Background(), args[0], project); err != nil {
+			if err := client.TransferCredential(cmd.Context(), args[0], project); err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
 					return nil

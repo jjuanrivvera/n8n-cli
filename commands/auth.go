@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -70,7 +69,7 @@ func authLoginCmd() *cobra.Command {
 				api.WithAPIKey(apiKey),
 				api.WithLogger(newLogger("warn")),
 			)
-			if _, _, err := client.Workflows().List(context.Background(), api.ListParams{Limit: 1}); err != nil {
+			if _, _, err := client.Workflows().List(cmd.Context(), api.ListParams{Limit: 1}); err != nil {
 				return fmt.Errorf("verification failed: %w", err)
 			}
 
@@ -135,7 +134,7 @@ func authStatusCmd() *cobra.Command {
 			if resolved.BaseURL != "" && keyPresent {
 				client, cerr := getAPIClient(cmd)
 				if cerr == nil {
-					if _, _, lerr := client.Workflows().List(context.Background(), api.ListParams{Limit: 1}); lerr == nil {
+					if _, _, lerr := client.Workflows().List(cmd.Context(), api.ListParams{Limit: 1}); lerr == nil {
 						status["valid"] = true
 					} else {
 						status["error"] = lerr.Error()

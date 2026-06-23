@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -53,13 +52,13 @@ func workflowExtra(parent *cobra.Command, sp resourceSpec[api.Workflow]) {
 				var wf *api.Workflow
 				switch action {
 				case "activate":
-					wf, err = client.ActivateWorkflow(context.Background(), args[0])
+					wf, err = client.ActivateWorkflow(cmd.Context(), args[0])
 				case "deactivate":
-					wf, err = client.DeactivateWorkflow(context.Background(), args[0])
+					wf, err = client.DeactivateWorkflow(cmd.Context(), args[0])
 				case "archive":
-					wf, err = client.ArchiveWorkflow(context.Background(), args[0])
+					wf, err = client.ArchiveWorkflow(cmd.Context(), args[0])
 				case "unarchive":
-					wf, err = client.UnarchiveWorkflow(context.Background(), args[0])
+					wf, err = client.UnarchiveWorkflow(cmd.Context(), args[0])
 				}
 				if err != nil {
 					if api.IsDryRun(err) {
@@ -87,7 +86,7 @@ func workflowExtra(parent *cobra.Command, sp resourceSpec[api.Workflow]) {
 			if err != nil {
 				return err
 			}
-			if err := client.TransferWorkflow(context.Background(), args[0], project); err != nil {
+			if err := client.TransferWorkflow(cmd.Context(), args[0], project); err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
 					return nil
@@ -116,7 +115,7 @@ func workflowExtra(parent *cobra.Command, sp resourceSpec[api.Workflow]) {
 			}
 			if cmd.Flags().Changed("set") {
 				ids := splitNonEmpty(setTags)
-				tags, err := client.SetWorkflowTags(context.Background(), args[0], ids)
+				tags, err := client.SetWorkflowTags(cmd.Context(), args[0], ids)
 				if err != nil {
 					if api.IsDryRun(err) {
 						dryRunNotice(cmd)
@@ -126,7 +125,7 @@ func workflowExtra(parent *cobra.Command, sp resourceSpec[api.Workflow]) {
 				}
 				return render(cmd, tags)
 			}
-			tags, err := client.GetWorkflowTags(context.Background(), args[0])
+			tags, err := client.GetWorkflowTags(cmd.Context(), args[0])
 			if err != nil {
 				if api.IsDryRun(err) {
 					return nil

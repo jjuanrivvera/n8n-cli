@@ -52,18 +52,35 @@ const extMarker = "$n8nctl_file"
 // It rejects absolute paths and any path that escapes dir, so a crafted workflow
 // file cannot make the CLI read arbitrary files (and upload them on apply/restore).
 func DirLoader(dir string) func(string) ([]byte, error) {
+	// Canonicalize the base once so symlinks in its ancestry (e.g. macOS
+	// /var -> /private/var) don't make legitimate reads look like escapes.
+	base := dir
+	if r, err := filepath.EvalSymlinks(dir); err == nil {
+		base = r
+	}
 	return func(rel string) ([]byte, error) {
 		clean := filepath.Clean(filepath.FromSlash(rel))
 		if filepath.IsAbs(clean) {
 			return nil, fmt.Errorf("refusing absolute externalized-file path %q", rel)
 		}
 		full := filepath.Join(dir, clean)
-		rp, err := filepath.Rel(dir, full)
-		if err != nil || rp == ".." || strings.HasPrefix(rp, ".."+string(filepath.Separator)) {
+		if escapesDir(dir, full) {
 			return nil, fmt.Errorf("refusing externalized-file path %q that escapes its directory", rel)
+		}
+		// Resolve symlinks and re-check against the canonical base, so a symlink
+		// inside dir cannot redirect the read outside it. EvalSymlinks fails for a
+		// not-yet-existing path; only re-check when it resolves.
+		if resolved, err := filepath.EvalSymlinks(full); err == nil && escapesDir(base, resolved) {
+			return nil, fmt.Errorf("refusing externalized-file path %q that resolves outside its directory", rel)
 		}
 		return os.ReadFile(full) //nolint:gosec // confined to dir by the checks above
 	}
+}
+
+// escapesDir reports whether path lies outside dir.
+func escapesDir(dir, path string) bool {
+	rp, err := filepath.Rel(dir, path)
+	return err != nil || rp == ".." || strings.HasPrefix(rp, ".."+string(filepath.Separator))
 }
 
 // externalizableExt maps a parameter field name to a file extension.

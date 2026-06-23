@@ -4,6 +4,7 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -66,6 +67,12 @@ key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	Version:       "", // set by version command / ldflags via SetVersionTemplate
+	// Validate the output format up front, so an invalid -o fails immediately
+	// rather than after a network round-trip.
+	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
+		_, err := outputFormat()
+		return err
+	},
 }
 
 // RootCmd exposes the root command (used by docs generation and tests).
@@ -74,7 +81,7 @@ func RootCmd() *cobra.Command { return rootCmd }
 func init() {
 	pf := rootCmd.PersistentFlags()
 	pf.StringVar(&flagProfile, "profile", "", "config profile (instance) to use [env: N8NCTL_PROFILE]")
-	pf.StringVarP(&flagOutput, "output", "o", "", "output format: table|json|yaml|csv [env: N8NCTL_OUTPUT]")
+	pf.StringVarP(&flagOutput, "output", "o", "", "output format: table|json|yaml|csv|id [env: N8NCTL_OUTPUT]")
 	pf.StringVar(&flagBaseURL, "base-url", "", "override the instance base URL (e.g. https://host/api/v1)")
 	pf.StringVar(&flagAPIKey, "api-key", "", "override the API key (prefer keyring via 'auth login')")
 	pf.Float64Var(&flagRPS, "rps", 0, "client-side rate limit in requests/sec (0 = use config/default)")
@@ -88,10 +95,12 @@ func init() {
 	pf.StringVar(&flagJQ, "jq", "", "apply a jq program to the result (e.g. '.[].id'); implies JSON input")
 }
 
-// Execute expands user aliases then runs the command tree.
-func Execute() error {
+// Execute expands user aliases then runs the command tree with a cancellable
+// context (wired to OS signals by main), so every command's cmd.Context() is
+// cancelled on Ctrl-C.
+func Execute(ctx context.Context) error {
 	expandAliases()
-	return rootCmd.Execute()
+	return rootCmd.ExecuteContext(ctx)
 }
 
 // --- configuration loading (resolved once per process) ---

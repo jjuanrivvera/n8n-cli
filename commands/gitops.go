@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -159,7 +158,7 @@ func workflowLintCmd() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				items, err := client.Workflows().ListAll(context.Background(), api.ListParams{}, 0)
+				items, err := client.Workflows().ListAll(cmd.Context(), api.ListParams{}, 0)
 				if err != nil {
 					if api.IsDryRun(err) {
 						return nil
@@ -277,7 +276,7 @@ func workflowApplyCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			remoteList, err := client.Workflows().ListAll(context.Background(), api.ListParams{}, 0)
+			remoteList, err := client.Workflows().ListAll(cmd.Context(), api.ListParams{}, 0)
 			if err != nil {
 				if api.IsDryRun(err) {
 					return nil
@@ -320,14 +319,14 @@ func workflowApplyCmd() *cobra.Command {
 				}
 				if ex, ok := remote[name]; ok {
 					// Update only if the writable content differs.
-					full, gerr := client.Workflows().Get(context.Background(), ex.ID.String(), nil)
+					full, gerr := client.Workflows().Get(cmd.Context(), ex.ID.String(), nil)
 					if gerr == nil && canonical(full) == canonical(lwf) {
 						unchanged++
 						continue
 					}
 					if flagDryRun {
 						fmt.Fprintf(out, "~ update %s\n", name)
-					} else if _, uerr := client.Workflows().Update(context.Background(), ex.ID.String(), body); uerr != nil {
+					} else if _, uerr := client.Workflows().Update(cmd.Context(), ex.ID.String(), body); uerr != nil {
 						return fmt.Errorf("updating %q: %w", name, uerr)
 					}
 					updated++
@@ -335,12 +334,12 @@ func workflowApplyCmd() *cobra.Command {
 					if flagDryRun {
 						fmt.Fprintf(out, "+ create %s\n", name)
 					} else {
-						res, cerr := client.Workflows().Create(context.Background(), body)
+						res, cerr := client.Workflows().Create(cmd.Context(), body)
 						if cerr != nil {
 							return fmt.Errorf("creating %q: %w", name, cerr)
 						}
 						if activate && res != nil && res.ID != "" {
-							_, _ = client.ActivateWorkflow(context.Background(), res.ID.String())
+							_, _ = client.ActivateWorkflow(cmd.Context(), res.ID.String())
 						}
 					}
 					created++
@@ -358,7 +357,7 @@ func workflowApplyCmd() *cobra.Command {
 					}
 					if flagDryRun {
 						fmt.Fprintf(out, "- prune %s\n", name)
-					} else if derr := client.Workflows().Delete(context.Background(), remote[name].ID.String()); derr != nil {
+					} else if derr := client.Workflows().Delete(cmd.Context(), remote[name].ID.String()); derr != nil {
 						return fmt.Errorf("pruning %q: %w", name, derr)
 					}
 					pruned++
@@ -409,9 +408,9 @@ func workflowDiffCmd() *cobra.Command {
 				rightLabel = file
 				// left = remote workflow: by id arg, else by name match
 				if len(args) == 1 {
-					left, err = client.Workflows().Get(context.Background(), args[0], nil)
+					left, err = client.Workflows().Get(cmd.Context(), args[0], nil)
 				} else {
-					left, err = findWorkflowByName(client, right.Name)
+					left, err = findWorkflowByName(cmd.Context(), client, right.Name)
 					if left == nil && err == nil {
 						return fmt.Errorf("no remote workflow named %q to diff against", right.Name)
 					}
@@ -424,7 +423,7 @@ func workflowDiffCmd() *cobra.Command {
 				if len(args) != 1 {
 					return fmt.Errorf("a workflow <id> is required with --to")
 				}
-				left, err = client.Workflows().Get(context.Background(), args[0], nil)
+				left, err = client.Workflows().Get(cmd.Context(), args[0], nil)
 				if err != nil {
 					return err
 				}
@@ -432,7 +431,7 @@ func workflowDiffCmd() *cobra.Command {
 				if derr != nil {
 					return derr
 				}
-				right, err = findWorkflowByName(dst, left.Name)
+				right, err = findWorkflowByName(cmd.Context(), dst, left.Name)
 				if err != nil {
 					return err
 				}

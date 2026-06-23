@@ -127,7 +127,8 @@ homebrew_casks:
     # The cask is named n8nctl-cli (matching the alegra-cli/canvas-cli convention),
     # but the binary inside the archive is `n8nctl`. Without this, GoReleaser
     # symlinks the cask name and `brew install` fails to find the binary.
-    binary: n8nctl
+    binaries:
+      - n8nctl
     repository:
       owner: jjuanrivvera
       name: homebrew-n8n-cli

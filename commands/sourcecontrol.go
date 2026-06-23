@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 
@@ -36,7 +35,7 @@ func init() {
 					return fmt.Errorf("parsing --variables JSON: %w", err)
 				}
 			}
-			res, err := client.SourceControlPull(context.Background(), force, vars)
+			res, err := client.SourceControlPull(cmd.Context(), force, vars)
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)

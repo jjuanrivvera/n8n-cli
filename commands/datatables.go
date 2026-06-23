@@ -50,7 +50,7 @@ func dataTableExtra(parent *cobra.Command, _ resourceSpec[api.DataTable]) {
 			if filter != "" {
 				params.Extra.Set("filter", filter)
 			}
-			raw, err := client.ListDataTableRows(context.Background(), args[0], params)
+			raw, err := client.ListDataTableRows(cmd.Context(), args[0], params)
 			if err != nil {
 				if api.IsDryRun(err) {
 					return nil
@@ -67,18 +67,18 @@ func dataTableExtra(parent *cobra.Command, _ resourceSpec[api.DataTable]) {
 
 	// add-rows <tableId> --data/--file/--stdin (a JSON array of row objects)
 	parent.AddCommand(rowMutationCmd("add-rows", "Add rows (body: a JSON array of row objects)",
-		func(c *api.Client, id string, body json.RawMessage) (json.RawMessage, error) {
-			return c.AddDataTableRows(context.Background(), id, body)
+		func(ctx context.Context, c *api.Client, id string, body json.RawMessage) (json.RawMessage, error) {
+			return c.AddDataTableRows(ctx, id, body)
 		}))
 
 	// update-rows / upsert-rows <tableId> --data/--file/--stdin (body: {filter, data})
 	parent.AddCommand(rowMutationCmd("update-rows", "Update rows matching a filter (body: {filter, data})",
-		func(c *api.Client, id string, body json.RawMessage) (json.RawMessage, error) {
-			return c.UpdateDataTableRows(context.Background(), id, body)
+		func(ctx context.Context, c *api.Client, id string, body json.RawMessage) (json.RawMessage, error) {
+			return c.UpdateDataTableRows(ctx, id, body)
 		}))
 	parent.AddCommand(rowMutationCmd("upsert-rows", "Insert or update rows (body: {filter, data})",
-		func(c *api.Client, id string, body json.RawMessage) (json.RawMessage, error) {
-			return c.UpsertDataTableRows(context.Background(), id, body)
+		func(ctx context.Context, c *api.Client, id string, body json.RawMessage) (json.RawMessage, error) {
+			return c.UpsertDataTableRows(ctx, id, body)
 		}))
 
 	// delete-rows <tableId> --filter <json>
@@ -95,7 +95,7 @@ func dataTableExtra(parent *cobra.Command, _ resourceSpec[api.DataTable]) {
 			if err != nil {
 				return err
 			}
-			raw, err := client.DeleteDataTableRows(context.Background(), args[0], delFilter)
+			raw, err := client.DeleteDataTableRows(cmd.Context(), args[0], delFilter)
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
@@ -112,7 +112,7 @@ func dataTableExtra(parent *cobra.Command, _ resourceSpec[api.DataTable]) {
 
 // rowMutationCmd builds a row-writing subcommand that reads a raw JSON body from
 // --data, --file, or --stdin and passes it to fn.
-func rowMutationCmd(use, short string, fn func(*api.Client, string, json.RawMessage) (json.RawMessage, error)) *cobra.Command {
+func rowMutationCmd(use, short string, fn func(context.Context, *api.Client, string, json.RawMessage) (json.RawMessage, error)) *cobra.Command {
 	var data, file string
 	var stdin bool
 	cmd := &cobra.Command{
@@ -128,7 +128,7 @@ func rowMutationCmd(use, short string, fn func(*api.Client, string, json.RawMess
 			if err != nil {
 				return err
 			}
-			out, err := fn(client, args[0], body)
+			out, err := fn(cmd.Context(), client, args[0], body)
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)

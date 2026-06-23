@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -53,7 +52,7 @@ func addWorkflowSearchCmd(parent *cobra.Command) {
 			if err != nil {
 				return err
 			}
-			workflows, err := client.Workflows().ListAll(context.Background(), api.ListParams{}, 0)
+			workflows, err := client.Workflows().ListAll(cmd.Context(), api.ListParams{}, 0)
 			if err != nil {
 				if api.IsDryRun(err) {
 					return nil

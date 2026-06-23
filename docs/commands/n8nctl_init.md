@@ -32,7 +32,7 @@ n8nctl init [flags]
       --jq string         apply a jq program to the result (e.g. '.[].id'); implies JSON input
       --no-color          disable colored output [env: NO_COLOR]
       --no-header         hide the table header row
-  -o, --output string     output format: table|json|yaml|csv [env: N8NCTL_OUTPUT]
+  -o, --output string     output format: table|json|yaml|csv|id [env: N8NCTL_OUTPUT]
   -q, --quiet             suppress non-essential chatter
       --rps float         client-side rate limit in requests/sec (0 = use config/default)
       --show-token        do not redact the API key in --dry-run output

@@ -16,6 +16,12 @@ Combine with profiles to promote the same desired state across instances:
   n8nctl --profile staging workflows apply --dir ./workflows
   n8nctl --profile prod    workflows apply --dir ./workflows --prune
 
+Workflows are matched by name (the only stable handle the API exposes), so
+renaming a file creates a new workflow and, with --prune, deletes the old one.
+Duplicate names on the instance are skipped to avoid acting on the wrong one.
+Reconcile covers name, nodes, connections and settings; runtime-only fields
+(pinData, meta) are not managed.
+
 Always preview with --dry-run first, especially with --prune.
 
 ```
@@ -41,7 +47,7 @@ n8nctl workflows apply --dir <dir> [flags]
       --jq string         apply a jq program to the result (e.g. '.[].id'); implies JSON input
       --no-color          disable colored output [env: NO_COLOR]
       --no-header         hide the table header row
-  -o, --output string     output format: table|json|yaml|csv [env: N8NCTL_OUTPUT]
+  -o, --output string     output format: table|json|yaml|csv|id [env: N8NCTL_OUTPUT]
       --profile string    config profile (instance) to use [env: N8NCTL_PROFILE]
   -q, --quiet             suppress non-essential chatter
       --rps float         client-side rate limit in requests/sec (0 = use config/default)

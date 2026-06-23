@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -57,7 +56,7 @@ func init() {
 				return err
 			}
 			var out json.RawMessage
-			if err := client.Do(context.Background(), method, path, q, body, &out); err != nil {
+			if err := client.Do(cmd.Context(), method, path, q, body, &out); err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
 					return nil

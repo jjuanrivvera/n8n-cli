@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -67,7 +68,7 @@ func run(t *testing.T, args ...string) (string, string, error) {
 	root.SetOut(&out)
 	root.SetErr(&errb)
 	root.SetArgs(args)
-	err := root.Execute()
+	err := root.ExecuteContext(context.Background())
 	return out.String(), errb.String(), err
 }
 

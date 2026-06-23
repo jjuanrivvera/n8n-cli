@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 	"os"
 
@@ -41,7 +40,7 @@ func packageExportCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			archive, err := client.ExportPackage(context.Background(), ids)
+			archive, err := client.ExportPackage(cmd.Context(), ids)
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
@@ -85,7 +84,7 @@ func packageImportCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			res, err := client.ImportPackage(context.Background(), archive, opts)
+			res, err := client.ImportPackage(cmd.Context(), archive, opts)
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)

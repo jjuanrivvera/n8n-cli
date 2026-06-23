@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -32,7 +31,7 @@ func projectExtra(parent *cobra.Command, _ resourceSpec[api.Project]) {
 			if err != nil {
 				return err
 			}
-			members, _, err := client.ListProjectMembers(context.Background(), args[0], api.ListParams{})
+			members, _, err := client.ListProjectMembers(cmd.Context(), args[0], api.ListParams{})
 			if err != nil {
 				if api.IsDryRun(err) {
 					return nil
@@ -58,7 +57,7 @@ func projectExtra(parent *cobra.Command, _ resourceSpec[api.Project]) {
 				return err
 			}
 			rel := []map[string]string{{"userId": addUser, "role": addRole}}
-			if err := client.AddProjectMembers(context.Background(), args[0], rel); err != nil {
+			if err := client.AddProjectMembers(cmd.Context(), args[0], rel); err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
 					return nil
@@ -89,7 +88,7 @@ func projectExtra(parent *cobra.Command, _ resourceSpec[api.Project]) {
 			if err != nil {
 				return err
 			}
-			if err := client.ChangeProjectMemberRole(context.Background(), args[0], args[1], newRole); err != nil {
+			if err := client.ChangeProjectMemberRole(cmd.Context(), args[0], args[1], newRole); err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
 					return nil
@@ -115,7 +114,7 @@ func projectExtra(parent *cobra.Command, _ resourceSpec[api.Project]) {
 			if err != nil {
 				return err
 			}
-			if err := client.RemoveProjectMember(context.Background(), args[0], args[1]); err != nil {
+			if err := client.RemoveProjectMember(cmd.Context(), args[0], args[1]); err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
 					return nil

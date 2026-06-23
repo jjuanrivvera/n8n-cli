@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -52,7 +51,7 @@ func userExtra(parent *cobra.Command, _ resourceSpec[api.User]) {
 				}
 				invites = append(invites, m)
 			}
-			res, err := client.InviteUsers(context.Background(), invites)
+			res, err := client.InviteUsers(cmd.Context(), invites)
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
@@ -81,7 +80,7 @@ func userExtra(parent *cobra.Command, _ resourceSpec[api.User]) {
 			if err != nil {
 				return err
 			}
-			if err := client.ChangeUserRole(context.Background(), args[0], newRole); err != nil {
+			if err := client.ChangeUserRole(cmd.Context(), args[0], newRole); err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
 					return nil

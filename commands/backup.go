@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -56,15 +55,21 @@ func backupCmd() *cobra.Command {
 				return err
 			}
 
-			workflows, err := client.Workflows().ListAll(context.Background(), api.ListParams{}, 0)
+			workflows, err := client.Workflows().ListAll(cmd.Context(), api.ListParams{}, 0)
 			if err != nil {
 				return err
 			}
+			var failures []string
+			savedWorkflows := 0
 			for i := range workflows {
 				wf := &workflows[i]
-				full, gerr := client.Workflows().Get(context.Background(), wf.ID.String(), nil)
+				full, gerr := client.Workflows().Get(cmd.Context(), wf.ID.String(), nil)
 				if gerr != nil {
-					return fmt.Errorf("fetching workflow %s: %w", wf.ID, gerr)
+					// Collect-and-continue: one unreadable workflow must not silently
+					// abort the whole backup, nor be reported as a clean success.
+					fmt.Fprintf(cmd.ErrOrStderr(), "failed to back up workflow %s: %v\n", wf.ID, gerr)
+					failures = append(failures, "workflow "+wf.ID.String())
+					continue
 				}
 				stem := slugify(wf.Name) + "." + wf.ID.String()
 				main, subfiles, eerr := wffile.EncodeExternalized(full, wfFormat, stem, externalize)
@@ -83,18 +88,25 @@ func backupCmd() *cobra.Command {
 						return err
 					}
 				}
+				savedWorkflows++
 			}
 
 			// Tags, variables, and credentials are best-effort: on a Community
-			// instance some are unlicensed (403) and must not abort the backup of
-			// the core workflows. Skipped sections are recorded in the manifest.
-			counts := map[string]int{"workflows": len(workflows)}
+			// instance some are unlicensed (403). A forbidden/unlicensed section is an
+			// expected skip; any other error (network, 5xx) is a real failure that
+			// must be surfaced, not silently recorded as a clean skip.
+			counts := map[string]int{"workflows": savedWorkflows}
 			var skipped []string
 			optional := func(name, file string, fetch func() (any, int, error)) error {
 				v, n, err := fetch()
 				if err != nil {
-					fmt.Fprintf(cmd.ErrOrStderr(), "skipping %s: %v\n", name, err)
-					skipped = append(skipped, name)
+					if api.IsForbidden(err) {
+						fmt.Fprintf(cmd.ErrOrStderr(), "skipping %s (unlicensed or forbidden): %v\n", name, err)
+						skipped = append(skipped, name)
+						return nil
+					}
+					fmt.Fprintf(cmd.ErrOrStderr(), "failed to back up %s: %v\n", name, err)
+					failures = append(failures, name)
 					return nil
 				}
 				counts[name] = n
@@ -102,20 +114,20 @@ func backupCmd() *cobra.Command {
 			}
 
 			if err := optional("tags", "tags.json", func() (any, int, error) {
-				t, e := client.Tags().ListAll(context.Background(), api.ListParams{}, 0)
+				t, e := client.Tags().ListAll(cmd.Context(), api.ListParams{}, 0)
 				return t, len(t), e
 			}); err != nil {
 				return err
 			}
 			if err := optional("variables", "variables.json", func() (any, int, error) {
-				v, e := client.Variables().ListAll(context.Background(), api.ListParams{}, 0)
+				v, e := client.Variables().ListAll(cmd.Context(), api.ListParams{}, 0)
 				return v, len(v), e
 			}); err != nil {
 				return err
 			}
 			// Credential inventory: metadata only. Secrets are write-only in the API.
 			if err := optional("credentials", "credentials.inventory.json", func() (any, int, error) {
-				c, e := client.Credentials().ListAll(context.Background(), api.ListParams{}, 0)
+				c, e := client.Credentials().ListAll(cmd.Context(), api.ListParams{}, 0)
 				return c, len(c), e
 			}); err != nil {
 				return err
@@ -127,6 +139,7 @@ func backupCmd() *cobra.Command {
 				"exportedAt": time.Now().UTC().Format(time.RFC3339),
 				"counts":     counts,
 				"skipped":    skipped,
+				"failures":   failures,
 				"note":       "credentials.inventory.json holds metadata only; secret values are not exported by the n8n API",
 			}
 			if err := writeJSON(filepath.Join(outDir, "manifest.json"), manifest); err != nil {
@@ -139,6 +152,11 @@ func backupCmd() *cobra.Command {
 				if len(skipped) > 0 {
 					fmt.Fprintf(cmd.OutOrStdout(), "skipped (unlicensed or unavailable): %s\n", strings.Join(skipped, ", "))
 				}
+			}
+			// A partial backup must exit non-zero so callers (and CI) never mistake
+			// it for a complete snapshot.
+			if len(failures) > 0 {
+				return fmt.Errorf("backup incomplete: %d section(s) failed: %s", len(failures), strings.Join(failures, ", "))
 			}
 			return nil
 		},
@@ -193,19 +211,19 @@ func restoreCmd() *cobra.Command {
 
 				var result *api.Workflow
 				if updateByName {
-					existing, ferr := findWorkflowByName(client, wf.Name)
+					existing, ferr := findWorkflowByName(cmd.Context(), client, wf.Name)
 					if ferr != nil {
 						return ferr
 					}
 					if existing != nil {
-						result, err = client.Workflows().Update(context.Background(), existing.ID.String(), body)
+						result, err = client.Workflows().Update(cmd.Context(), existing.ID.String(), body)
 						updated++
 					} else {
-						result, err = client.Workflows().Create(context.Background(), body)
+						result, err = client.Workflows().Create(cmd.Context(), body)
 						created++
 					}
 				} else {
-					result, err = client.Workflows().Create(context.Background(), body)
+					result, err = client.Workflows().Create(cmd.Context(), body)
 					created++
 				}
 				if err != nil {
@@ -215,7 +233,9 @@ func restoreCmd() *cobra.Command {
 					return fmt.Errorf("restoring %q: %w", wf.Name, err)
 				}
 				if activate && result != nil && result.ID != "" {
-					_, _ = client.ActivateWorkflow(context.Background(), result.ID.String())
+					if _, aerr := client.ActivateWorkflow(cmd.Context(), result.ID.String()); aerr != nil && !api.IsDryRun(aerr) {
+						fmt.Fprintf(cmd.ErrOrStderr(), "warning: restored %q but failed to activate: %v\n", wf.Name, aerr)
+					}
 				}
 			}
 			if !flagQuiet {

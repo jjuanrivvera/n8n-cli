@@ -52,7 +52,7 @@ func addWorkflowSyncCmd(parent *cobra.Command) {
 			if err != nil {
 				return fmt.Errorf("source profile %q: %w", source, err)
 			}
-			wf, err := srcClient.Workflows().Get(context.Background(), args[0], nil)
+			wf, err := srcClient.Workflows().Get(cmd.Context(), args[0], nil)
 			if err != nil {
 				return fmt.Errorf("reading workflow from %q: %w", source, err)
 			}
@@ -65,17 +65,17 @@ func addWorkflowSyncCmd(parent *cobra.Command) {
 
 			var result *api.Workflow
 			if updateByName {
-				existing, ferr := findWorkflowByName(dstClient, wf.Name)
+				existing, ferr := findWorkflowByName(cmd.Context(), dstClient, wf.Name)
 				if ferr != nil {
 					return ferr
 				}
 				if existing != nil {
-					result, err = dstClient.Workflows().Update(context.Background(), existing.ID.String(), body)
+					result, err = dstClient.Workflows().Update(cmd.Context(), existing.ID.String(), body)
 				} else {
-					result, err = dstClient.Workflows().Create(context.Background(), body)
+					result, err = dstClient.Workflows().Create(cmd.Context(), body)
 				}
 			} else {
-				result, err = dstClient.Workflows().Create(context.Background(), body)
+				result, err = dstClient.Workflows().Create(cmd.Context(), body)
 			}
 			if err != nil {
 				if api.IsDryRun(err) {
@@ -86,7 +86,7 @@ func addWorkflowSyncCmd(parent *cobra.Command) {
 			}
 
 			if activate && result != nil && result.ID != "" {
-				if _, err := dstClient.ActivateWorkflow(context.Background(), result.ID.String()); err != nil && !api.IsDryRun(err) {
+				if _, err := dstClient.ActivateWorkflow(cmd.Context(), result.ID.String()); err != nil && !api.IsDryRun(err) {
 					fmt.Fprintf(cmd.ErrOrStderr(), "warning: synced but failed to activate: %v\n", err)
 				}
 			}
@@ -110,8 +110,8 @@ func addWorkflowSyncCmd(parent *cobra.Command) {
 }
 
 // findWorkflowByName returns the first workflow whose name matches, or nil.
-func findWorkflowByName(client *api.Client, name string) (*api.Workflow, error) {
-	items, err := client.Workflows().ListAll(context.Background(), api.ListParams{}, 0)
+func findWorkflowByName(ctx context.Context, client *api.Client, name string) (*api.Workflow, error) {
+	items, err := client.Workflows().ListAll(ctx, api.ListParams{}, 0)
 	if err != nil {
 		if api.IsDryRun(err) {
 			return nil, nil

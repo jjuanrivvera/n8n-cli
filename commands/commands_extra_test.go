@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -62,7 +63,7 @@ func TestExecuteFunc(t *testing.T) {
 	t.Cleanup(func() { os.Args = old })
 	resetCommandTree(RootCmd())
 	RootCmd().SetArgs(nil)
-	require.NoError(t, Execute())
+	require.NoError(t, Execute(context.Background()))
 }
 
 func TestCreateBodyVariants(t *testing.T) {

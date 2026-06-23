@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 	"os"
 
@@ -55,7 +54,7 @@ func init() {
 				client, cerr := getAPIClient(cmd)
 				if cerr != nil {
 					add("api auth", false, cerr.Error())
-				} else if _, _, lerr := client.Workflows().List(context.Background(), api.ListParams{Limit: 1}); lerr != nil {
+				} else if _, _, lerr := client.Workflows().List(cmd.Context(), api.ListParams{Limit: 1}); lerr != nil {
 					add("api auth", false, lerr.Error())
 				} else {
 					authOK = true

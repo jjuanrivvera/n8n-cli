@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 
 	"github.com/jjuanrivvera/n8n-cli/internal/api"
@@ -23,7 +21,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			report, err := client.GenerateAudit(context.Background(), api.AuditOptions{
+			report, err := client.GenerateAudit(cmd.Context(), api.AuditOptions{
 				DaysAbandonedWorkflow: days,
 				Categories:            categories,
 			})

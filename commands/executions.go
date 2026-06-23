@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"net/url"
 
 	"github.com/spf13/cobra"
@@ -43,7 +42,7 @@ func executionExtra(parent *cobra.Command, _ resourceSpec[api.Execution]) {
 			if err != nil {
 				return err
 			}
-			ex, err := client.RetryExecution(context.Background(), args[0], loadWorkflow)
+			ex, err := client.RetryExecution(cmd.Context(), args[0], loadWorkflow)
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
@@ -66,7 +65,7 @@ func executionExtra(parent *cobra.Command, _ resourceSpec[api.Execution]) {
 			if err != nil {
 				return err
 			}
-			ex, err := client.StopExecution(context.Background(), args[0])
+			ex, err := client.StopExecution(cmd.Context(), args[0])
 			if err != nil {
 				if api.IsDryRun(err) {
 					dryRunNotice(cmd)
@@ -93,7 +92,7 @@ func executionExtra(parent *cobra.Command, _ resourceSpec[api.Execution]) {
 			if includeData {
 				q.Set("includeData", "true")
 			}
-			ex, err := client.Executions().Get(context.Background(), args[0], q)
+			ex, err := client.Executions().Get(cmd.Context(), args[0], q)
 			if err != nil {
 				if api.IsDryRun(err) {
 					return nil
