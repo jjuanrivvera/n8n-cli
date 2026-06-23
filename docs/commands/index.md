@@ -23,6 +23,7 @@ Auto-generated from the CLI. See [n8nctl](n8nctl.md) for the root command.
 - [mcp](n8nctl_mcp.md) — MCP server management
 - [packages](n8nctl_packages.md) — Export and import workflows as .n8np packages (beta)
 - [projects](n8nctl_projects.md) — Manage projects and their members
+- [proxy](n8nctl_proxy.md) — Run a local n8n API proxy that lint-gates workflow writes
 - [restore](n8nctl_restore.md) — Recreate workflows from a backup directory
 - [skills](n8nctl_skills.md) — Install this CLI's AI-agent skill into Claude, Cursor, and other agents
 - [source-control](n8nctl_source-control.md) — Interact with the Source Control (Git) integration

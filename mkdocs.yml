@@ -57,6 +57,7 @@ nav:
   - Workflows as Code: workflows-as-code.md
   - MCP Server: mcp.md
   - Agent Guard: agent-guard.md
+  - Lint-enforcing Proxy: proxy.md
   - vs. other n8n CLIs: comparison.md
   - Reference:
       - Command Reference: commands/index.md

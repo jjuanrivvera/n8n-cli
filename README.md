@@ -465,8 +465,18 @@ n8nctl agent guard --host claude-code           # print the safety config for re
 n8nctl agent guard --host claude-code --write   # install it (won't overwrite existing files)
 ```
 
-See [MCP server](docs/mcp.md) and [Agent guard](docs/agent-guard.md) for the full
-setup, manual config, and the MCP-only-is-strongest security model.
+And enforce quality at the API boundary: `n8nctl proxy` fronts the instance and
+**rejects any workflow create/update that fails lint with a 422** (reads pass
+through), so a bad definition can't land no matter who pushes it:
+
+```bash
+n8nctl proxy                                       # lint-gate writes on 127.0.0.1:8099
+n8nctl --base-url http://127.0.0.1:8099 workflows create --file wf.json
+```
+
+See [MCP server](docs/mcp.md), [Agent guard](docs/agent-guard.md), and
+[Lint-enforcing proxy](docs/proxy.md) for the full setup, manual config, and the
+MCP-only-is-strongest security model.
 
 ## Documentation
 

@@ -55,6 +55,7 @@ key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
 * [n8nctl mcp](n8nctl_mcp.md)	 - MCP server management
 * [n8nctl packages](n8nctl_packages.md)	 - Export and import workflows as .n8np packages (beta)
 * [n8nctl projects](n8nctl_projects.md)	 - Manage projects and their members
+* [n8nctl proxy](n8nctl_proxy.md)	 - Run a local n8n API proxy that lint-gates workflow writes
 * [n8nctl restore](n8nctl_restore.md)	 - Recreate workflows from a backup directory
 * [n8nctl skills](n8nctl_skills.md)	 - Install this CLI's AI-agent skill into Claude, Cursor, and other agents
 * [n8nctl source-control](n8nctl_source-control.md)	 - Interact with the Source Control (Git) integration

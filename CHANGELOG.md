@@ -7,6 +7,14 @@ All notable changes to this project are documented here. The format is based on
 ## [Unreleased]
 
 ### Added
+- **Lint-enforcing proxy**: `n8nctl proxy` runs a local reverse proxy in front of
+  the active instance that **lints every workflow create/update and rejects errors
+  with HTTP 422** before they reach n8n — so a workflow with lint errors can never
+  land, regardless of who pushes it (a human, a script, or an AI agent). Reads pass
+  through; the active profile's API key is injected from the keyring so clients
+  forward without the secret. `--disable-rule` tunes the rules and
+  `--block-destructive` also rejects workflow DELETEs. (Inspired by the server-side
+  enforcement proxy in `ubie-oss/n8n-cli`.)
 - **MCP server**: `n8nctl mcp` runs the CLI as a Model Context Protocol server so
   AI agents (Claude Code/Desktop, Cursor, VS Code) drive any n8n instance.
   `mcp start` (stdio), `mcp stream` (HTTP), `mcp tools` (export the catalog), and

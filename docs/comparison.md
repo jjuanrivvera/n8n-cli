@@ -38,9 +38,10 @@ These tools are not all trying to be the same thing. The useful question is not
 | Multi-instance | **profiles + keyring** | single, plaintext config | single, env vars | single, `.env` |
 | Apply from files | **`apply`** (+ prune / dry-run, **cross-instance**) | — | **`apply`** (+ `--from-git-changes`) | **`sync`** (+ prune) |
 | Lint | 5 schema-grounded rules | — | **6 rules incl. `node-params` (schema-aware) + `node-schema` dump** | — |
-| Other authoring | convert, diff | — | **convert, fmt, trace, `proxy`** | refresh |
+| Lint-enforcing proxy | `proxy` (5 rules, 422 gate) | — | **`proxy` (more rules + dup-name)** | — |
+| Other authoring | convert, diff | — | **convert, fmt, trace** | refresh |
 | Management MCP | **`mcp` (73 tools)** | — | — | — |
-| Agent safety | **`agent guard`** | — | `proxy` (server-side lint gate) | — |
+| Agent safety | **`agent guard` + lint `proxy`** | — | `proxy` (lint gate) | — |
 | backup / restore / search | **yes** | — | — | — |
 | Secrets | **OS keyring** | plaintext config | plaintext env | plaintext `.env` |
 | Resilience (retry / rate-limit) | **adaptive** | single fetch | basic | basic |
@@ -67,12 +68,14 @@ workflow *quality*. Its `lint` ships rules including **`node-params`, which
 validates node parameters**, backed by a **`node-schema`** command that dumps the
 real node-type schemas — per-node validation that `n8nctl`'s five structural rules
 do not attempt. `fmt` tidies node layout, `trace` analyses data-flow cardinality,
-and **`proxy`** is a distinctive idea: an HTTP proxy in front of the n8n API that
-enforces lint **server-side**, so any push that fails lint — from a human or an AI
-agent — is rejected with a 422, making quality structural rather than a convention.
-It is single-instance (env vars, no keyring) and has no MCP or agent-management
-layer. **Use it** if your priority is keeping a team's workflow definitions clean,
-schema-valid, and consistently formatted.
+and **`proxy`** is a distinctive idea ubie pioneered: an HTTP proxy in front of the
+n8n API that enforces lint **server-side**, so any push that fails lint — from a
+human or an AI agent — is rejected with a 422, making quality structural rather
+than a convention. (`n8nctl` has since adopted the same pattern in `n8nctl proxy`;
+ubie's remains deeper — more rules, schema-aware validation, and duplicate-name
+rejection.) It is single-instance (env vars, no keyring) and has no MCP or
+agent-management layer. **Use it** if your priority is keeping a team's workflow
+definitions clean, schema-valid, and consistently formatted.
 
 ### GitOps sync — `edenreich/n8n-cli`
 
@@ -103,6 +106,9 @@ This project's lane. It is the only one of the four that combines:
   Context Protocol server (73 annotated tools, reusing keyring auth and the active
   profile) and `n8nctl agent guard` generates host rules that hard-block
   destructive operations. See [the layer note](#a-note-on-mcp-and-agents).
+- **Lint enforcement at the boundary.** `n8nctl proxy` (adopting ubie's idea)
+  fronts the instance and rejects any workflow create/update that fails lint with a
+  422, so bad definitions can't land regardless of who pushes them.
 - **Fleet operations:** `backup`/`restore` (git-friendly snapshots), `workflows
   search` (find by node type / credential / webhook path), cross-instance `sync`.
 - **Richer output** (table / json / yaml / csv, `--columns`, `--jq` via full
@@ -120,9 +126,10 @@ single binary, value **keyring** security and **production resilience**, keep
   `package shared`, which `n8nctl` lacks); auto-JSON-on-pipe and auto-pagination
   are nicer scripting defaults; npm-native for Node projects.
 - **`ubie-oss/n8n-cli`** — schema-aware linting (`node-params` + `node-schema`),
-  `fmt`, `trace`, and the server-side `proxy` enforcement gateway make it the
-  better tool for authoring quality. `n8nctl`'s lint roadmap tracks node-schema
-  validation; the lint-enforcing proxy is a genuinely different idea worth knowing.
+  `fmt`, and `trace` make it the better tool for authoring quality. `n8nctl` has
+  adopted ubie's server-side lint-enforcement `proxy` idea (`n8nctl proxy`), but
+  ubie's is more mature — more lint rules, schema-aware node validation, and
+  duplicate-name rejection. `n8nctl`'s lint roadmap tracks node-schema validation.
 - **`edenreich/n8n-cli`** — if you want *only* GitOps sync and nothing else, it is
   smaller and has less to learn.
 

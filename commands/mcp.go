@@ -11,7 +11,7 @@ import "github.com/njayp/ophis"
 // Matching is by path substring (ExcludeCmdsContaining) so a whole subtree is
 // dropped by its parent name. This can only ever remove a tool, never leak one;
 // TestMCPExcludesSetupCommands guards the surface regardless.
-var mcpExcludedCommands = []string{"agent", "auth", "config", "alias", "init", "skills", "doctor"}
+var mcpExcludedCommands = []string{"agent", "auth", "config", "alias", "init", "skills", "doctor", "proxy"}
 
 // init registers `n8nctl mcp`, which exposes the CLI's n8n operations as a Model
 // Context Protocol server so AI agents can drive any n8n instance. Each generated

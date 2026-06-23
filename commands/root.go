@@ -190,6 +190,35 @@ func getAPIClient(cmd *cobra.Command) (*api.Client, error) {
 	), nil
 }
 
+// resolveTarget returns the active profile's base URL and API key using the same
+// precedence as getAPIClient (flag > env > keyring). Used by `proxy`, which needs
+// the raw target + key to forward requests rather than a typed client.
+func resolveTarget() (baseURL, apiKey, profileName string, err error) {
+	profileName, c, err := activeProfile()
+	if err != nil {
+		return "", "", "", err
+	}
+	resolved := c.Resolve(profileName)
+	baseURL = resolved.BaseURL
+	if flagBaseURL != "" {
+		baseURL = flagBaseURL
+	}
+	if baseURL == "" {
+		return "", "", profileName, fmt.Errorf("no base URL for profile %q — run `n8nctl init` or pass --base-url", profileName)
+	}
+	apiKey = resolved.APIKey
+	if flagAPIKey != "" {
+		apiKey = flagAPIKey
+	}
+	if apiKey == "" {
+		apiKey = auth.Lookup(profileName)
+	}
+	if apiKey == "" {
+		return baseURL, "", profileName, fmt.Errorf("no API key for profile %q — run `n8nctl auth login` (or set N8NCTL_API_KEY)", profileName)
+	}
+	return baseURL, apiKey, profileName, nil
+}
+
 // clientForProfile builds a client for a specific named profile (used by
 // cross-instance features like sync, backup, and restore). Unlike getAPIClient
 // it ignores --base-url/--api-key flags so it always targets the named instance.

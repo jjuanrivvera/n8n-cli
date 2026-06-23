@@ -143,6 +143,7 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `mcp start\|stream\|tools` | Run n8nctl as an MCP server (stdio / HTTP / export tool list) so an agent drives n8n via 73 annotated tools | `n8nctl mcp start` |
 | `mcp claude\|cursor\|vscode enable\|disable\|list` | Wire the MCP server into a host's config | `n8nctl mcp claude enable` |
 | `agent guard --host <h>` | Generate host-level rules that block destructive n8n ops for an agent (`--all-writes`, `--write`) | `n8nctl agent guard --host claude-code` |
+| `proxy` | Local reverse proxy that lint-gates workflow writes (422 on lint errors) before they reach n8n; reads pass through, key injected from keyring (`--disable-rule`, `--block-destructive`) | `n8nctl proxy --listen 127.0.0.1:8099` |
 | `backup --out <dir>` | Snapshot the instance (workflows + tags + variables + credential metadata + manifest) for git; `--format yaml` + `--externalize N` make it git-friendlier | `n8nctl --profile prod backup --out ./backups/prod --format yaml --externalize 5` |
 | `restore --in <dir>` | Re-apply a backup directory (reads JSON or YAML, re-inlines `$ref` code; `--update-by-name`, `--activate`); credential secrets are NOT in the backup | `n8nctl --profile staging restore --in ./backups/prod --update-by-name` |
 | `api <METHOD> <PATH>` | Raw authenticated request (escape hatch) | `n8nctl api GET /workflows -q limit=5` |
@@ -235,12 +236,18 @@ VS Code) drives n8n through typed tools instead of shelling out — and it ships
   excluded from the MCP surface so an agent can't disable its own rails. **MCP-only
   operation is the strongest guarantee** — the MCP-tool block is hard, the Bash
   hook is best-effort (defeats quote/backslash tricks, not variable indirection).
+- **`proxy`** complements the guard at the API boundary: it fronts the instance
+  and rejects any workflow create/update that fails lint with a `422` (reads pass
+  through). Point a client (or agent) at it so bad definitions can't land,
+  regardless of who pushes them. `agent guard` blocks *destructive* ops; `proxy`
+  blocks *low-quality* ones.
 
 ```bash
 n8nctl mcp start                          # expose n8n to an agent over stdio
 n8nctl mcp claude enable                  # wire the server into Claude Desktop
 n8nctl agent guard --host claude-code     # print the safety config for review
 n8nctl agent guard --host claude-code --write   # install it (won't overwrite)
+n8nctl proxy                              # lint-gate every workflow write (127.0.0.1:8099)
 ```
 
 See `docs/mcp.md` and `docs/agent-guard.md` for the full setup, manual JSON
