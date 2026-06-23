@@ -116,7 +116,7 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `workflows tags <id> [--set id1,id2]` | Get or replace a workflow's tags | `n8nctl workflows tags 42 --set 3,8` |
 | `workflows sync <id> --to <profile>` | Promote a workflow to another instance (dev→prod); credentials NOT copied | `n8nctl workflows sync 2tUt1wbLX592XDdX --from dev --to prod --update-by-name --activate` |
 | `workflows apply --dir <dir>` | GitOps reconcile: create/update/skip workflows from a dir (`--prune` deletes absent, `--activate`); always `--dry-run` first | `n8nctl workflows apply --dir ./workflows --dry-run` |
-| `workflows lint [--dir\|-f\|--remote]` | Static checks (9 grounded rules incl. node-schema typo/param/value checks — `invalid-parameter-value` flags an options value the node disallows); exits non-zero on errors, so it gates CI (`--list-rules`, `--disable-rule`, `-o json`) | `n8nctl workflows lint --dir ./workflows` |
+| `workflows lint [--dir\|-f\|--remote]` | Static checks (8 grounded rules incl. node-schema typo/param/value checks — `invalid-parameter-value` flags an options value the node disallows); exits non-zero on errors, so it gates CI (`--list-rules`, `--disable-rule`, `-o json`) | `n8nctl workflows lint --dir ./workflows` |
 | `workflows autofix [--dir\|-f]` | Repair mechanical mistakes lint detects: typo'd node types (vs catalog), expressions missing leading `=`, missing webhook ids. Report-only unless `--write` | `n8nctl workflows autofix --dir ./workflows --write` |
 | `workflows breaking-changes [--dir\|-f\|--remote\|<id>]` | Report nodes pinned to an older `typeVersion` than the catalog's latest, plus params the latest schema dropped. Informational, exits 0. Alias `breaking` | `n8nctl workflows breaking-changes --dir ./workflows` |
 | `workflows bulk activate\|deactivate --tag <name>` | Flip every workflow carrying a tag in one call (maintenance windows); previews then needs `--yes` (or `--dry-run`) | `n8nctl workflows bulk deactivate --tag prod --yes` |
@@ -249,7 +249,7 @@ VS Code) drives n8n through typed tools instead of shelling out — and it ships
 
 - **`mcp start`** runs an MCP server over stdio (use `mcp stream --host H --port N`
   for HTTP, `mcp tools` to export the catalog to `mcp-tools.json`). It auto-exposes
-  the CLI as **73 MCP tools** named with an `n8n` prefix (`n8n_workflows_list`,
+  the CLI as **85 MCP tools** named with an `n8n` prefix (`n8n_workflows_list`,
   `n8n_workflows_create`, `n8n_workflows_delete`, `n8n_data-tables_delete-rows`).
   Each tool replays the matching cobra command, reusing the same keyring auth,
   active profile, and `--dry-run`. Tools carry annotations — **read-only**

@@ -495,7 +495,7 @@ n8nctl workflows lint --list-rules                   # rules + canonical basis
 n8nctl workflows lint --dir ./workflows --disable-rule expression-prefix
 ```
 
-The 9 rules and their grounding (shown by `--list-rules`):
+The 8 rules and their grounding (shown by `--list-rules`):
 
 | Rule | Severity | Basis |
 |---|---|---|
@@ -628,7 +628,7 @@ n8nctl mcp cursor enable               # wire into Cursor
 n8nctl mcp vscode enable               # wire into VS Code
 ```
 
-The server auto-exposes the CLI as **73 MCP tools** named with an `n8n` prefix
+The server auto-exposes the CLI as **85 MCP tools** named with an `n8n` prefix
 (`n8n_workflows_list`, `n8n_workflows_create`, `n8n_workflows_delete`,
 `n8n_data-tables_delete-rows`). Each tool replays the matching cobra command,
 reusing the same keyring auth, active profile, and `--dry-run`. Tools are

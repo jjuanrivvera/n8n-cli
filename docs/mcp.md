@@ -113,7 +113,7 @@ For Claude Code, register the server with the standard MCP wiring (the same
 
 ## Tool naming and annotations
 
-The server auto-exposes the CLI's command tree as **73 MCP tools**, named with an
+The server auto-exposes the CLI's command tree as **85 MCP tools**, named with an
 `n8n` prefix that mirrors the command path. A few examples:
 
 | CLI command | MCP tool |
