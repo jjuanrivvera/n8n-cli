@@ -10,6 +10,7 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/itchyny/gojq"
 	"gopkg.in/yaml.v3"
@@ -261,7 +262,7 @@ func renderTable(w io.Writer, data any, opts Options) error {
 
 	widths := make([]int, len(cols))
 	for i, c := range cols {
-		widths[i] = len(c)
+		widths[i] = utf8.RuneCountInString(c)
 	}
 	cells := make([][]string, len(rows))
 	for ri, r := range rows {
@@ -269,8 +270,8 @@ func renderTable(w io.Writer, data any, opts Options) error {
 		for ci, c := range cols {
 			s := scalar(r[c])
 			cells[ri][ci] = s
-			if len(s) > widths[ci] {
-				widths[ci] = len(s)
+			if w := utf8.RuneCountInString(s); w > widths[ci] {
+				widths[ci] = w
 			}
 		}
 	}
@@ -298,10 +299,11 @@ func renderTable(w io.Writer, data any, opts Options) error {
 }
 
 func pad(s string, width int) string {
-	if len(s) >= width {
+	n := utf8.RuneCountInString(s)
+	if n >= width {
 		return s
 	}
-	return s + strings.Repeat(" ", width-len(s))
+	return s + strings.Repeat(" ", width-n)
 }
 
 // scalar renders a cell value as a compact single-line string. Nested

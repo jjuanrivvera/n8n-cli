@@ -77,3 +77,17 @@ func TestRulesHaveBasis(t *testing.T) {
 		assert.NotEmpty(t, r.Basis, r.Name) // every rule documents its canonical basis
 	}
 }
+
+func TestLint_MalformedJSON_NoPanic(t *testing.T) {
+	w := &api.Workflow{Name: "w", Nodes: json.RawMessage(`not-json`), Connections: json.RawMessage(`{}`)}
+	assert.NotPanics(t, func() { Lint(w, nil) })
+}
+
+func TestExpressionPrefix_NoFalsePositive(t *testing.T) {
+	// a plain string containing "{{" but no n8n token must NOT be flagged
+	plain := wf(`[{"name":"A","type":"x","parameters":{"text":"use {{ mustache }} templates"}}]`, `{}`)
+	assert.False(t, rules(Lint(plain, nil))["expression-prefix"])
+	// a genuine expression nested in a map IS flagged
+	nested := wf(`[{"name":"A","type":"x","parameters":{"opts":{"url":"{{ $json.id }}"}}}]`, `{}`)
+	assert.True(t, rules(Lint(nested, nil))["expression-prefix"])
+}

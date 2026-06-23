@@ -174,9 +174,7 @@ func restoreCmd() *cobra.Command {
 				return fmt.Errorf("reading %s: %w", wfDir, err)
 			}
 
-			loader := func(rel string) ([]byte, error) {
-				return os.ReadFile(filepath.Join(wfDir, filepath.FromSlash(rel))) //nolint:gosec // within backup dir
-			}
+			loader := wffile.DirLoader(wfDir)
 			var created, updated int
 			for _, e := range entries {
 				if e.IsDir() || !isWorkflowFile(e.Name()) {

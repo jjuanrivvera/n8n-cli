@@ -8,6 +8,8 @@ package wffile
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -42,9 +44,27 @@ func Encode(wf *api.Workflow, format Format) ([]byte, error) {
 }
 
 // extMarker is the single-key object an externalized field becomes on disk:
-// {"$ref": "relpath"}. It is unambiguous (no native n8n field is shaped this
-// way) and reads cleanly in YAML.
-const extMarker = "$ref"
+// {"$n8nctl_file": "relpath"}. The key is namespaced so it cannot collide with a
+// legitimate workflow parameter that happens to be shaped like {"$ref": "..."}.
+const extMarker = "$n8nctl_file"
+
+// DirLoader returns a loader for externalized $ref files that is confined to dir.
+// It rejects absolute paths and any path that escapes dir, so a crafted workflow
+// file cannot make the CLI read arbitrary files (and upload them on apply/restore).
+func DirLoader(dir string) func(string) ([]byte, error) {
+	return func(rel string) ([]byte, error) {
+		clean := filepath.Clean(filepath.FromSlash(rel))
+		if filepath.IsAbs(clean) {
+			return nil, fmt.Errorf("refusing absolute externalized-file path %q", rel)
+		}
+		full := filepath.Join(dir, clean)
+		rp, err := filepath.Rel(dir, full)
+		if err != nil || rp == ".." || strings.HasPrefix(rp, ".."+string(filepath.Separator)) {
+			return nil, fmt.Errorf("refusing externalized-file path %q that escapes its directory", rel)
+		}
+		return os.ReadFile(full) //nolint:gosec // confined to dir by the checks above
+	}
+}
 
 // externalizableExt maps a parameter field name to a file extension.
 func externalizableExt(field string) (ext string, ok bool) {
@@ -129,7 +149,7 @@ func externalizeNodes(wf map[string]any, stem string, threshold int, subfiles ma
 				continue
 			}
 			ext, ok := externalizableExt(field)
-			if !ok || lineCount(s) < threshold {
+			if !ok || lineCount(s) <= threshold { // externalize only when strictly longer than N lines
 				continue
 			}
 			rel := "_subfiles/" + slug(stem) + "/" + slug(nodeName) + "-" + field + "." + ext

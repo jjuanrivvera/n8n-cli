@@ -190,7 +190,9 @@ func (c *Client) do(ctx context.Context, method, rawURL string, body []byte) ([]
 		if err != nil {
 			lastErr = err
 			if c.retryPolicy.shouldRetry(method, nil, err) && attempt < c.retryPolicy.MaxRetries {
-				c.sleep(ctx, c.retryPolicy.backoff(attempt, nil))
+				if serr := c.sleep(ctx, c.retryPolicy.backoff(attempt, nil)); serr != nil {
+					return nil, serr
+				}
 				continue
 			}
 			return nil, fmt.Errorf("request to %s failed: %w", rawURL, err)
@@ -217,7 +219,9 @@ func (c *Client) do(ctx context.Context, method, rawURL string, body []byte) ([]
 		if c.retryPolicy.shouldRetry(method, resp, nil) && attempt < c.retryPolicy.MaxRetries {
 			c.logger.Debug("retrying request", "method", method, "url", rawURL,
 				"status", resp.StatusCode, "attempt", attempt+1)
-			c.sleep(ctx, c.retryPolicy.backoff(attempt, resp))
+			if serr := c.sleep(ctx, c.retryPolicy.backoff(attempt, resp)); serr != nil {
+				return nil, serr
+			}
 			continue
 		}
 		return nil, apiErr
@@ -225,13 +229,16 @@ func (c *Client) do(ctx context.Context, method, rawURL string, body []byte) ([]
 	return nil, lastErr
 }
 
-// sleep waits for d or until ctx is cancelled.
-func (c *Client) sleep(ctx context.Context, d time.Duration) {
+// sleep waits for d or until ctx is cancelled, returning ctx.Err() on
+// cancellation so a retry loop short-circuits instead of running another attempt.
+func (c *Client) sleep(ctx context.Context, d time.Duration) error {
 	t := time.NewTimer(d)
 	defer t.Stop()
 	select {
 	case <-ctx.Done():
+		return ctx.Err()
 	case <-t.C:
+		return nil
 	}
 }
 
@@ -341,9 +348,15 @@ func (c *Client) PostMultipart(ctx context.Context, path string, fields map[stri
 	if readErr != nil {
 		return nil, fmt.Errorf("reading upload response: %w", readErr)
 	}
+	// React to the rate-limit budget like do() does, so uploads share the same
+	// adaptive throttle/recovery rather than diverging.
+	if resp.StatusCode == http.StatusTooManyRequests {
+		c.rateLimiter.Throttle()
+	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, newAPIError(resp.StatusCode, respBody)
 	}
+	c.rateLimiter.Restore()
 	return respBody, nil
 }
 

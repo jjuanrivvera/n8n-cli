@@ -32,9 +32,7 @@ func readWorkflowDir(dir string) (map[string]*api.Workflow, error) {
 	if err != nil {
 		return nil, err
 	}
-	loader := func(rel string) ([]byte, error) {
-		return os.ReadFile(filepath.Join(dir, filepath.FromSlash(rel))) //nolint:gosec // within the user-supplied dir
-	}
+	loader := wffile.DirLoader(dir)
 	for _, e := range entries {
 		if e.IsDir() || !isWorkflowFile(e.Name()) {
 			continue
@@ -260,6 +258,11 @@ func workflowApplyCmd() *cobra.Command {
 			"Combine with profiles to promote the same desired state across instances:\n" +
 			"  n8nctl --profile staging workflows apply --dir ./workflows\n" +
 			"  n8nctl --profile prod    workflows apply --dir ./workflows --prune\n\n" +
+			"Workflows are matched by name (the only stable handle the API exposes), so\n" +
+			"renaming a file creates a new workflow and, with --prune, deletes the old one.\n" +
+			"Duplicate names on the instance are skipped to avoid acting on the wrong one.\n" +
+			"Reconcile covers name, nodes, connections and settings; runtime-only fields\n" +
+			"(pinData, meta) are not managed.\n\n" +
 			"Always preview with --dry-run first, especially with --prune.",
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -281,16 +284,40 @@ func workflowApplyCmd() *cobra.Command {
 				}
 				return err
 			}
+			// n8n does not enforce unique workflow names. Reconcile matches by name,
+			// so ambiguous (duplicate-name) remote workflows are unsafe to update or
+			// prune — acting on an arbitrary one could lose or delete the wrong
+			// workflow. Detect duplicates and skip those names entirely.
 			remote := map[string]*api.Workflow{}
+			ambiguous := map[string]bool{}
 			for i := range remoteList {
-				remote[remoteList[i].Name] = &remoteList[i]
+				n := remoteList[i].Name
+				if _, ok := remote[n]; ok {
+					ambiguous[n] = true
+				}
+				remote[n] = &remoteList[i]
+			}
+			if len(ambiguous) > 0 {
+				dups := make([]string, 0, len(ambiguous))
+				for n := range ambiguous {
+					dups = append(dups, n)
+				}
+				sort.Strings(dups)
+				fmt.Fprintf(cmd.ErrOrStderr(),
+					"warning: %d duplicate workflow name(s) on the instance (%s); apply will skip them to avoid acting on the wrong workflow\n",
+					len(ambiguous), strings.Join(dups, ", "))
 			}
 
 			out := cmd.OutOrStdout()
-			var created, updated, pruned, unchanged int
+			var created, updated, pruned, unchanged, skipped int
 			for _, name := range sortedKeys(local) {
 				lwf := local[name]
 				body := workflowCreateBody(lwf)
+				if ambiguous[name] {
+					fmt.Fprintf(out, "! skip %s (ambiguous: duplicate name on instance)\n", name)
+					skipped++
+					continue
+				}
 				if ex, ok := remote[name]; ok {
 					// Update only if the writable content differs.
 					full, gerr := client.Workflows().Get(context.Background(), ex.ID.String(), nil)
@@ -324,6 +351,11 @@ func workflowApplyCmd() *cobra.Command {
 					if _, ok := local[name]; ok {
 						continue
 					}
+					if ambiguous[name] {
+						fmt.Fprintf(out, "! skip prune of %s (ambiguous: duplicate name on instance)\n", name)
+						skipped++
+						continue
+					}
 					if flagDryRun {
 						fmt.Fprintf(out, "- prune %s\n", name)
 					} else if derr := client.Workflows().Delete(context.Background(), remote[name].ID.String()); derr != nil {
@@ -336,7 +368,7 @@ func workflowApplyCmd() *cobra.Command {
 			if flagDryRun {
 				verb = "plan"
 			}
-			fmt.Fprintf(out, "%s: %d created, %d updated, %d unchanged, %d pruned\n", verb, created, updated, unchanged, pruned)
+			fmt.Fprintf(out, "%s: %d created, %d updated, %d unchanged, %d pruned, %d skipped\n", verb, created, updated, unchanged, pruned, skipped)
 			return nil
 		},
 	}

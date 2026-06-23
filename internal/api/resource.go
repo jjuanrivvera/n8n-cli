@@ -66,7 +66,7 @@ func (r *Resource[T]) ListAll(ctx context.Context, params ListParams, maxPages i
 // page cap was reached while more pages remained.
 func (r *Resource[T]) ListAllChecked(ctx context.Context, params ListParams, maxPages int) ([]T, bool, error) {
 	if maxPages <= 0 {
-		maxPages = 10000
+		maxPages = DefaultMaxPages
 	}
 	var all []T
 	cursor := params.Cursor

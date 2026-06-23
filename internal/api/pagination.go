@@ -11,6 +11,9 @@ import (
 const (
 	DefaultLimit = 100
 	MaxLimit     = 250
+	// DefaultMaxPages caps ListAll when the caller passes no page limit, as a
+	// runaway-loop backstop.
+	DefaultMaxPages = 10000
 )
 
 // ListParams are the query parameters common to n8n list endpoints. n8n paginates

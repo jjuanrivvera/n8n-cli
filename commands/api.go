@@ -23,7 +23,7 @@ func init() {
 		Short: "Make a raw authenticated API request (escape hatch)",
 		Long: "Call any n8n API endpoint directly. PATH is relative to the instance base URL\n" +
 			"(the leading /api/v1 is added automatically).\n\n" +
-			"  n8nctl api GET /workflows -q limit=5\n" +
+			"  n8nctl api GET /workflows --query limit=5\n" +
 			"  n8nctl api POST /tags -d '{\"name\":\"Prod\"}'\n" +
 			"  n8nctl api DELETE /executions/42 --dry-run",
 		Args: cobra.ExactArgs(2),

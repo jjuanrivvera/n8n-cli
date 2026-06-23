@@ -6,6 +6,29 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Security
+- **Path traversal in externalized code files.** A crafted workflow file's `$ref`
+  could point outside its directory (e.g. `../../../etc/passwd`), making `restore`,
+  `workflows apply`, `lint --dir`, and `diff` read arbitrary local files — and on
+  apply/restore upload them to the configured instance. Externalized-file loading
+  is now confined to the workflow's directory (absolute and escaping paths are
+  refused). The externalization marker also changed from `$ref` to the namespaced
+  `$n8nctl_file` so it cannot collide with a legitimate `$ref` parameter
+  (re-externalize any 0.2.0 backups).
+
+### Fixed
+- `workflows apply` now detects duplicate workflow names on the instance and skips
+  them, instead of silently updating/pruning an arbitrary one (n8n does not enforce
+  unique names). The plan/summary reports skipped workflows.
+- Multipart uploads now share the adaptive rate limiter's 429 throttle/recovery,
+  matching regular requests.
+- Retry backoff no longer dereferences a nil jitter source (dead nil-guard), and
+  context cancellation during a retry backoff now returns immediately.
+- `lint` `expression-prefix` recurses into nested parameters and only flags genuine
+  n8n expressions, removing false positives on plain `{{ }}` text.
+- `--all` truncation warning prints the real page cap; `--externalize N` now means
+  "longer than N lines" as documented; table output measures width by rune, not byte.
+
 ## [0.2.0]
 
 ### Added

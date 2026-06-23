@@ -2,6 +2,8 @@ package wffile
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -64,7 +66,7 @@ func TestExternalizeRoundTrip(t *testing.T) {
 		assert.True(t, strings.HasSuffix(rel, ".js"))
 	}
 	// main file references the subfile, not the inline code
-	assert.Contains(t, string(main), "$ref")
+	assert.Contains(t, string(main), "$n8nctl_file")
 	assert.NotContains(t, string(main), "const x = 1;")
 
 	// Re-inline via loader.
@@ -74,7 +76,7 @@ func TestExternalizeRoundTrip(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Contains(t, string(wf.Nodes), "const x = 1;")
-	assert.NotContains(t, string(wf.Nodes), "$ref")
+	assert.NotContains(t, string(wf.Nodes), "$n8nctl_file")
 }
 
 func TestExternalize_BelowThreshold(t *testing.T) {
@@ -115,3 +117,32 @@ func TestDecodeWithFiles_LoaderError(t *testing.T) {
 }
 
 func jsonEsc(s string) string { return strings.ReplaceAll(s, "\n", "\\n") }
+
+func TestDirLoader_RejectsTraversal(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "ok.js"), []byte("inside"), 0o600))
+	load := DirLoader(dir)
+
+	// legitimate relative path within dir works
+	b, err := load("ok.js")
+	require.NoError(t, err)
+	assert.Equal(t, "inside", string(b))
+
+	// traversal and absolute paths are refused
+	for _, bad := range []string{"../../../../etc/passwd", "/etc/passwd", "a/../../escape"} {
+		_, err := load(bad)
+		require.Error(t, err, bad)
+		assert.Contains(t, err.Error(), "refusing")
+	}
+}
+
+func TestDecode_Errors(t *testing.T) {
+	_, err := Decode([]byte(`{bad json`), JSON)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "parsing")
+	_, err = Decode([]byte("- a\n- b\n"), YAML) // a sequence is not a workflow object
+	require.Error(t, err)
+	_, err = Decode([]byte(`null`), JSON)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "empty workflow")
+}

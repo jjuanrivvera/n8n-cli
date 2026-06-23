@@ -109,3 +109,13 @@ func TestRenderRawMessage(t *testing.T) {
 	require.NoError(t, Render(&buf, raw, JSON, Options{}))
 	assert.Contains(t, buf.String(), "Raw")
 }
+
+func TestRender_ErrorPaths(t *testing.T) {
+	var buf bytes.Buffer
+	// unknown format
+	require.Error(t, Render(&buf, map[string]any{"id": 1}, Format("xml"), Options{}))
+	// non-serializable input (a channel cannot be JSON-marshalled)
+	require.Error(t, Render(&buf, map[string]any{"bad": make(chan int)}, JSON, Options{}))
+	require.Error(t, ApplyJQ(&buf, map[string]any{"bad": make(chan int)}, "."))
+	require.Error(t, ApplyJQ(&buf, map[string]any{"id": 1}, "{{invalid"))
+}

@@ -142,3 +142,21 @@ func TestResolveUnknownProfile(t *testing.T) {
 	assert.Equal(t, "table", r.OutputFormat) // default applied
 	assert.Equal(t, "warn", r.LogLevel)
 }
+
+func TestLoad_MalformedYAML(t *testing.T) {
+	path := withTempConfig(t)
+	require.NoError(t, os.WriteFile(path, []byte(":\n bad: [yaml"), 0o600))
+	_, err := Load()
+	require.Error(t, err)
+}
+
+func TestResolve_BadRPSEnvIgnored(t *testing.T) {
+	withTempConfig(t)
+	c := New()
+	c.Profiles["default"] = &Profile{BaseURL: "https://x/api/v1"}
+	base := c.Resolve("default").RequestsPerSecond
+	t.Setenv("N8NCTL_RPS", "notanumber")
+	assert.Equal(t, base, c.Resolve("default").RequestsPerSecond) // invalid env left the value unchanged
+	t.Setenv("N8NCTL_LOG_LEVEL", "debug")
+	assert.Equal(t, "debug", c.Resolve("default").LogLevel)
+}

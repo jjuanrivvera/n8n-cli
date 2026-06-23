@@ -78,9 +78,9 @@ func (p *RetryPolicy) backoff(attempt int, resp *http.Response) time.Duration {
 	if base > float64(p.MaxBackoff) {
 		base = float64(p.MaxBackoff)
 	}
-	jitter := p.randFloat()
-	if p.randFloat == nil {
-		jitter = 0.5
+	jitter := 0.5
+	if p.randFloat != nil {
+		jitter = p.randFloat()
 	}
 	return time.Duration(base * jitter)
 }

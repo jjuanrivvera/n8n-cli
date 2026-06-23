@@ -49,14 +49,6 @@ type resourceSpec[T any] struct {
 	Extra func(parent *cobra.Command, sp resourceSpec[T])
 }
 
-// resourceInfo records a registered resource for the spec-coverage check.
-type resourceInfo struct {
-	Name string
-	Path string
-}
-
-var registeredResources []resourceInfo
-
 // registerResource builds the command group for a resource and attaches it to root.
 func registerResource[T any](sp resourceSpec[T]) {
 	cmd := buildResourceCmd(sp)
@@ -88,9 +80,6 @@ func buildResourceCmd[T any](sp resourceSpec[T]) *cobra.Command {
 	if sp.Extra != nil {
 		sp.Extra(parent, sp)
 	}
-
-	// Record for spec-check (registration order is deterministic).
-	registeredResources = append(registeredResources, resourceInfo{Name: sp.Use, Path: "/" + sp.Use})
 	return parent
 }
 
@@ -138,7 +127,11 @@ func newListCmd[T any](sp resourceSpec[T]) *cobra.Command {
 					return err
 				}
 				if truncated && !flagQuiet {
-					fmt.Fprintf(cmd.ErrOrStderr(), "warning: results truncated at %d pages; narrow filters or raise --max-pages\n", maxPages)
+					effCap := maxPages
+					if effCap <= 0 {
+						effCap = api.DefaultMaxPages
+					}
+					fmt.Fprintf(cmd.ErrOrStderr(), "warning: results truncated at %d pages; narrow filters or raise --max-pages\n", effCap)
 				}
 				return render(cmd, items, sp.Columns...)
 			}

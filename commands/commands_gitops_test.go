@@ -27,7 +27,7 @@ func TestConvertAndExternalize(t *testing.T) {
 	require.NoError(t, err)
 	yaml, rerr := os.ReadFile(filepath.Join(dir, "wf.yaml"))
 	require.NoError(t, rerr)
-	assert.Contains(t, string(yaml), "$ref")         // jsCode externalized
+	assert.Contains(t, string(yaml), "$n8nctl_file") // jsCode externalized
 	assert.NotContains(t, string(yaml), "const a=1") // not inline
 	_, serr := os.Stat(filepath.Join(dir, "_subfiles", "wf", "Code-jsCode.js"))
 	require.NoError(t, serr)
@@ -204,4 +204,19 @@ func TestBackupYAMLAndRestore(t *testing.T) {
 	out, _, err := run(t, "restore", "--in", dir)
 	require.NoError(t, err)
 	assert.Contains(t, out, "restored")
+}
+
+func TestApplyAmbiguousNames(t *testing.T) {
+	// two remote workflows share the name "dup": apply must skip it, never prune it
+	srv := gitopsServer(t, `{"id":"k1","name":"dup"},{"id":"k2","name":"dup"}`)
+	setupProfile(t, srv.URL)
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "fresh.json"),
+		[]byte(`{"name":"fresh","nodes":[],"connections":{},"settings":{}}`), 0o600))
+	out, errOut, err := run(t, "workflows", "apply", "--dir", dir, "--dry-run", "--prune")
+	require.NoError(t, err)
+	assert.Contains(t, errOut, "duplicate workflow name")
+	assert.Contains(t, out, "! skip prune of dup")
+	assert.NotContains(t, out, "- prune dup") // never prunes an ambiguous name
+	assert.Contains(t, out, "1 skipped")
 }

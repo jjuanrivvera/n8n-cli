@@ -107,17 +107,55 @@ func Lint(wf *api.Workflow, disabled map[string]bool) []Finding {
 		if on("webhook-id-required") && isWebhookish(n.Type) && n.WebhookID == "" {
 			out = append(out, Finding{"webhook-id-required", Error, n.Name, "webhook/formTrigger node is missing webhookId"})
 		}
-		// expression-prefix
+		// expression-prefix: walk all nested string params; only flag strings that
+		// look like a genuine n8n expression (contain {{ }} and an n8n token) yet
+		// are missing the leading '=' that marks an evaluated expression.
 		if on("expression-prefix") {
 			for field, v := range n.Parameters {
-				if s, ok := v.(string); ok && strings.Contains(s, "{{") && !strings.HasPrefix(s, "=") {
-					out = append(out, Finding{"expression-prefix", Warning, n.Name,
-						"parameter \"" + field + "\" looks like an expression but is missing the leading '='"})
-				}
+				walkStrings(v, func(s string) {
+					if looksLikeExpression(s) && !strings.HasPrefix(s, "=") {
+						out = append(out, Finding{"expression-prefix", Warning, n.Name,
+							"parameter \"" + field + "\" contains an n8n expression but is missing the leading '='"})
+					}
+				})
 			}
 		}
 	}
 	return out
+}
+
+// walkStrings calls fn for every string value reachable in v (nested maps/slices).
+func walkStrings(v any, fn func(string)) {
+	switch t := v.(type) {
+	case string:
+		fn(t)
+	case map[string]any:
+		for _, vv := range t {
+			walkStrings(vv, fn)
+		}
+	case []any:
+		for _, vv := range t {
+			walkStrings(vv, fn)
+		}
+	}
+}
+
+// exprTokens are markers of a real n8n expression, used to avoid flagging plain
+// strings that merely contain "{{".
+var exprTokens = []string{"$json", "$node", "$(", "$vars", "$workflow", "$env",
+	"$now", "$today", "$items", "$input", "$prevNode", "$execution", "$runIndex", "$itemIndex"}
+
+// looksLikeExpression reports whether s is plausibly an unprefixed n8n expression.
+func looksLikeExpression(s string) bool {
+	if !strings.Contains(s, "{{") {
+		return false
+	}
+	for _, tok := range exprTokens {
+		if strings.Contains(s, tok) {
+			return true
+		}
+	}
+	return false
 }
 
 func isWebhookish(t string) bool {
