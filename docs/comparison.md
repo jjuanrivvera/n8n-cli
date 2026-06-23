@@ -43,7 +43,7 @@ These tools are not all trying to be the same thing. The useful question is not
 | Multi-instance | **profiles + keyring** | single, plaintext | single, env | multi-profile, plaintext | single, `.env` |
 | Apply from files | **`apply`** (prune, cross-instance) | — | `apply` (+ git-changes) | import / export | `sync` (+ prune) |
 | Validation | **node-schema lint (type + params + values) + autofix + breaking-changes + `proxy` gate** | — | **node-schema lint + `proxy` gate** | **offline validate + autofix + breaking-changes** | — |
-| Templates / node catalog | — | — | `node-schema` dump | **templates + node catalog (FTS5)** | — |
+| Templates / node catalog | **`templates` + `nodes` catalog** | — | `node-schema` dump | **templates + node catalog (FTS5)** | — |
 | Agent tooling | **`mcp` + `agent guard`** | — | — | — | — |
 | backup / restore / sync / search | **all four** | — | — | export/import + version history | `sync` |
 | Secrets | **OS keyring** | plaintext | plaintext | plaintext | plaintext |
