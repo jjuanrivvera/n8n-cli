@@ -1,18 +1,26 @@
 #!/usr/bin/env bash
 # n8n-cli pre-commit hook: format, vet, lint (golangci-lint v2), quick tests.
 # Enable with:  make setup-hooks   (sets core.hooksPath = .githooks)
-# CI is the source of truth; this hook is a fast local pre-flight.
+# CI is the source of truth; this hook is a fast local pre-flight that blocks the
+# obvious breakage (unformatted, vet errors, lint, failing tests).
 set -euo pipefail
 
-# gofmt: only staged Go files (skip the check entirely when none, so gofmt
-# never blocks reading from stdin).
-go_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$' || true)
+staged=$(git diff --cached --name-only --diff-filter=ACM || true)
+go_files=$(echo "$staged" | grep '\.go$' || true)
+go_relevant=$(echo "$staged" | grep -E '\.go$|^go\.mod$|^go\.sum$' || true)
+
+# Docs-only / config-only commit: nothing Go to check, exit fast.
+if [ -z "$go_relevant" ]; then
+  echo "pre-commit: no Go changes — skipping the Go gate."
+  exit 0
+fi
+
 if [ -n "$go_files" ]; then
   echo "==> gofmt"
   # shellcheck disable=SC2086 # intentional word-split over the file list
   unformatted=$(gofmt -l $go_files)
   if [ -n "$unformatted" ]; then
-    echo "These files need gofmt -w:"
+    echo "These files need 'gofmt -s -w':"
     echo "$unformatted"
     exit 1
   fi
