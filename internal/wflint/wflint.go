@@ -28,9 +28,9 @@ type Finding struct {
 }
 
 // Rules lists the available rules, what they check, and the canonical basis for
-// each — these are grounded in n8n's own schema/behavior, not invented. n8n has
-// no official workflow linter; deeper node-parameter validation would require
-// bundling n8n's per-node schemas (a planned extension).
+// each — these are grounded in n8n's own schema/behavior, not invented. The last
+// two are node-schema-aware: they validate against an embedded catalog of n8n's
+// real node definitions (see internal/wflint/node_catalog.json).
 var Rules = []struct {
 	Name  string
 	Desc  string
@@ -41,6 +41,8 @@ var Rules = []struct {
 	{"orphaned-node", "nodes should be connected to the graph", "workflow connection graph model"},
 	{"webhook-id-required", "webhook/formTrigger nodes need a webhookId", "n8n webhook registration behavior"},
 	{"expression-prefix", "expression strings ({{ }}) should start with '='", "n8n expression syntax (the '=' prefix marks an evaluated expression)"},
+	{"unknown-node-type", "node type must be a real n8n node (typo detection)", "embedded n8n node catalog (n8n-nodes-base + langchain)"},
+	{"unknown-parameter", "node parameters should match the node's schema", "embedded n8n node catalog (n8n-nodes-base + langchain)"},
 }
 
 type node struct {
@@ -118,6 +120,30 @@ func Lint(wf *api.Workflow, disabled map[string]bool) []Finding {
 							"parameter \"" + field + "\" contains an n8n expression but is missing the leading '='"})
 					}
 				})
+			}
+		}
+		// unknown-node-type: the node type is from a package the catalog covers but
+		// is not in it — almost always a typo. Community/custom nodes are skipped.
+		if on("unknown-node-type") && hasKnownPrefix(n.Type) && !nodeKnown(n.Type) {
+			msg := "unknown node type \"" + n.Type + "\""
+			if s, ok := suggestNode(n.Type); ok {
+				msg += " — did you mean \"" + s + "\"?"
+			}
+			out = append(out, Finding{"unknown-node-type", Error, n.Name, msg})
+		}
+		// unknown-parameter: a top-level parameter key that the node type does not
+		// define (only checked for catalogued nodes; a warning, since node versions
+		// and dynamic params can legitimately vary).
+		if on("unknown-parameter") && nodeKnown(n.Type) {
+			for field := range n.Parameters {
+				if paramKnown(n.Type, field) {
+					continue
+				}
+				msg := "parameter \"" + field + "\" is not defined for node type \"" + n.Type + "\""
+				if s, ok := suggestParam(n.Type, field); ok {
+					msg += " — did you mean \"" + s + "\"?"
+				}
+				out = append(out, Finding{"unknown-parameter", Warning, n.Name, msg})
 			}
 		}
 	}

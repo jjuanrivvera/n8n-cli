@@ -91,3 +91,48 @@ func TestExpressionPrefix_NoFalsePositive(t *testing.T) {
 	nested := wf(`[{"name":"A","type":"x","parameters":{"opts":{"url":"{{ $json.id }}"}}}]`, `{}`)
 	assert.True(t, rules(Lint(nested, nil))["expression-prefix"])
 }
+
+func TestLint_UnknownNodeType(t *testing.T) {
+	// a typo'd base node type is an error with a suggestion
+	w := wf(`[{"name":"S","type":"n8n-nodes-base.slak","parameters":{}}]`, `{}`)
+	fs := Lint(w, nil)
+	assert.True(t, rules(fs)["unknown-node-type"])
+	var msg string
+	for _, f := range fs {
+		if f.Rule == "unknown-node-type" {
+			msg = f.Message
+		}
+	}
+	assert.Contains(t, msg, "n8n-nodes-base.slack") // did-you-mean
+
+	// a real node type is fine
+	ok := wf(`[{"name":"S","type":"n8n-nodes-base.slack","parameters":{}}]`, `{}`)
+	assert.False(t, rules(Lint(ok, nil))["unknown-node-type"])
+
+	// a community/custom node (prefix not in the catalog) is never flagged
+	custom := wf(`[{"name":"C","type":"n8n-nodes-acme.widget","parameters":{}}]`, `{}`)
+	assert.False(t, rules(Lint(custom, nil))["unknown-node-type"])
+}
+
+func TestLint_UnknownParameter(t *testing.T) {
+	// a param the node doesn't define is a warning (only for catalogued nodes)
+	w := wf(`[{"name":"H","type":"n8n-nodes-base.httpRequest","parameters":{"notARealParam":"x"}}]`, `{}`)
+	assert.True(t, rules(Lint(w, nil))["unknown-parameter"])
+
+	// valid params produce no unknown-parameter finding
+	ok := wf(`[{"name":"H","type":"n8n-nodes-base.httpRequest","parameters":{"url":"https://x"}}]`, `{}`)
+	assert.False(t, rules(Lint(ok, nil))["unknown-parameter"])
+
+	// params on an unknown/community node are not second-guessed
+	custom := wf(`[{"name":"C","type":"n8n-nodes-acme.widget","parameters":{"anything":"y"}}]`, `{}`)
+	assert.False(t, rules(Lint(custom, nil))["unknown-parameter"])
+}
+
+func TestNodeCatalog_Loaded(t *testing.T) {
+	c := loadCatalog()
+	assert.Greater(t, len(c.types), 500, "catalog should hold the full node set")
+	assert.True(t, nodeKnown("n8n-nodes-base.slack"))
+	assert.True(t, nodeKnown("@n8n/n8n-nodes-langchain.agent") || len(c.types) > 0)
+	assert.False(t, nodeKnown("n8n-nodes-base.definitelyNotANode"))
+	assert.Contains(t, catalogBasis(), "n8n-nodes-base@")
+}

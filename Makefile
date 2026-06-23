@@ -89,6 +89,10 @@ cover-check: ## Fail if total statement coverage is below COVERAGE_MIN (default 
 docs-gen: ## Generate CLI reference docs from the command tree
 	$(GO) run ./tools/gendocs
 
+.PHONY: gen-node-schemas
+gen-node-schemas: ## Refresh the embedded n8n node catalog used by wflint
+	$(GO) run ./tools/gen-node-schemas
+
 .PHONY: docs-serve
 docs-serve: docs-gen ## Serve the docs site locally
 	mkdocs serve
