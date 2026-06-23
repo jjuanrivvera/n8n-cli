@@ -49,7 +49,9 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Features: features.md
   - Getting Started: getting-started.md
+  - Recipes: recipes.md
   - Multi-instance & Profiles: profiles.md
   - Authentication: authentication.md
   - Output & Filtering: output.md

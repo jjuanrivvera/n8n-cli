@@ -70,6 +70,8 @@ n8nctl doctor
 
 ## Next steps
 
+- See everything `n8nctl` can do: [Features](features.md).
+- Solve a common task: [Recipes](recipes.md).
 - Run more than one instance: [Multi-instance and profiles](profiles.md).
 - Shape the output: [Output and filtering](output.md).
 - Browse every command and flag: [Command reference](commands/index.md).

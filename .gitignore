@@ -25,3 +25,4 @@ credentials.json
 
 # Worktree checkouts created by the worktree skill
 /.claude/worktrees/
+mcp-tools.json

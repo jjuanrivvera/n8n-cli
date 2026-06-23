@@ -3,8 +3,7 @@
 `n8nctl` is more than a thin wrapper over the n8n REST endpoints. A handful of
 commands compose the public API into operations the n8n UI cannot do at all —
 cross-instance promotion, git-friendly snapshots, and a graph search across every
-workflow. This page documents them with worked examples and lists the roadmap of
-further beyond-API ideas.
+workflow. This page documents them with worked examples.
 
 Every command here honors the global flags, including `--dry-run`, `--profile`,
 and `-o json|yaml|csv`. Preview anything destructive with `--dry-run` first.
@@ -127,57 +126,12 @@ n8nctl workflows search --name '^prod-'
 `search` reads from the active instance; combine it with `--profile` to audit a
 specific one. It is read-only — nothing is modified.
 
-## Roadmap
+## Workflows as code
 
-### Implemented
+These commands pair naturally with the declarative `workflows apply`, `lint`,
+`diff`, and `convert` commands, which treat a directory of workflow files as the
+desired state of an instance. See [Workflows as Code](workflows-as-code.md).
 
-The "workflows as code" set shipped in **v0.2.0** and is documented in full on the
-[Workflows as Code](workflows-as-code.md) page:
-
-- **Declarative reconcile — `workflows apply`** *(implemented)*. Treat a directory
-  of workflow files as the desired state: create, update, skip-unchanged, and
-  with `--prune` delete instance workflows absent from the directory. The
-  multi-instance angle — promoting the same directory across profiles — is the
-  Community-tier answer to Enterprise Git Source Control.
-- **Static linting — `workflows lint`** *(implemented)*. Five grounded rules over
-  workflow files or live workflows (`--remote`), exiting non-zero on errors so it
-  works as a CI gate.
-- **Format conversion — `workflows convert`** *(implemented)*. Convert workflow
-  files between JSON and YAML, with `--externalize` to split long code fields into
-  reviewable sibling files.
-- **Cross-instance diff — `workflows diff`** *(implemented)*. Compare the same
-  workflow on two profiles (e.g. dev vs prod), or against a local file, and print
-  a unified diff of writable content before a promotion, so it is reviewable
-  rather than blind.
-
-### Proposed
-
-The following are **proposed, not yet implemented**. They are grounded in common
-n8n operational pain points and follow the same "compose the public API into
-something the UI can't do" pattern. Tracking them here so the direction is clear;
-they may change or be dropped.
-
-- **Execution pruning — `executions prune`** *(proposed)*. Bulk-delete old
-  execution records by age and/or status to reclaim database space on busy
-  self-hosted instances, with a `--dry-run` count first. n8n's UI deletes
-  executions one page at a time; the API exposes the filters to do it in bulk.
-- **Live failure watch — `executions watch`** *(proposed)*. Poll the executions
-  endpoint and stream new `error`/`crashed` runs as they happen, so a terminal
-  can tail an instance's failures during a deploy or incident.
-- **Node-schema lint validation** *(proposed)*. Extend `workflows lint` to validate
-  each node's parameters against that node type's own schema (for example, a
-  missing required parameter or an invalid option value), beyond the current
-  structural and graph-level rules. This needs per-node-type schemas and is the
-  natural next step for the linter.
-- **Bulk activate/deactivate by tag — `workflows activate --tag <name>`**
-  *(proposed)*. Toggle every workflow carrying a tag in one command, for
-  maintenance windows (deactivate the `prod` set, do the work, reactivate),
-  previewable with `--dry-run`.
-- **Instance health summary — `stats`** *(proposed)*. A one-shot health and
-  usage summary for an instance, composed from the insights and audit endpoints:
-  workflow/execution counts, recent failure rate, and the audit's risk
-  highlights, rendered as a table or `json`.
-
-If one of these would help you, open an issue — concrete use cases drive what
-ships next.
-</content>
+Have an idea for another beyond-API command?
+[Open an issue](https://github.com/jjuanrivvera/n8n-cli/issues) — concrete use
+cases drive what ships next.

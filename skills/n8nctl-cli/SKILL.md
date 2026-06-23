@@ -116,7 +116,7 @@ as JSON when possible). `list` adds `--limit`, `--cursor`, `--all`,
 | `workflows tags <id> [--set id1,id2]` | Get or replace a workflow's tags | `n8nctl workflows tags 42 --set 3,8` |
 | `workflows sync <id> --to <profile>` | Promote a workflow to another instance (dev→prod); credentials NOT copied | `n8nctl workflows sync 2tUt1wbLX592XDdX --from dev --to prod --update-by-name --activate` |
 | `workflows apply --dir <dir>` | GitOps reconcile: create/update/skip workflows from a dir (`--prune` deletes absent, `--activate`); always `--dry-run` first | `n8nctl workflows apply --dir ./workflows --dry-run` |
-| `workflows lint [--dir\|-f\|--remote]` | Static checks (5 grounded rules); exits non-zero on errors, so it gates CI (`--list-rules`, `--disable-rule`, `-o json`) | `n8nctl workflows lint --dir ./workflows` |
+| `workflows lint [--dir\|-f\|--remote]` | Static checks (7 grounded rules incl. node-schema typo/param checks); exits non-zero on errors, so it gates CI (`--list-rules`, `--disable-rule`, `-o json`) | `n8nctl workflows lint --dir ./workflows` |
 | `workflows convert <file…> --to json\|yaml` | Convert workflow files between JSON/YAML; `--externalize N` splits long code fields to sibling files | `n8nctl workflows convert wf.json --to yaml --externalize 5` |
 | `workflows diff <id> [--to <profile>\|--file <path>]` | Unified diff of a workflow's writable content vs another profile or a local file | `n8nctl workflows diff 2tUt1wbLX592XDdX --to prod` |
 | `workflows search [--node\|--credential\|--webhook\|--name]` | Scan all workflows' node graphs for matches (impossible in the UI) | `n8nctl workflows search --node slack` |
@@ -172,7 +172,7 @@ graph-wide search, or a full **workflows-as-code / GitOps** loop:
   dir across profiles: `n8nctl --profile staging workflows apply --dir ./workflows`
   then `n8nctl --profile prod workflows apply --dir ./workflows --prune`. The
   official single-instance tools can't do this.
-- **`workflows lint`** runs 5 grounded static rules over files (`--dir`/`-f`) or
+- **`workflows lint`** runs 7 grounded static rules (incl. node-type and parameter validation against an embedded n8n node catalog) over files (`--dir`/`-f`) or
   live workflows (`--remote`): required-fields, connection-reference,
   orphaned-node, webhook-id-required, expression-prefix. It **exits non-zero on
   errors**, so it gates CI. `--list-rules` shows each rule's canonical basis;

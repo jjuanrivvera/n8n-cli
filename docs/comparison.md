@@ -5,9 +5,9 @@ different jobs. This page maps the landscape honestly and shows where each tool
 fits — including where the others are a better choice than `n8nctl`.
 
 _As of June 2026: `n8nctl` 0.3.0, `@n8n/cli` 0.8.0, `ubie-oss/n8n-cli` 2.2.1,
-`edenreich/n8n-cli` 0.7.1. All four talk to the same n8n public API, so the CRUD
-surface converges over time; the real differences are in focus, runtime, and the
-layers each tool adds on top._
+`yigitkonur/n8n-cli` 1.9.3, `edenreich/n8n-cli` 0.7.1. They all talk to the same
+n8n public API, so the CRUD surface converges over time; the real differences are
+in focus, runtime, and the layers each tool adds on top._
 
 ## The cast
 
@@ -21,6 +21,11 @@ layers each tool adds on top._
 - **`ubie-oss/n8n-cli`** — an independent **Bun** binary focused on **workflow
   authoring quality**: deep linting, node-schema inspection, formatting, data-flow
   tracing, and a server-side lint-enforcement proxy.
+- **`yigitkonur/n8n-cli`** — an independent **Node** CLI focused on **workflow
+  intelligence**. It bundles n8n's own packages (`n8n-nodes-base`, `n8n-workflow`)
+  and a SQLite node catalog to validate and **auto-repair** workflows offline,
+  explore the node library, detect cross-version breaking changes, and deploy from
+  the n8n template gallery.
 - **`edenreich/n8n-cli`** — an independent **Go** binary focused on one job:
   **GitOps sync** of workflows from a directory to an instance.
 
@@ -29,23 +34,20 @@ These tools are not all trying to be the same thing. The useful question is not
 
 ## At a glance
 
-| | n8nctl | @n8n/cli (official) | ubie-oss | edenreich |
-|---|---|---|---|---|
-| Vendor | 3rd-party | **First-party (n8n team)** | 3rd-party | 3rd-party |
-| Runtime | **Go static binary** | Node.js + npm | Bun binary | Go binary |
-| Primary lane | multi-instance **ops + GitOps + agent mgmt** | first-party general client | **authoring + quality** | **GitOps sync** |
-| CRUD breadth | full + data-tables + packages | full + data-tables + packages (`+ shared`) | full + data-tables + `node-schema` | **workflows only** |
-| Multi-instance | **profiles + keyring** | single, plaintext config | single, env vars | single, `.env` |
-| Apply from files | **`apply`** (+ prune / dry-run, **cross-instance**) | — | **`apply`** (+ `--from-git-changes`) | **`sync`** (+ prune) |
-| Lint | 5 schema-grounded rules | — | **6 rules incl. `node-params` (schema-aware) + `node-schema` dump** | — |
-| Lint-enforcing proxy | `proxy` (5 rules, 422 gate) | — | **`proxy` (more rules + dup-name)** | — |
-| Other authoring | convert, diff | — | **convert, fmt, trace** | refresh |
-| Management MCP | **`mcp` (73 tools)** | — | — | — |
-| Agent safety | **`agent guard` + lint `proxy`** | — | `proxy` (lint gate) | — |
-| backup / restore / search | **yes** | — | — | — |
-| Secrets | **OS keyring** | plaintext config | plaintext env | plaintext `.env` |
-| Resilience (retry / rate-limit) | **adaptive** | single fetch | basic | basic |
-| Distribution | brew / scoop / deb-rpm-apk + cosign + SBOM | npm | source / cross-compile | curl / `go install` |
+| | n8nctl | @n8n/cli | ubie-oss | yigitkonur | edenreich |
+|---|---|---|---|---|---|
+| Vendor | 3rd-party | **first-party** | 3rd-party | 3rd-party | 3rd-party |
+| Runtime | **Go static binary** | Node + npm | Bun binary | Node + npm | Go binary |
+| Primary lane | **ops + GitOps + agent mgmt** | first-party general | **authoring quality** | **workflow intelligence** | GitOps sync |
+| CRUD breadth | full + data-tables + packages | full + data-tables + packages (`+ shared`) | full + data-tables | full + `nodes` + `templates` | workflows only |
+| Multi-instance | **profiles + keyring** | single, plaintext | single, env | multi-profile, plaintext | single, `.env` |
+| Apply from files | **`apply`** (prune, cross-instance) | — | `apply` (+ git-changes) | import / export | `sync` (+ prune) |
+| Validation | **node-schema lint** (type + params) + `proxy` gate | — | **node-schema lint + `proxy` gate** | **offline validate + autofix + breaking-changes** | — |
+| Templates / node catalog | — | — | `node-schema` dump | **templates + node catalog (FTS5)** | — |
+| Agent tooling | **`mcp` + `agent guard`** | — | — | — | — |
+| backup / restore / sync / search | **all four** | — | — | export/import + version history | `sync` |
+| Secrets | **OS keyring** | plaintext | plaintext | plaintext | plaintext |
+| Distribution | **brew / scoop / deb-rpm-apk + cosign + SBOM** | npm | source / cross-compile | npm | curl / `go install` |
 
 ## Where each tool fits
 
@@ -63,11 +65,12 @@ It is the only tool here with the `package shared` command.
 
 ### Workflow authoring & quality — `ubie-oss/n8n-cli`
 
-The deepest authoring tool of the four, and genuinely ahead of `n8nctl` on
-workflow *quality*. Its `lint` ships rules including **`node-params`, which
-validates node parameters**, backed by a **`node-schema`** command that dumps the
-real node-type schemas — per-node validation that `n8nctl`'s five structural rules
-do not attempt. `fmt` tidies node layout, `trace` analyses data-flow cardinality,
+The deepest authoring tool, and ahead of `n8nctl` on workflow *quality*. Its
+`lint` ships rules including **`node-params`, which validates node parameter
+values against the schema**, backed by a **`node-schema`** command that dumps the
+real node-type schemas. (`n8nctl` now validates node types and parameter *names*
+against an embedded catalog too, but ubie checks parameter *values* and types more
+deeply.) `fmt` tidies node layout, `trace` analyses data-flow cardinality,
 and **`proxy`** is a distinctive idea ubie pioneered: an HTTP proxy in front of the
 n8n API that enforces lint **server-side**, so any push that fails lint — from a
 human or an AI agent — is rejected with a 422, making quality structural rather
@@ -76,6 +79,29 @@ ubie's remains deeper — more rules, schema-aware validation, and duplicate-nam
 rejection.) It is single-instance (env vars, no keyring) and has no MCP or
 agent-management layer. **Use it** if your priority is keeping a team's workflow
 definitions clean, schema-valid, and consistently formatted.
+
+### Workflow intelligence — `yigitkonur/n8n-cli`
+
+The most workflow-aware tool of the five, and the deepest on *correctness*. It
+bundles n8n's real packages (`n8n-nodes-base`, `n8n-workflow`) and a SQLite,
+FTS5-indexed catalog of every node, which unlocks things no other CLI here does:
+**offline `workflows validate`** (check a workflow against the actual node
+definitions with no running instance), **`workflows autofix`** (auto-repair
+expression prefixes, missing webhook paths, Switch v3 conditions, and node-type
+typos, applied confidence-filtered), a **`nodes`** explorer (`list`, `search`,
+`show`, and `breaking-changes --from <v> --to <v>` for cross-version
+compatibility), **`templates`** search/get with `workflows deploy-template`, plus
+surgical partial edits, local version history with rollback, `diff`, `trigger`,
+`bulk`, and `health`. `n8nctl` now does node-type and parameter-name validation
+against an embedded catalog, but this tool goes further — schema-accurate value
+validation **and automatic repair**.
+
+It is single-purpose in the other direction: no MCP, no agent guard, no GitOps
+reconcile with prune, no cross-instance sync, no OS keyring (credentials sit in a
+plaintext `.n8nrc.json`), and it needs a Node runtime (npm-only, no signed
+binary). **Use it** if your priority is validating, repairing, and authoring
+correct workflows against real node schemas — it is the strongest tool here for
+that.
 
 ### GitOps sync — `edenreich/n8n-cli`
 
@@ -129,7 +155,17 @@ single binary, value **keyring** security and **production resilience**, keep
   `fmt`, and `trace` make it the better tool for authoring quality. `n8nctl` has
   adopted ubie's server-side lint-enforcement `proxy` idea (`n8nctl proxy`), but
   ubie's is more mature — more lint rules, schema-aware node validation, and
-  duplicate-name rejection. `n8nctl`'s lint roadmap tracks node-schema validation.
+  duplicate-name rejection.
+- **`yigitkonur/n8n-cli`** — the strongest validation engine of all five: besides
+  node-type and parameter checks (which `n8nctl` now also does), it offers
+  **autofix** (auto-repair), cross-version **breaking-change** detection, a
+  searchable node catalog, and template deployment. If workflow *repair* and
+  correctness are your priority, it goes further than anyone here.
+- `n8nctl` now does **node-schema-aware linting** too (`unknown-node-type` /
+  `unknown-parameter`, validated against an embedded catalog of n8n's real node
+  definitions). `ubie` and `yigitkonur` remain deeper on workflow quality —
+  ubie with its server-side `proxy` rule set, yigitkonur with autofix and
+  breaking-change detection — but the basic node-schema gap is closed.
 - **`edenreich/n8n-cli`** — if you want *only* GitOps sync and nothing else, it is
   smaller and has less to learn.
 
@@ -159,8 +195,8 @@ instance's latency, not the CLI. The CLI's own processing is in the microseconds
 
 The one place a CLI's own cost is visible is **process startup**, paid on every
 invocation. The two Go binaries (`n8nctl`, edenreich) and the Bun binary (ubie)
-start in single-digit milliseconds; the Node-based official CLI pays the Node +
-oclif boot:
+start in single-digit milliseconds; the Node-based CLIs (the official one,
+`yigitkonur`) pay the Node runtime boot:
 
 | | Startup (warm, `--version`) | Footprint |
 |---|---|---|
@@ -181,11 +217,13 @@ high variance. Reproduce with `go test -bench=. ./internal/...` and
 - **`@n8n/cli`** — the official tool; single instance, Node-native, newest endpoints.
 - **`ubie-oss/n8n-cli`** — authoring quality: schema-aware lint, formatting, and
   server-side lint enforcement.
+- **`yigitkonur/n8n-cli`** — workflow correctness: offline validation, autofix,
+  node catalog, breaking-change detection, and template deployment.
 - **`edenreich/n8n-cli`** — minimal GitOps sync, nothing else.
 - **`n8nctl`** — multiple instances, no Node + a signed binary, keyring security,
   production resilience, workflows-as-code across environments, fleet
   backup/promote/search, and agent management (MCP + guard).
 
-Many teams will reasonably use more than one — for example, `ubie` to lint and
-author workflows, and `n8nctl` to operate the fleet, promote across instances, and
-back it up.
+Many teams will reasonably use more than one — for example, `yigitkonur` or `ubie`
+to validate and author workflows, and `n8nctl` to operate the fleet, promote
+across instances, manage it from an agent, and back it up.
