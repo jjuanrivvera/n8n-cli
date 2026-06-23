@@ -6,6 +6,35 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-06-23
+
+### Added
+- **`invalid-parameter-value` lint rule** — validates `options`/`multiOptions`
+  parameter *values* (not just names) against the node's allowed set, resolved
+  through each node's `displayOptions` so the active option set is used (a Slack
+  node's `operation` options differ by `resource`). A warning, with a "did you
+  mean …?" hint; conservative — it skips dynamic option lists, expression values,
+  and any parameter whose active options it cannot resolve, so it does not
+  false-positive on a valid workflow.
+- **`workflows breaking-changes`** — reports nodes pinned to an older
+  `typeVersion` than the catalog's latest, plus parameters they use that the
+  catalog does not recognize for the node. Works on files, a directory, a live
+  id, or `--remote`. Informational (exits 0).
+- **`templates search | get | deploy`** — browse and deploy workflows from the
+  public n8n template gallery (`api.n8n.io`, no API key). `deploy` creates the
+  workflow on the active instance (credentials not included) and honors
+  `--dry-run` / `--activate`.
+
+### Changed
+- The embedded node catalog now carries each parameter's full schema (type,
+  option values, required, `displayOptions`) and each node's latest typeVersion,
+  and merges n8n's per-version node entries so a parameter that exists only in a
+  newer version is no longer mis-flagged by `unknown-parameter`.
+- `comparison.md`: corrected — `@n8n/cli` has no `package shared` command (its
+  package topic is export/import, which `n8nctl` already matches); `n8nctl` now
+  matches the workflow-intelligence feature set (autofix, breaking-changes,
+  nodes, templates).
+
 ## [0.4.0] - 2026-06-23
 
 ### Added
@@ -144,7 +173,8 @@ All notable changes to this project are documented here. The format is based on
 - Initial release of `n8nctl`, a command-line interface for the n8n workflow
   automation API.
 
-[Unreleased]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jjuanrivvera/n8n-cli/compare/v0.1.0...v0.2.0

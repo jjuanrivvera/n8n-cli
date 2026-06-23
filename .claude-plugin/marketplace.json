@@ -9,7 +9,7 @@
     {
       "name": "n8nctl-cli",
       "source": "./",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "description": "Manage n8n workflows, executions, credentials, variables, projects, and users across one or many instances from the terminal.",
       "homepage": "https://github.com/jjuanrivvera/n8n-cli",
       "keywords": ["n8n", "cli", "workflow-automation", "ai-agent"]
