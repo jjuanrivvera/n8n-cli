@@ -49,18 +49,22 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Features: features.md
-  - Getting Started: getting-started.md
-  - Recipes: recipes.md
-  - Multi-instance & Profiles: profiles.md
-  - Authentication: authentication.md
-  - Output & Filtering: output.md
-  - Beyond the API: beyond-api.md
-  - Workflows as Code: workflows-as-code.md
-  - MCP Server: mcp.md
-  - Agent Guard: agent-guard.md
-  - Lint-enforcing Proxy: proxy.md
-  - vs. other n8n CLIs: comparison.md
+  - Get Started:
+      - Getting Started: getting-started.md
+      - Recipes: recipes.md
+  - Guides:
+      - Multi-instance & Profiles: profiles.md
+      - Authentication: authentication.md
+      - Output & Filtering: output.md
+  - Workflows:
+      - Beyond the API: beyond-api.md
+      - Workflows as Code: workflows-as-code.md
+  - AI Agents:
+      - MCP Server: mcp.md
+      - Agent Guard: agent-guard.md
+      - Lint-enforcing Proxy: proxy.md
   - Reference:
+      - Features: features.md
       - Command Reference: commands/index.md
-  - Contributing: contributing.md
+      - vs. Other n8n CLIs: comparison.md
+      - Contributing: contributing.md
