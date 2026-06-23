@@ -59,12 +59,22 @@ one instance or script against n8n in CI:
 - **Fleet operations beyond CRUD.** `workflows sync` promotes a workflow across
   instances, `backup`/`restore` snapshot an instance to git-friendly JSON, and
   `workflows search` finds workflows by node type, credential, or webhook path.
+- **Workflows as code (GitOps).** `workflows apply --dir` reconciles a directory
+  of workflow files into an instance (with `--prune` and a `--dry-run` plan), and
+  `workflows lint`/`diff`/`convert` make workflows reviewable in CI.
+- **Manage instances from an AI agent.** `n8nctl mcp` runs the CLI as an MCP
+  server (Claude, Cursor, VS Code) and `n8nctl agent guard` generates host rules
+  that block destructive operations. This is the *management* layer — an agent
+  administering instances — complementary to n8n's own workflow-layer MCP (the
+  MCP Server Trigger / Client Tool nodes). See
+  [MCP server & agent safety](#mcp-server--agent-safety).
 - **Faster to invoke.** A single Go binary starts in ~6 ms versus ~150 ms for the
   Node-based official CLI — invisible for one command, but real in loops and CI.
 
-`n8nctl` covers every command the official CLI exposes (data tables, package
-import/export, `--jq`, an `id-only` output mode, a `skills install` command) and
-adds the above. The official `@n8n/cli` is still the right pick if you want the
+`n8nctl` covers essentially every command the official CLI exposes (data tables,
+package import/export, `--jq`, an `id-only` output mode, a `skills install`
+command) and adds the above; the one thing it lacks is the official's newer
+`package shared`. The official `@n8n/cli` is still the right pick if you want the
 **first-party** tool, work with a single instance, or already live in Node — it
 is maintained by the n8n team and tracks new endpoints first.
 

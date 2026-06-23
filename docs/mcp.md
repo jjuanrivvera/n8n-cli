@@ -11,6 +11,19 @@ which wraps the official [modelcontextprotocol/go-sdk](https://github.com/modelc
 It reuses the same client, OS-keyring auth, named profiles, and `--dry-run`
 support as the CLI: each tool call replays the corresponding cobra command.
 
+!!! info "Relation to n8n's built-in MCP"
+    n8n the platform is already MCP-native at the **workflow layer**: the **MCP
+    Server Trigger** node turns a workflow into an MCP server (agents call your
+    workflows as tools), and the **MCP Client Tool** node lets a workflow consume
+    external MCP tools. That is the *data plane* — automations exposed as tools.
+
+    `n8nctl mcp` is a different, complementary layer: the **control plane**. It
+    exposes the n8n **management API** — list / create / activate / delete
+    workflows, manage credentials, projects, executions, **across instances** — so
+    an agent can *operate and administer* your n8n fleet, not run a single
+    workflow. Use n8n's nodes to expose automations to agents; use `n8nctl mcp` to
+    let an agent manage the instances themselves.
+
 ## What MCP is
 
 MCP is an open protocol that lets an AI host discover and call tools exposed by
