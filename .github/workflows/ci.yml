@@ -57,17 +57,12 @@ jobs:
           go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck ./...
       - name: gosec (gate on high severity)
-        run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@v2.21.4
-          # Fail the build on high-severity findings; still emit SARIF for the report.
-          gosec -severity high -confidence medium -fmt sarif -out gosec.sarif ./...
-      - name: Upload gosec report
-        if: always()
-        uses: actions/upload-artifact@v7
+        # Use the published action (a prebuilt binary) rather than `go install`,
+        # which avoids building an old gosec against a newer Go toolchain. Fails
+        # the build on high/medium-confidence high-severity findings.
+        uses: securego/gosec@v2.27.1
         with:
-          name: gosec-sarif
-          path: gosec.sarif
-          if-no-files-found: ignore
+          args: '-severity high -confidence medium ./...'
 
   test:
     strategy:
