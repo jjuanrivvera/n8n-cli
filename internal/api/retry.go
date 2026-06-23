@@ -25,8 +25,8 @@ type RetryPolicy struct {
 
 // DefaultRetryPolicy returns sensible defaults: up to 4 retries, 500ms→8s backoff.
 func DefaultRetryPolicy(logger *slog.Logger) *RetryPolicy {
-	//nolint:gosec // jitter does not require a cryptographic RNG
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	// #nosec G404 -- backoff jitter is not security-sensitive; crypto/rand is unwarranted
+	r := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec // jitter, not crypto
 	return &RetryPolicy{
 		MaxRetries:     4,
 		InitialBackoff: 500 * time.Millisecond,

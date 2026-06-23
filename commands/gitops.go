@@ -100,6 +100,7 @@ func workflowConvertCmd() *cobra.Command {
 					dir = filepath.Dir(in)
 				}
 				dst := filepath.Join(dir, stem+"."+string(format))
+				// #nosec G703 G304 -- convert writes to the user's own --out dir / input path, not untrusted input
 				if err := os.WriteFile(dst, main, 0o600); err != nil {
 					return err
 				}
