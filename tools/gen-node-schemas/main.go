@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -34,9 +35,19 @@ type source struct {
 	pkg, ver, prefix string
 }
 
+// paramSchema is the slice of an n8n node property the lint rules need: enough to
+// validate parameter values without re-implementing n8n's whole property model.
+type paramSchema struct {
+	Type           string                         `json:"type,omitempty"`
+	Options        []string                       `json:"options,omitempty"`        // allowed values for options/multiOptions
+	Required       bool                           `json:"required,omitempty"`       // n8n "required" flag
+	DisplayOptions map[string]map[string][]string `json:"displayOptions,omitempty"` // "show"/"hide" -> param -> values
+}
+
 type nodeEntry struct {
-	DisplayName string   `json:"displayName"`
-	Params      []string `json:"params"`
+	DisplayName string                   `json:"displayName"`
+	Version     int                      `json:"version,omitempty"` // latest typeVersion
+	Params      map[string][]paramSchema `json:"params"`            // name -> property variants (n8n repeats a name per resource/operation)
 }
 
 type catalog struct {
@@ -68,13 +79,34 @@ func main() {
 				continue
 			}
 			fullType := s.prefix + name
-			out.Nodes[fullType] = nodeEntry{
-				DisplayName: stringOr(n["displayName"], name),
-				Params:      topLevelParamNames(n["properties"]),
+			// n8n publishes one entry per major-version line of a versioned node, all
+			// sharing the same name. Merge them: take the highest version and the union
+			// of parameter variants, so the catalog covers every supported version (and
+			// the lint rules don't false-positive on a param that only exists in one).
+			entry := out.Nodes[fullType]
+			if entry.Params == nil {
+				entry.Params = map[string][]paramSchema{}
 			}
+			if entry.DisplayName == "" {
+				entry.DisplayName = stringOr(n["displayName"], name)
+			}
+			if v := latestVersion(n); v > entry.Version {
+				entry.Version = v
+			}
+			for pname, variants := range topLevelParams(n["properties"]) {
+				entry.Params[pname] = append(entry.Params[pname], variants...)
+			}
+			out.Nodes[fullType] = entry
 		}
 		out.GeneratedFrom[s.pkg] = s.ver
 		fmt.Fprintf(os.Stderr, "%s@%s: %d nodes\n", s.pkg, s.ver, len(nodes))
+	}
+
+	// Drop duplicate variants introduced by merging version entries.
+	for _, e := range out.Nodes {
+		for pname, variants := range e.Params {
+			e.Params[pname] = dedupVariants(variants)
+		}
 	}
 
 	b, err := json.MarshalIndent(out, "", " ")
@@ -108,24 +140,155 @@ func fetch(c *http.Client, url string) ([]map[string]any, error) {
 	return nodes, nil
 }
 
-// topLevelParamNames returns the names of a node's top-level properties — which
-// are exactly the keys a workflow node's `parameters` object uses. Nested
-// collection/option entries are deliberately excluded (they are values under a
-// top-level key, not parameter keys), keeping the catalog precise and clean.
-func topLevelParamNames(properties any) []string {
+// topLevelParams returns a node's top-level properties keyed by name — exactly the
+// keys a workflow node's `parameters` object uses. For each it captures the type,
+// the static allowed values (for options/multiOptions), the required flag, and the
+// displayOptions visibility rules. Nested collection entries are excluded (they are
+// values under a top-level key, not parameter keys themselves).
+func topLevelParams(properties any) map[string][]paramSchema {
 	props, ok := properties.([]any)
+	if !ok {
+		return map[string][]paramSchema{}
+	}
+	out := map[string][]paramSchema{}
+	for _, p := range props {
+		pm, ok := p.(map[string]any)
+		if !ok {
+			continue
+		}
+		name, _ := pm["name"].(string)
+		if name == "" {
+			continue
+		}
+		ps := paramSchema{Type: stringOr(pm["type"], "")}
+		if req, ok := pm["required"].(bool); ok {
+			ps.Required = req
+		}
+		if ps.Type == "options" || ps.Type == "multiOptions" {
+			ps.Options = optionValues(pm["options"])
+		}
+		ps.DisplayOptions = displayOptions(pm["displayOptions"])
+		out[name] = append(out[name], ps)
+	}
+	return out
+}
+
+// optionValues collects the static `value`s of an options/multiOptions property.
+// Returns nil when the options are loaded dynamically (loadOptionsMethod), so the
+// value rule stays silent rather than guessing.
+func optionValues(v any) []string {
+	arr, ok := v.([]any)
 	if !ok {
 		return nil
 	}
-	set := map[string]bool{}
-	for _, p := range props {
-		if pm, ok := p.(map[string]any); ok {
-			if n, ok := pm["name"].(string); ok && n != "" {
-				set[n] = true
-			}
+	var out []string
+	for _, o := range arr {
+		om, ok := o.(map[string]any)
+		if !ok {
+			continue
+		}
+		if val, ok := om["value"]; ok {
+			out = append(out, stringifyValue(val))
 		}
 	}
-	return sortedKeys(set)
+	sort.Strings(out)
+	return out
+}
+
+// displayOptions normalizes n8n's show/hide visibility map to
+// section -> param -> []allowed-values (stringified).
+func displayOptions(v any) map[string]map[string][]string {
+	dm, ok := v.(map[string]any)
+	if !ok {
+		return nil
+	}
+	out := map[string]map[string][]string{}
+	for _, section := range []string{"show", "hide"} {
+		sm, ok := dm[section].(map[string]any)
+		if !ok {
+			continue
+		}
+		conds := map[string][]string{}
+		for param, vals := range sm {
+			if arr, ok := vals.([]any); ok {
+				var ss []string
+				for _, x := range arr {
+					ss = append(ss, stringifyValue(x))
+				}
+				conds[param] = ss
+			}
+		}
+		if len(conds) > 0 {
+			out[section] = conds
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+// latestVersion returns a node's current typeVersion, preferring defaultVersion
+// (the version n8n instantiates) and falling back to the max of the version field.
+func latestVersion(n map[string]any) int {
+	if v := nodeVersion(n["defaultVersion"]); v > 0 {
+		return v
+	}
+	return nodeVersion(n["version"])
+}
+
+// dedupVariants removes property variants that are structurally identical (same
+// type, options, required flag, and displayOptions), which merging version entries
+// can introduce.
+func dedupVariants(variants []paramSchema) []paramSchema {
+	seen := map[string]bool{}
+	var out []paramSchema
+	for _, ps := range variants {
+		sig, _ := json.Marshal(ps)
+		if seen[string(sig)] {
+			continue
+		}
+		seen[string(sig)] = true
+		out = append(out, ps)
+	}
+	return out
+}
+
+// nodeVersion returns the highest typeVersion a node supports (the field is a
+// number or an array of numbers).
+func nodeVersion(v any) int {
+	switch t := v.(type) {
+	case float64:
+		return int(t)
+	case []any:
+		max := 0
+		for _, x := range t {
+			if f, ok := x.(float64); ok && int(f) > max {
+				max = int(f)
+			}
+		}
+		return max
+	default:
+		return 0
+	}
+}
+
+// stringifyValue renders a JSON scalar (string/number/bool) as a string so option
+// values and displayOptions conditions compare uniformly.
+func stringifyValue(v any) string {
+	switch t := v.(type) {
+	case string:
+		return t
+	case bool:
+		if t {
+			return "true"
+		}
+		return "false"
+	case float64:
+		return strconv.FormatFloat(t, 'f', -1, 64)
+	default:
+		return fmt.Sprintf("%v", t)
+	}
 }
 
 func stringOr(v any, fallback string) string {
@@ -133,15 +296,6 @@ func stringOr(v any, fallback string) string {
 		return s
 	}
 	return fallback
-}
-
-func sortedKeys(m map[string]bool) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	sort.Strings(out)
-	return out
 }
 
 func fatalf(format string, a ...any) {

@@ -21,7 +21,7 @@ func addWorkflowGitopsCmds(parent *cobra.Command) {
 	parent.AddCommand(
 		readOnlyHints(workflowConvertCmd()), readOnlyHints(workflowLintCmd()),
 		writeHints(workflowApplyCmd()), readOnlyHints(workflowDiffCmd()),
-		writeHints(workflowAutofixCmd()),
+		writeHints(workflowAutofixCmd()), readOnlyHints(workflowBreakingChangesCmd()),
 	)
 }
 

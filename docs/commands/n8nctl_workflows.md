@@ -45,6 +45,7 @@ A workflow body requires name, nodes, connections and settings.
 * [n8nctl workflows apply](n8nctl_workflows_apply.md)	 - Reconcile a directory of workflow files into the instance (GitOps)
 * [n8nctl workflows archive](n8nctl_workflows_archive.md)	 - Archive a workflow
 * [n8nctl workflows autofix](n8nctl_workflows_autofix.md)	 - Auto-repair common workflow mistakes in files
+* [n8nctl workflows breaking-changes](n8nctl_workflows_breaking-changes.md)	 - Find nodes pinned to an outdated typeVersion (upgrade risk)
 * [n8nctl workflows bulk](n8nctl_workflows_bulk.md)	 - Bulk activate/deactivate workflows by tag
 * [n8nctl workflows convert](n8nctl_workflows_convert.md)	 - Convert workflow files between JSON and YAML (local)
 * [n8nctl workflows create](n8nctl_workflows_create.md)	 - Create a workflow

@@ -20,16 +20,31 @@ var catalogJSON []byte
 // schema for them, so flagging them would be a false positive.
 var knownNodePrefixes = []string{"n8n-nodes-base.", "@n8n/n8n-nodes-langchain."}
 
+// ParamSchema is the slice of an n8n node property the lint rules validate
+// against: the type, the static allowed values (options/multiOptions), the
+// required flag, and the displayOptions visibility rules. A parameter name maps
+// to several of these because n8n repeats a name (e.g. "operation") once per
+// resource, each variant gated by its own displayOptions.
+type ParamSchema struct {
+	Type           string                         `json:"type,omitempty"`
+	Options        []string                       `json:"options,omitempty"`
+	Required       bool                           `json:"required,omitempty"`
+	DisplayOptions map[string]map[string][]string `json:"displayOptions,omitempty"`
+}
+
 type catalogEntry struct {
-	DisplayName string   `json:"displayName"`
-	Params      []string `json:"params"`
+	DisplayName string                   `json:"displayName"`
+	Version     int                      `json:"version,omitempty"`
+	Params      map[string][]ParamSchema `json:"params"`
 }
 
 type nodeCatalog struct {
 	versions map[string]string
-	types    []string                   // sorted type names, for suggestions
-	params   map[string]map[string]bool // type -> set of valid parameter names
-	display  map[string]string          // type -> display name
+	types    []string                            // sorted type names, for suggestions
+	params   map[string]map[string]bool          // type -> set of valid parameter names
+	schemas  map[string]map[string][]ParamSchema // type -> param -> property variants
+	display  map[string]string                   // type -> display name
+	nodeVer  map[string]int                      // type -> latest typeVersion
 }
 
 // NodeInfo is a public view of one catalogued node type, for the `nodes` command.
@@ -53,15 +68,19 @@ func loadCatalog() *nodeCatalog {
 		_ = json.Unmarshal(catalogJSON, &raw)
 		catalog.versions = raw.GeneratedFrom
 		catalog.params = make(map[string]map[string]bool, len(raw.Nodes))
+		catalog.schemas = make(map[string]map[string][]ParamSchema, len(raw.Nodes))
 		catalog.display = make(map[string]string, len(raw.Nodes))
+		catalog.nodeVer = make(map[string]int, len(raw.Nodes))
 		catalog.types = make([]string, 0, len(raw.Nodes))
 		for t, e := range raw.Nodes {
 			set := make(map[string]bool, len(e.Params))
-			for _, p := range e.Params {
-				set[p] = true
+			for name := range e.Params {
+				set[name] = true
 			}
 			catalog.params[t] = set
+			catalog.schemas[t] = e.Params
 			catalog.display[t] = e.DisplayName
+			catalog.nodeVer[t] = e.Version
 			catalog.types = append(catalog.types, t)
 		}
 		sort.Strings(catalog.types)
@@ -102,6 +121,23 @@ func NodeTypeCorrection(nodeType string) (string, bool) {
 
 // CatalogBasis exposes the catalog provenance string.
 func CatalogBasis() string { return catalogBasis() }
+
+// paramVariants returns the property variants for a node parameter, if catalogued.
+func paramVariants(nodeType, param string) ([]ParamSchema, bool) {
+	byName, ok := loadCatalog().schemas[nodeType]
+	if !ok {
+		return nil, false
+	}
+	v, ok := byName[param]
+	return v, ok
+}
+
+// NodeLatestVersion returns the highest typeVersion the catalog knows for a node
+// type (0 if unknown). Used by breaking-change detection.
+func NodeLatestVersion(nodeType string) (int, bool) {
+	v, ok := loadCatalog().nodeVer[nodeType]
+	return v, ok && v > 0
+}
 
 func nodeInfo(c *nodeCatalog, t string) NodeInfo {
 	params := make([]string, 0, len(c.params[t]))

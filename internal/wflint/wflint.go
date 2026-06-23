@@ -43,6 +43,7 @@ var Rules = []struct {
 	{"expression-prefix", "expression strings ({{ }}) should start with '='", "n8n expression syntax (the '=' prefix marks an evaluated expression)"},
 	{"unknown-node-type", "node type must be a real n8n node (typo detection)", "embedded n8n node catalog (n8n-nodes-base + langchain)"},
 	{"unknown-parameter", "node parameters should match the node's schema", "embedded n8n node catalog (n8n-nodes-base + langchain)"},
+	{"invalid-parameter-value", "options parameters must use a value the node allows", "embedded n8n node catalog (option values + displayOptions visibility)"},
 }
 
 type node struct {
@@ -144,6 +145,18 @@ func Lint(wf *api.Workflow, disabled map[string]bool) []Finding {
 					msg += " — did you mean \"" + s + "\"?"
 				}
 				out = append(out, Finding{"unknown-parameter", Warning, n.Name, msg})
+			}
+		}
+
+		// invalid-parameter-value: an options/multiOptions parameter set to a value
+		// the node doesn't allow, evaluated against the property variant that is
+		// active for this node's other parameters (n8n shows a different option set
+		// per resource/operation). Conservative: skips dynamic/expression values.
+		if on("invalid-parameter-value") && nodeKnown(n.Type) {
+			for field, val := range n.Parameters {
+				for _, msg := range invalidOptionValues(n.Type, field, val, n.Parameters) {
+					out = append(out, Finding{"invalid-parameter-value", Error, n.Name, msg})
+				}
 			}
 		}
 	}
