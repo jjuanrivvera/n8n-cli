@@ -53,6 +53,9 @@ an honest, lane-by-lane breakdown of all of them, see the
 ## Install
 
 ```bash
+# Quick install (macOS/Linux) — auto-detects platform, verifies checksum
+curl -fsSL https://raw.githubusercontent.com/jjuanrivvera/n8n-cli/main/install.sh | sh
+
 # Homebrew (macOS/Linux) — installed as a cask
 brew install jjuanrivvera/n8n-cli/n8nctl-cli
 # or, tap first then install by name
