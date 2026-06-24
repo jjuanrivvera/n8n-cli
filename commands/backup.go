@@ -62,16 +62,24 @@ func backupCmd() *cobra.Command {
 			var failures []string
 			savedWorkflows := 0
 			for i := range workflows {
-				wf := &workflows[i]
-				full, gerr := client.Workflows().Get(cmd.Context(), wf.ID.String(), nil)
-				if gerr != nil {
-					// Collect-and-continue: one unreadable workflow must not silently
-					// abort the whole backup, nor be reported as a clean success.
-					fmt.Fprintf(cmd.ErrOrStderr(), "failed to back up workflow %s: %v\n", wf.ID, gerr)
-					failures = append(failures, "workflow "+wf.ID.String())
-					continue
+				full := &workflows[i]
+				// The public-API list endpoint returns full workflow bodies
+				// (nodes/connections are required fields in the workflow schema), so
+				// we avoid a redundant GET per workflow. Older n8n versions may omit
+				// nodes from the list response; fall back to a per-workflow fetch only
+				// when they're missing.
+				if len(full.Nodes) == 0 || string(full.Nodes) == "null" {
+					fetched, gerr := client.Workflows().Get(cmd.Context(), full.ID.String(), nil)
+					if gerr != nil {
+						// Collect-and-continue: one unreadable workflow must not silently
+						// abort the whole backup, nor be reported as a clean success.
+						fmt.Fprintf(cmd.ErrOrStderr(), "failed to back up workflow %s: %v\n", full.ID, gerr)
+						failures = append(failures, "workflow "+full.ID.String())
+						continue
+					}
+					full = fetched
 				}
-				stem := slugify(wf.Name) + "." + wf.ID.String()
+				stem := slugify(full.Name) + "." + full.ID.String()
 				main, subfiles, eerr := wffile.EncodeExternalized(full, wfFormat, stem, externalize)
 				if eerr != nil {
 					return eerr

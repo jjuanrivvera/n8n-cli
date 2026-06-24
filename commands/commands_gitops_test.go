@@ -124,7 +124,7 @@ func TestLintDirAndRemote(t *testing.T) {
 	// --dir
 	dir := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "ok.json"),
-		[]byte(`{"name":"ok","nodes":[],"connections":{}}`), 0o600))
+		[]byte(`{"name":"ok","nodes":[{"name":"S","type":"n8n-nodes-base.set","parameters":{}}],"connections":{}}`), 0o600))
 	srv := gitopsServer(t, `{"id":"k1","name":"keeper"}`)
 	setupProfile(t, srv.URL)
 	_, _, err := run(t, "workflows", "lint", "--dir", dir, "-o", "json")

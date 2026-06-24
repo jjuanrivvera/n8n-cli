@@ -1,8 +1,8 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -73,34 +73,9 @@ func workflowExtra(parent *cobra.Command, sp resourceSpec[api.Workflow]) {
 	}
 
 	// transfer <id> --project <projectId>
-	var project string
-	transfer := &cobra.Command{
-		Use:   "transfer <id> --project <projectId>",
-		Short: "Transfer a workflow to another project",
-		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if project == "" {
-				return fmt.Errorf("--project is required")
-			}
-			client, err := getAPIClient(cmd)
-			if err != nil {
-				return err
-			}
-			if err := client.TransferWorkflow(cmd.Context(), args[0], project); err != nil {
-				if api.IsDryRun(err) {
-					dryRunNotice(cmd)
-					return nil
-				}
-				return err
-			}
-			if !flagQuiet {
-				fmt.Fprintf(cmd.OutOrStdout(), "transferred workflow %s to project %s\n", args[0], project)
-			}
-			return nil
-		},
-	}
-	transfer.Flags().StringVar(&project, "project", "", "destination project id (required)")
-	parent.AddCommand(transfer)
+	parent.AddCommand(buildTransferCmd("workflow", func(ctx context.Context, c *api.Client, id, projectID string) error {
+		return c.TransferWorkflow(ctx, id, projectID)
+	}))
 
 	// tags <id> [--set id1,id2] — get or replace a workflow's tags.
 	var setTags []string

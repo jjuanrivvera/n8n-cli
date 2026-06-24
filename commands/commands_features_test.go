@@ -164,6 +164,71 @@ func TestBackupAndRestore(t *testing.T) {
 	assert.Contains(t, out, "restored")
 }
 
+func TestBackupAvoidsPerWorkflowGet(t *testing.T) {
+	// The list endpoint already returns full workflow bodies (with nodes), so
+	// backup must not issue a redundant GET /workflows/{id} per workflow.
+	var perItemGets int
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/v1/workflows", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[` + sampleWorkflow + `],"nextCursor":null}`))
+	})
+	mux.HandleFunc("GET /api/v1/workflows/w1", func(w http.ResponseWriter, _ *http.Request) {
+		perItemGets++
+		_, _ = w.Write([]byte(sampleWorkflow))
+	})
+	backupSideTables(mux)
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+	setupProfile(t, srv.URL)
+
+	dir := t.TempDir()
+	_, _, err := run(t, "backup", "--out", dir)
+	require.NoError(t, err)
+	assert.Zero(t, perItemGets, "list returned full bodies; no per-workflow GET expected")
+	wfFiles, _ := os.ReadDir(filepath.Join(dir, "workflows"))
+	require.Len(t, wfFiles, 1)
+}
+
+// backupSideTables registers the tags/variables/credentials endpoints backup
+// fetches in addition to workflows, so a backup test exits cleanly.
+func backupSideTables(mux *http.ServeMux) {
+	mux.HandleFunc("GET /api/v1/tags", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[],"nextCursor":null}`))
+	})
+	mux.HandleFunc("GET /api/v1/variables", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[],"nextCursor":null}`))
+	})
+	mux.HandleFunc("GET /api/v1/credentials", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[],"nextCursor":null}`))
+	})
+}
+
+func TestBackupFallsBackToGetWhenListLacksNodes(t *testing.T) {
+	// Older n8n versions may return summary-only list items (no nodes); backup
+	// must fall back to a per-workflow GET so the saved body is complete.
+	var perItemGets int
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/v1/workflows", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[{"id":"w1","name":"Order Sync"}],"nextCursor":null}`))
+	})
+	mux.HandleFunc("GET /api/v1/workflows/w1", func(w http.ResponseWriter, _ *http.Request) {
+		perItemGets++
+		_, _ = w.Write([]byte(sampleWorkflow))
+	})
+	backupSideTables(mux)
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+	setupProfile(t, srv.URL)
+
+	dir := t.TempDir()
+	_, _, err := run(t, "backup", "--out", dir)
+	require.NoError(t, err)
+	assert.Equal(t, 1, perItemGets, "summary-only list item should trigger one fallback GET")
+	saved, err := os.ReadFile(filepath.Join(dir, "workflows", "order-sync.w1.json"))
+	require.NoError(t, err)
+	assert.Contains(t, string(saved), "Webhook", "fallback GET body (with nodes) must be saved")
+}
+
 func TestBackupRequiresOut(t *testing.T) {
 	setupProfile(t, "https://a/api/v1")
 	_, _, err := run(t, "backup")
