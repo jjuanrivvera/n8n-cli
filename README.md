@@ -31,6 +31,8 @@ with secrets in your **OS keyring**.
 > Unofficial. Not affiliated with n8n. Talks to the public API at
 > `<your-host>/api/v1` using the `X-N8N-API-KEY` header.
 
+> 🏭 Part of the [cliwright](https://github.com/jjuanrivvera/cliwright) CLI fleet.
+
 ## Why n8nctl
 
 - **Multi-instance, first class.** Named profiles, one per instance — switch with
