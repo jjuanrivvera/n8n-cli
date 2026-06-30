@@ -137,7 +137,7 @@ func TestProxyRejectDuplicateName(t *testing.T) {
 
 	// creating "dup" (already exists) -> 409, not forwarded
 	req, _ := http.NewRequest(http.MethodPost, proxy.URL+"/api/v1/workflows",
-		strings.NewReader(`{"name":"dup","nodes":[],"connections":{},"settings":{}}`))
+		strings.NewReader(`{"name":"dup","nodes":[{"name":"S","type":"n8n-nodes-base.set","parameters":{}}],"connections":{},"settings":{}}`))
 	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
 	_ = resp.Body.Close()
@@ -242,7 +242,7 @@ func TestProxyDupNameAllowsNew(t *testing.T) {
 	proxy := httptest.NewServer(newLintProxy(&url.URL{Scheme: tu.Scheme, Host: tu.Host}, "secret", nil, false, true, io.Discard))
 	t.Cleanup(proxy.Close)
 	req, _ := http.NewRequest(http.MethodPost, proxy.URL+"/api/v1/workflows",
-		strings.NewReader(`{"name":"brand-new","nodes":[],"connections":{},"settings":{}}`))
+		strings.NewReader(`{"name":"brand-new","nodes":[{"name":"S","type":"n8n-nodes-base.set","parameters":{}}],"connections":{},"settings":{}}`))
 	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
 	_ = resp.Body.Close()
