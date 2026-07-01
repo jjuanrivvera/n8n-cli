@@ -11,13 +11,13 @@ import (
 )
 
 func init() {
-	var profileName, baseURL, apiKey string
+	var profileName, profileAlias, baseURL, apiKey string
 	cmd := &cobra.Command{
 		Use:     "init",
 		Aliases: []string{"setup"},
 		Short:   "Interactive first-run setup for an instance/profile",
-		Long: "Walks you through naming a profile, setting its base URL, capturing an API key\n" +
-			"(stored in your OS keyring), verifying connectivity, and writing the config.",
+		Long: "Walks you through naming an instance (profile), setting its base URL, capturing\n" +
+			"an API key (stored in your OS keyring), verifying connectivity, and writing config.",
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			c, err := loadConfig()
@@ -26,7 +26,10 @@ func init() {
 			}
 
 			if profileName == "" {
-				profileName = prompt(cmd, "Profile name [default]: ")
+				profileName = profileAlias
+			}
+			if profileName == "" {
+				profileName = prompt(cmd, "Instance name [default]: ")
 			}
 			if profileName == "" {
 				profileName = "default"
@@ -85,7 +88,9 @@ func init() {
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&profileName, "profile", "", "profile name to create/update")
+	cmd.Flags().StringVar(&profileName, "instance", "", "instance (profile) name to create/update")
+	cmd.Flags().StringVar(&profileAlias, "profile", "", "deprecated alias for --instance")
+	_ = cmd.Flags().MarkHidden("profile")
 	cmd.Flags().StringVar(&baseURL, "base-url", "", "instance base URL")
 	cmd.Flags().StringVar(&apiKey, "api-key", "", "API key (otherwise prompted without echo)")
 	rootCmd.AddCommand(cmd)

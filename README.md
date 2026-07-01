@@ -35,8 +35,9 @@ with secrets in your **OS keyring**.
 
 ## Why n8nctl
 
-- **Multi-instance, first class.** Named profiles, one per instance — switch with
-  `--profile`. API keys live in your **OS keyring**, never in a plaintext file.
+- **Multi-instance, first class.** One named profile per instance — switch with
+  `--instance` (`--profile` still works as an alias). API keys live in your **OS
+  keyring**, never in a plaintext file.
 - **One static binary, no Node.** `brew install`, `go install`, or a single
   download; starts in ~6 ms, painless on CI runners.
 - **Workflows as code.** Declarative `apply` (with `--prune` / `--dry-run`),
@@ -89,7 +90,7 @@ n8nctl workflows get 42 -o json # one workflow as JSON
 n8nctl auth status              # confirm which instance you're on
 ```
 
-Prefer to script it? `n8nctl init --profile homelab --base-url https://n8n.lan/api/v1 --api-key "$KEY"`.
+Prefer to script it? `n8nctl init --instance homelab --base-url https://n8n.lan/api/v1 --api-key "$KEY"`.
 
 ## Features at a glance
 

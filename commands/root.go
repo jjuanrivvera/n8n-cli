@@ -39,6 +39,7 @@ func stdinReader() *bufio.Reader {
 
 // Global persistent flags, bound in init().
 var (
+	flagInstance  string
 	flagProfile   string
 	flagOutput    string
 	flagBaseURL   string
@@ -62,8 +63,9 @@ var rootCmd = &cobra.Command{
 It manages workflows, executions, credentials, tags, variables, projects and
 users on any n8n instance — self-hosted or Cloud — over HTTPS with an API key.
 
-Multi-instance is first class: define named profiles, store each instance's API
-key in your OS keyring, and switch with --profile or "n8nctl config use <name>".`,
+Multi-instance is first class: define one named profile per instance, store each
+instance's API key in your OS keyring, and switch with --instance or
+"n8nctl config use <name>".`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	Version:       "", // set by version command / ldflags via SetVersionTemplate
@@ -80,7 +82,11 @@ func RootCmd() *cobra.Command { return rootCmd }
 
 func init() {
 	pf := rootCmd.PersistentFlags()
-	pf.StringVar(&flagProfile, "profile", "", "config profile (instance) to use [env: N8NCTL_PROFILE]")
+	// An n8nctl "profile" is one n8n instance, so the user-facing flag is --instance.
+	// --profile stays as a hidden, still-working alias so existing scripts don't break.
+	pf.StringVar(&flagInstance, "instance", "", "n8n instance to use: a named profile [env: N8NCTL_INSTANCE, N8NCTL_PROFILE]")
+	pf.StringVar(&flagProfile, "profile", "", "deprecated alias for --instance")
+	_ = pf.MarkHidden("profile")
 	pf.StringVarP(&flagOutput, "output", "o", "", "output format: table|json|yaml|csv|id [env: N8NCTL_OUTPUT]")
 	pf.StringVar(&flagBaseURL, "base-url", "", "override the instance base URL (e.g. https://host/api/v1)")
 	pf.StringVar(&flagAPIKey, "api-key", "", "override the API key (prefer keyring via 'auth login')")
@@ -116,13 +122,26 @@ func loadConfig() (*config.Config, error) {
 	return cfgVal, cfgErr
 }
 
+// instanceOverride resolves the multi-instance selector from --instance, its hidden
+// --profile back-compat alias, then the N8NCTL_INSTANCE env var. An empty result lets
+// config fall back to N8NCTL_PROFILE, the default profile, then "default".
+func instanceOverride() string {
+	if flagInstance != "" {
+		return flagInstance
+	}
+	if flagProfile != "" {
+		return flagProfile
+	}
+	return os.Getenv("N8NCTL_INSTANCE")
+}
+
 // activeProfile returns the resolved active profile name (flag > env > default).
 func activeProfile() (string, *config.Config, error) {
 	c, err := loadConfig()
 	if err != nil {
 		return "", nil, err
 	}
-	return c.ActiveProfileName(flagProfile), c, nil
+	return c.ActiveProfileName(instanceOverride()), c, nil
 }
 
 // newLogger builds a stderr logger at the level implied by --verbose/config.
@@ -270,7 +289,7 @@ func outputFormat() (output.Format, error) {
 	if err != nil {
 		return output.Table, nil //nolint:nilerr // fall back to default on config error
 	}
-	return output.Parse(c.Resolve(c.ActiveProfileName(flagProfile)).OutputFormat)
+	return output.Parse(c.Resolve(c.ActiveProfileName(instanceOverride())).OutputFormat)
 }
 
 // render writes data to stdout in the resolved format with column/color options.

@@ -51,7 +51,7 @@ func resetConfigForTest() {
 // resetFlags returns all global persistent flags to their zero values, since the
 // root command is a shared singleton across test invocations.
 func resetFlags() {
-	flagProfile, flagOutput, flagBaseURL, flagAPIKey = "", "", "", ""
+	flagInstance, flagProfile, flagOutput, flagBaseURL, flagAPIKey = "", "", "", "", ""
 	flagRPS = 0
 	flagDryRun, flagShowToken, flagVerbose, flagNoColor, flagQuiet = false, false, false, false, false
 	flagColumns = nil
@@ -108,7 +108,7 @@ func setupProfile(t *testing.T, baseURL string) {
 	keyring.MockInit()
 	path := filepath.Join(t.TempDir(), "config.yaml")
 	t.Setenv("N8NCTL_CONFIG", path)
-	for _, k := range []string{"N8NCTL_PROFILE", "N8NCTL_BASE_URL", "N8NCTL_API_KEY", "N8NCTL_OUTPUT", "N8NCTL_RPS", "N8NCTL_LOG_LEVEL"} {
+	for _, k := range []string{"N8NCTL_INSTANCE", "N8NCTL_PROFILE", "N8NCTL_BASE_URL", "N8NCTL_API_KEY", "N8NCTL_OUTPUT", "N8NCTL_RPS", "N8NCTL_LOG_LEVEL"} {
 		t.Setenv(k, "")
 	}
 	c := config.New()
@@ -220,6 +220,29 @@ func TestCmd_ConfigUseAndListProfiles(t *testing.T) {
 	out, _, err := run(t, "config", "list-profiles", "-o", "json")
 	require.NoError(t, err)
 	assert.Contains(t, out, "cloud")
+}
+
+// The multi-instance selector is --instance; --profile is a hidden back-compat alias.
+// Both must select the same named profile, and --profile must stay out of help.
+func TestCmd_InstanceFlagAndProfileAlias(t *testing.T) {
+	setupProfile(t, "https://a/api/v1")
+
+	// --instance writes to the named profile.
+	_, _, err := run(t, "config", "set", "base_url", "https://viaInstance/api/v1", "--instance", "prod")
+	require.NoError(t, err)
+	// --profile (deprecated alias) writes to a different named profile.
+	_, _, err = run(t, "config", "set", "base_url", "https://viaProfile/api/v1", "--profile", "legacy")
+	require.NoError(t, err)
+
+	out, _, err := run(t, "config", "list-profiles", "-o", "json")
+	require.NoError(t, err)
+	assert.Contains(t, out, "prod")
+	assert.Contains(t, out, "legacy")
+
+	help, _, err := run(t, "help")
+	require.NoError(t, err)
+	assert.Contains(t, help, "--instance")
+	assert.NotContains(t, help, "--profile")
 }
 
 func TestCmd_AliasLifecycle(t *testing.T) {

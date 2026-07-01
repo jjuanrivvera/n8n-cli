@@ -13,8 +13,9 @@ n8nctl is a portable, single-binary client for the n8n public REST API.
 It manages workflows, executions, credentials, tags, variables, projects and
 users on any n8n instance — self-hosted or Cloud — over HTTPS with an API key.
 
-Multi-instance is first class: define named profiles, store each instance's API
-key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
+Multi-instance is first class: define one named profile per instance, store each
+instance's API key in your OS keyring, and switch with --instance or
+"n8nctl config use <name>".
 
 ### Options
 
@@ -24,11 +25,11 @@ key in your OS keyring, and switch with --profile or "n8nctl config use <name>".
       --columns strings   comma-separated columns for table/csv output
       --dry-run           print the equivalent curl and send no request
   -h, --help              help for n8nctl
+      --instance string   n8n instance to use: a named profile [env: N8NCTL_INSTANCE, N8NCTL_PROFILE]
       --jq string         apply a jq program to the result (e.g. '.[].id'); implies JSON input
       --no-color          disable colored output [env: NO_COLOR]
       --no-header         hide the table header row
   -o, --output string     output format: table|json|yaml|csv|id [env: N8NCTL_OUTPUT]
-      --profile string    config profile (instance) to use [env: N8NCTL_PROFILE]
   -q, --quiet             suppress non-essential chatter
       --rps float         client-side rate limit in requests/sec (0 = use config/default)
       --show-token        do not redact the API key in --dry-run output

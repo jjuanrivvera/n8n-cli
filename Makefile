@@ -19,6 +19,8 @@ LDFLAGS := -ldflags "\
 GO ?= go
 
 COVERAGE_MIN ?= 80
+# spec-completeness: min % of the enumerated full API the manifest must wrap
+API_COVERAGE_MIN ?= 90
 
 .PHONY: help
 help: ## Show this help
@@ -47,6 +49,26 @@ dev: fmt vet build ## Format, vet, and build
 
 .PHONY: check
 check: fmt vet lint test ## Run the full local quality gate
+
+# --- acceptance gate (cliwright) ---
+# verify == the DETERMINISTIC gate (build/vet/lint/test + spec-completeness + coverage). Fast,
+# repeatable, CI-safe, zero LLM/tokens — this is what CI and routine `make` runs should use.
+.PHONY: verify
+verify: check spec-completeness cover-check ## Deterministic gate (no judge); exit 0 == green
+
+# judge == the ONE non-deterministic gate (an LLM scores the subjective DoD items a grep can't
+# prove). It needs an agent and spends tokens, so it is NOT part of `verify` — run it only at
+# build-acceptance time, never on a routine CI/dev `make verify`.
+.PHONY: judge
+judge: ## LLM-scored subjective gate (build-acceptance only; needs claude/codex)
+	./scripts/judge.sh
+
+.PHONY: accept
+accept: verify judge ## Full acceptance (verify + judge); exit 0 == done
+
+.PHONY: spec-completeness
+spec-completeness: ## Manifest must wrap >= API_COVERAGE_MIN% of the enumerated full API
+	./scripts/spec-completeness.sh api-manifest.json $(API_COVERAGE_MIN)
 
 .PHONY: fmt
 fmt: ## Format the code

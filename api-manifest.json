@@ -1,0 +1,32 @@
+{
+  "_comment": "Spec-derived manifest (cliwright GOAL.md §0/§11). DERIVED from the ENUMERATED n8n public API v1 OpenAPI (the per-endpoint path specs under packages/cli/src/public-api/v1/handlers/**/spec/paths/*.yml), NOT model recall. scripts/spec-completeness.sh proves this manifest covers >= API_COVERAGE_MIN% of api_method_total (completeness).",
+  "binary": "n8nctl",
+  "base_url": "https://<your-n8n-host>/api/v1",
+  "auth": "api-key-header",
+  "pagination": "cursor",
+
+  "_completeness_comment": "api_method_total = the COUNT of operations (x-eov-operation-id) enumerated from api_method_source across all 49 path specs on n8n master (2026-06-30). Covered = sum of resources[].verbs (+ methods[]). Below API_COVERAGE_MIN with no coverage-waiver in DECISIONS.md fails spec-completeness.sh. Current: 60/80 = 75% -> waived (see DECISIONS.md); the uncovered 20 are the newest/enterprise-gated surfaces (data-table columns, folders, insights, discover, community-packages, execution tags, workflow version, credential test).",
+  "api_method_total": 80,
+  "api_method_source": "https://github.com/n8n-io/n8n/tree/master/packages/cli/src/public-api/v1/handlers (OpenAPI path specs, x-eov-operation-id count, enumerated 2026-06-30)",
+
+  "_profile_comment": "profile_flag/profile_noun name the multi-instance selector so it reads naturally: an n8nctl profile IS one n8n instance, so the user-facing flag is --instance. --profile stays as a HIDDEN back-compat alias (commands/root.go).",
+  "profile_flag": "instance",
+  "profile_noun": "instance",
+
+  "resources": [
+    { "name": "workflows",      "verbs": ["list", "get", "create", "update", "delete", "activate", "deactivate", "transfer", "get-tags", "set-tags", "archive", "unarchive"], "key_fields": ["id", "name", "active"] },
+    { "name": "executions",     "verbs": ["list", "get", "delete", "retry", "stop"], "key_fields": ["id", "workflowId", "status", "startedAt"] },
+    { "name": "credentials",    "verbs": ["list", "get", "create", "update", "delete", "schema", "transfer"], "key_fields": ["id", "name", "type"] },
+    { "name": "tags",           "verbs": ["list", "get", "create", "update", "delete"], "key_fields": ["id", "name"] },
+    { "name": "users",          "verbs": ["list", "get", "invite", "delete", "change-role"], "key_fields": ["id", "email", "role"] },
+    { "name": "variables",      "verbs": ["list", "create", "update", "delete"], "key_fields": ["id", "key", "value"] },
+    { "name": "projects",       "verbs": ["list", "create", "update", "delete", "members", "add-member", "set-member-role", "remove-member"], "key_fields": ["id", "name", "type"] },
+    { "name": "data-tables",    "verbs": ["list", "get", "create", "update", "delete", "rows", "add-rows", "update-rows", "upsert-rows", "delete-rows"], "key_fields": ["id", "name", "projectId"] },
+    { "name": "packages",       "verbs": ["export", "import"], "key_fields": ["id", "name"] },
+    { "name": "audit",          "verbs": ["generate"], "read_only": true, "key_fields": ["risk", "sections"] },
+    { "name": "source-control", "verbs": ["pull"], "key_fields": ["variables", "credentials", "workflows"] }
+  ],
+
+  "_methods_comment": "n8n's public API is REST-shaped, so everything maps to resources[] above; no flat RPC-style methods to list.",
+  "methods": []
+}

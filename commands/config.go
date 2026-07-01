@@ -40,7 +40,7 @@ func configSetURLCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			p := c.Profile(c.ActiveProfileName(flagProfile))
+			p := c.Profile(c.ActiveProfileName(instanceOverride()))
 			p.BaseURL = args[0]
 			c.SetProfile(p)
 			if err := c.Save(); err != nil {
@@ -113,7 +113,7 @@ func configViewCmd() *cobra.Command {
 			}
 			view := map[string]any{
 				"path":            c.Path(),
-				"default_profile": c.ActiveProfileName(flagProfile),
+				"default_profile": c.ActiveProfileName(instanceOverride()),
 				"settings": map[string]any{
 					"output_format":       c.Settings.OutputFormat,
 					"requests_per_second": c.Settings.RequestsPerSecond,
@@ -153,7 +153,7 @@ func configSetCmd() *cobra.Command {
 				}
 				c.Settings.RequestsPerSecond = f
 			case "base_url", "description":
-				p := c.Profile(c.ActiveProfileName(flagProfile))
+				p := c.Profile(c.ActiveProfileName(instanceOverride()))
 				if key == "base_url" {
 					p.BaseURL = value
 				} else {
@@ -207,7 +207,7 @@ func configListProfilesCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			active := c.ActiveProfileName(flagProfile)
+			active := c.ActiveProfileName(instanceOverride())
 			type row struct {
 				Profile     string `json:"profile"`
 				Active      bool   `json:"active"`

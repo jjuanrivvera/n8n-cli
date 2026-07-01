@@ -8,8 +8,8 @@ Interactive first-run setup for an instance/profile
 
 ### Synopsis
 
-Walks you through naming a profile, setting its base URL, capturing an API key
-(stored in your OS keyring), verifying connectivity, and writing the config.
+Walks you through naming an instance (profile), setting its base URL, capturing
+an API key (stored in your OS keyring), verifying connectivity, and writing config.
 
 ```
 n8nctl init [flags]
@@ -21,7 +21,7 @@ n8nctl init [flags]
       --api-key string    API key (otherwise prompted without echo)
       --base-url string   instance base URL
   -h, --help              help for init
-      --profile string    profile name to create/update
+      --instance string   instance (profile) name to create/update
 ```
 
 ### Options inherited from parent commands
