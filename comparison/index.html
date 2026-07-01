@@ -1,0 +1,1960 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A portable, single-binary CLI for the n8n public REST API">
+      
+      
+      
+        <link rel="canonical" href="https://jjuanrivvera.github.io/n8n-cli/comparison/">
+      
+      
+        <link rel="prev" href="../commands/">
+      
+      
+        <link rel="next" href="../contributing/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>vs. Other n8n CLIs - n8nctl</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/timeago.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#n8nctl-vs-other-n8n-clis" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="n8nctl" class="md-header__button md-logo" aria-label="n8nctl" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            n8nctl
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              vs. Other n8n CLIs
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="red" data-md-color-accent="red"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jjuanrivvera/n8n-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jjuanrivvera/n8n-cli
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/" class="md-tabs__link">
+          
+  
+  
+  Get Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../profiles/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../beyond-api/" class="md-tabs__link">
+          
+  
+  
+  Workflows
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../mcp/" class="md-tabs__link">
+          
+  
+  
+  AI Agents
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../features/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="n8nctl" class="md-nav__button md-logo" aria-label="n8nctl" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    n8nctl
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jjuanrivvera/n8n-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jjuanrivvera/n8n-cli
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../recipes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../profiles/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-instance & Profiles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../output/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Output & Filtering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../beyond-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Beyond the API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflows-as-code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows as Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Agents
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    AI Agents
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../agent-guard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Guard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proxy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lint-enforcing Proxy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vs. Other n8n CLIs
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vs. Other n8n CLIs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-cast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The cast
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        At a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-each-tool-fits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where each tool fits
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Where each tool fits">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#first-party-api-client-n8ncli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        First-party API client — @n8n/cli
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-authoring-quality-ubie-ossn8n-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflow authoring &amp; quality — ubie-oss/n8n-cli
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-intelligence-yigitkonurn8n-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflow intelligence — yigitkonur/n8n-cli
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitops-sync-edenreichn8n-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitOps sync — edenreich/n8n-cli
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-instance-operations-gitops-agent-management-n8nctl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-instance operations, GitOps &amp; agent management — n8nctl
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-the-others-are-genuinely-better-than-n8nctl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the others are genuinely better than n8nctl
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-note-on-mcp-and-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A note on MCP and agents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#which-should-you-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which should you use?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-cast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The cast
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        At a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-each-tool-fits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where each tool fits
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Where each tool fits">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#first-party-api-client-n8ncli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        First-party API client — @n8n/cli
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-authoring-quality-ubie-ossn8n-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflow authoring &amp; quality — ubie-oss/n8n-cli
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-intelligence-yigitkonurn8n-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflow intelligence — yigitkonur/n8n-cli
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitops-sync-edenreichn8n-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitOps sync — edenreich/n8n-cli
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-instance-operations-gitops-agent-management-n8nctl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-instance operations, GitOps &amp; agent management — n8nctl
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-the-others-are-genuinely-better-than-n8nctl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the others are genuinely better than n8nctl
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-note-on-mcp-and-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A note on MCP and agents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#which-should-you-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which should you use?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="n8nctl-vs-other-n8n-clis">n8nctl vs other n8n CLIs<a class="headerlink" href="#n8nctl-vs-other-n8n-clis" title="Permanent link">&para;</a></h1>
+<p>Several command-line clients exist for n8n, built by different people for
+different jobs. This page maps the landscape honestly and shows where each tool
+fits — including where the others are a better choice than <code>n8nctl</code>.</p>
+<p><em>As of June 2026: <code>n8nctl</code> 0.3.0, <code>@n8n/cli</code> 0.8.0, <code>ubie-oss/n8n-cli</code> 2.2.1,
+<code>yigitkonur/n8n-cli</code> 1.9.3, <code>edenreich/n8n-cli</code> 0.7.1. They all talk to the same
+n8n public API, so the CRUD surface converges over time; the real differences are
+in focus, runtime, and the layers each tool adds on top.</em></p>
+<h2 id="the-cast">The cast<a class="headerlink" href="#the-cast" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><code>@n8n/cli</code></strong> (binary <code>n8n-cli</code>) — the <strong>official, first-party</strong> CLI from the
+  n8n team. Node.js/oclif, distributed on npm, currently <strong>beta</strong> ("for
+  experimenting, local development, and personal projects"). The reference client
+  for the public API; tracks new endpoints first.</li>
+<li><strong><code>n8nctl</code></strong> (this project) — an independent, single-binary <strong>Go</strong> client
+  focused on <strong>multi-instance operation, workflows-as-code, and driving n8n from
+  AI agents</strong>.</li>
+<li><strong><code>ubie-oss/n8n-cli</code></strong> — an independent <strong>Bun</strong> binary focused on <strong>workflow
+  authoring quality</strong>: deep linting, node-schema inspection, formatting, data-flow
+  tracing, and a server-side lint-enforcement proxy.</li>
+<li><strong><code>yigitkonur/n8n-cli</code></strong> — an independent <strong>Node</strong> CLI focused on <strong>workflow
+  intelligence</strong>. It bundles n8n's own packages (<code>n8n-nodes-base</code>, <code>n8n-workflow</code>)
+  and a SQLite node catalog to validate and <strong>auto-repair</strong> workflows offline,
+  explore the node library, detect cross-version breaking changes, and deploy from
+  the n8n template gallery.</li>
+<li><strong><code>edenreich/n8n-cli</code></strong> — an independent <strong>Go</strong> binary focused on one job:
+  <strong>GitOps sync</strong> of workflows from a directory to an instance.</li>
+</ul>
+<p>These tools are not all trying to be the same thing. The useful question is not
+"which is best" but "which lane is yours."</p>
+<h2 id="at-a-glance">At a glance<a class="headerlink" href="#at-a-glance" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>n8nctl</th>
+<th>@n8n/cli</th>
+<th>ubie-oss</th>
+<th>yigitkonur</th>
+<th>edenreich</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vendor</td>
+<td>3rd-party</td>
+<td><strong>first-party</strong></td>
+<td>3rd-party</td>
+<td>3rd-party</td>
+<td>3rd-party</td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td><strong>Go static binary</strong></td>
+<td>Node + npm</td>
+<td>Bun binary</td>
+<td>Node + npm</td>
+<td>Go binary</td>
+</tr>
+<tr>
+<td>Primary lane</td>
+<td><strong>ops + GitOps + agent mgmt</strong></td>
+<td>first-party general</td>
+<td><strong>authoring quality</strong></td>
+<td><strong>workflow intelligence</strong></td>
+<td>GitOps sync</td>
+</tr>
+<tr>
+<td>CRUD breadth</td>
+<td>full + data-tables + packages + <code>nodes</code> + <code>templates</code></td>
+<td>full + data-tables + packages</td>
+<td>full + data-tables</td>
+<td>full + <code>nodes</code> + <code>templates</code></td>
+<td>workflows only</td>
+</tr>
+<tr>
+<td>Multi-instance</td>
+<td><strong>profiles + keyring</strong></td>
+<td>single, plaintext</td>
+<td>single, env</td>
+<td>multi-profile, plaintext</td>
+<td>single, <code>.env</code></td>
+</tr>
+<tr>
+<td>Apply from files</td>
+<td><strong><code>apply</code></strong> (prune, cross-instance)</td>
+<td>—</td>
+<td><code>apply</code> (+ git-changes)</td>
+<td>import / export</td>
+<td><code>sync</code> (+ prune)</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td><strong>node-schema lint (type + params + values) + autofix + breaking-changes + <code>proxy</code> gate</strong></td>
+<td>—</td>
+<td><strong>node-schema lint + <code>proxy</code> gate</strong></td>
+<td><strong>offline validate + autofix + breaking-changes</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Templates / node catalog</td>
+<td><strong><code>templates</code> + <code>nodes</code> catalog</strong></td>
+<td>—</td>
+<td><code>node-schema</code> dump</td>
+<td><strong>templates + node catalog (FTS5)</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Agent tooling</td>
+<td><strong><code>mcp</code> + <code>agent guard</code></strong></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>backup / restore / sync / search</td>
+<td><strong>all four</strong></td>
+<td>—</td>
+<td>—</td>
+<td>export/import + version history</td>
+<td><code>sync</code></td>
+</tr>
+<tr>
+<td>Secrets</td>
+<td><strong>OS keyring</strong></td>
+<td>plaintext</td>
+<td>plaintext</td>
+<td>plaintext</td>
+<td>plaintext</td>
+</tr>
+<tr>
+<td>Distribution</td>
+<td><strong>brew / scoop / deb-rpm-apk + cosign + SBOM</strong></td>
+<td>npm</td>
+<td>source / cross-compile</td>
+<td>npm</td>
+<td>curl / <code>go install</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="where-each-tool-fits">Where each tool fits<a class="headerlink" href="#where-each-tool-fits" title="Permanent link">&para;</a></h2>
+<h3 id="first-party-api-client-n8ncli">First-party API client — <code>@n8n/cli</code><a class="headerlink" href="#first-party-api-client-n8ncli" title="Permanent link">&para;</a></h3>
+<p>Built and maintained by the n8n team alongside the API, so it tracks new endpoints
+and changes immediately and is the tool the n8n docs point to. It has thoughtful
+scripting defaults — it <strong>auto-selects JSON when stdout is piped</strong> and
+<strong>auto-paginates lists by default</strong> — and <code>npx @n8n/cli</code> is zero-friction inside a
+Node project. It is single-instance (one <code>{url, apiKey}</code> in a plaintext config,
+no keyring), issues a single <code>fetch</code> with no retry or rate limiting, and is
+labelled not-for-production. <strong>Use it</strong> if you want the first-party tool, work
+with one instance, already live in Node, or need brand-new endpoints on day one.</p>
+<h3 id="workflow-authoring-quality-ubie-ossn8n-cli">Workflow authoring &amp; quality — <code>ubie-oss/n8n-cli</code><a class="headerlink" href="#workflow-authoring-quality-ubie-ossn8n-cli" title="Permanent link">&para;</a></h3>
+<p>The deepest authoring tool, and ahead of <code>n8nctl</code> on workflow <em>quality</em>. Its
+<code>lint</code> ships rules including <strong><code>node-params</code>, which validates node parameter
+values against the schema</strong>, backed by a <strong><code>node-schema</code></strong> command that dumps the
+real node-type schemas. (<code>n8nctl</code> now validates node types and parameter <em>names</em>
+against an embedded catalog too, but ubie checks parameter <em>values</em> and types more
+deeply.) <code>fmt</code> tidies node layout, <code>trace</code> analyses data-flow cardinality,
+and <strong><code>proxy</code></strong> is a distinctive idea ubie pioneered: an HTTP proxy in front of the
+n8n API that enforces lint <strong>server-side</strong>, so any push that fails lint — from a
+human or an AI agent — is rejected with a 422, making quality structural rather
+than a convention. (<code>n8nctl</code> has since adopted the same pattern in <code>n8nctl proxy</code>;
+ubie's remains deeper — more rules, schema-aware validation, and duplicate-name
+rejection.) It is single-instance (env vars, no keyring) and has no MCP or
+agent-management layer. <strong>Use it</strong> if your priority is keeping a team's workflow
+definitions clean, schema-valid, and consistently formatted.</p>
+<h3 id="workflow-intelligence-yigitkonurn8n-cli">Workflow intelligence — <code>yigitkonur/n8n-cli</code><a class="headerlink" href="#workflow-intelligence-yigitkonurn8n-cli" title="Permanent link">&para;</a></h3>
+<p>The most workflow-aware tool of the five, and the deepest on <em>correctness</em>. It
+bundles n8n's real packages (<code>n8n-nodes-base</code>, <code>n8n-workflow</code>) and a SQLite,
+FTS5-indexed catalog of every node, which unlocks things no other CLI here does:
+<strong>offline <code>workflows validate</code></strong> (check a workflow against the actual node
+definitions with no running instance), <strong><code>workflows autofix</code></strong> (auto-repair
+expression prefixes, missing webhook paths, Switch v3 conditions, and node-type
+typos, applied confidence-filtered), a <strong><code>nodes</code></strong> explorer (<code>list</code>, <code>search</code>,
+<code>show</code>, and <code>breaking-changes --from &lt;v&gt; --to &lt;v&gt;</code> for cross-version
+compatibility), <strong><code>templates</code></strong> search/get with <code>workflows deploy-template</code>, plus
+surgical partial edits, local version history with rollback, <code>diff</code>, <code>trigger</code>,
+<code>bulk</code>, and <code>health</code>. <code>n8nctl</code> now does node-type and parameter-name validation
+against an embedded catalog, but this tool goes further — schema-accurate value
+validation <strong>and automatic repair</strong>.</p>
+<p>It is single-purpose in the other direction: no MCP, no agent guard, no GitOps
+reconcile with prune, no cross-instance sync, no OS keyring (credentials sit in a
+plaintext <code>.n8nrc.json</code>), and it needs a Node runtime (npm-only, no signed
+binary). <strong>Use it</strong> if your priority is validating, repairing, and authoring
+correct workflows against real node schemas — it is the strongest tool here for
+that.</p>
+<h3 id="gitops-sync-edenreichn8n-cli">GitOps sync — <code>edenreich/n8n-cli</code><a class="headerlink" href="#gitops-sync-edenreichn8n-cli" title="Permanent link">&para;</a></h3>
+<p>Does one job cleanly. <code>workflows sync --directory --prune --dry-run</code> reconciles a
+folder of workflow JSON into an instance; <code>refresh</code> pulls the other way; plus
+<code>activate</code>/<code>deactivate</code>. It is workflow-only (no executions, credentials, tags,
+projects, …), single-instance, and reads the key from a plaintext <code>.env</code>. <strong>Use
+it</strong> if all you need is "push this folder of workflows to this instance in CI" with
+the least surface to learn.</p>
+<h3 id="multi-instance-operations-gitops-agent-management-n8nctl">Multi-instance operations, GitOps &amp; agent management — <code>n8nctl</code><a class="headerlink" href="#multi-instance-operations-gitops-agent-management-n8nctl" title="Permanent link">&para;</a></h3>
+<p>This project's lane. It is the only one of the four that combines:</p>
+<ul>
+<li><strong>Multi-instance profiles + OS keyring.</strong> Named profiles, one per instance,
+  switched with <code>--profile</code> / <code>N8NCTL_PROFILE</code> / <code>config use</code>; keys in the macOS
+  Keychain / Linux Secret Service / Windows Credential Manager. The others target a
+  single instance with the key in a plaintext file or env var.</li>
+<li><strong>Production resilience.</strong> Exponential backoff with jitter, idempotency-aware
+  retries (never retries POST/PATCH), adaptive rate limiting, and 429 handling.</li>
+<li><strong>Workflows as code.</strong> <code>workflows apply --dir</code> reconciles a directory into an
+  instance (create / update / skip-unchanged / <code>--prune</code>, with a <code>--dry-run</code>
+  plan); <code>workflows lint</code> (schema-grounded rules as a CI gate), <code>diff</code>, and
+  <code>convert</code> (JSON↔YAML with long code fields externalised to sibling files). Both
+  ubie and edenreich do declarative apply too; <code>n8nctl</code>'s differentiator is that,
+  combined with profiles, the <strong>same directory promotes across instances</strong>.</li>
+<li><strong>Manage instances from an AI agent.</strong> <code>n8nctl mcp</code> runs the CLI as a Model
+  Context Protocol server (73 annotated tools, reusing keyring auth and the active
+  profile) and <code>n8nctl agent guard</code> generates host rules that hard-block
+  destructive operations. See <a href="#a-note-on-mcp-and-agents">the layer note</a>.</li>
+<li><strong>Lint enforcement at the boundary.</strong> <code>n8nctl proxy</code> (adopting ubie's idea)
+  fronts the instance and rejects any workflow create/update that fails lint with a
+  422, so bad definitions can't land regardless of who pushes them.</li>
+<li><strong>Fleet operations:</strong> <code>backup</code>/<code>restore</code> (git-friendly snapshots), <code>workflows
+  search</code> (find by node type / credential / webhook path), cross-instance <code>sync</code>.</li>
+<li><strong>Richer output</strong> (table / json / yaml / csv, <code>--columns</code>, <code>--jq</code> via full
+  gojq, <code>-o id</code>), <code>--dry-run</code> that prints a redacted <code>curl</code>, and a signed,
+  multi-channel distribution (Homebrew/Scoop/deb/rpm/apk + cosign + SBOM).</li>
+</ul>
+<p><strong>Use it</strong> if you operate <strong>several instances</strong>, want <strong>no Node</strong> and a signed
+single binary, value <strong>keyring</strong> security and <strong>production resilience</strong>, keep
+<strong>workflows as code</strong> across environments, drive n8n from an <strong>AI agent</strong>, or want
+<strong>backup / promote / search</strong> across a fleet.</p>
+<h2 id="where-the-others-are-genuinely-better-than-n8nctl">Where the others are genuinely better than n8nctl<a class="headerlink" href="#where-the-others-are-genuinely-better-than-n8nctl" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><code>@n8n/cli</code></strong> — first-party and tracks new endpoints first; auto-JSON-on-pipe
+  and auto-pagination are nicer scripting defaults; npm-native for Node projects.</li>
+<li><strong><code>ubie-oss/n8n-cli</code></strong> — schema-aware linting (<code>node-params</code> + <code>node-schema</code>),
+  <code>fmt</code>, and <code>trace</code> make it strong for authoring quality. <code>n8nctl</code> adopted
+  ubie's server-side lint-enforcement <code>proxy</code> idea (<code>n8nctl proxy</code>, now with
+  duplicate-name rejection); ubie still ships <code>fmt</code> and <code>trace</code>, which <code>n8nctl</code>
+  does not.</li>
+<li><strong><code>yigitkonur/n8n-cli</code></strong> — a deep validation engine: node-type and parameter
+  checks, <strong>autofix</strong>, cross-version <strong>breaking-change</strong> detection, a searchable
+  node catalog, and template deployment. <code>n8nctl</code> now matches each of these
+  (<code>workflows autofix</code>, <code>workflows breaking-changes</code>, <code>nodes</code>, <code>templates</code>); the
+  two are closely comparable on workflow intelligence.</li>
+<li><code>n8nctl</code> does <strong>node-schema-aware linting</strong> validated against an embedded
+  catalog of n8n's real node definitions: <code>unknown-node-type</code> and
+  <code>unknown-parameter</code>, plus <code>invalid-parameter-value</code> (option values resolved
+  through each node's <code>displayOptions</code>). Combined with <code>autofix</code>,
+  <code>breaking-changes</code>, <code>nodes</code>, and <code>templates</code>, the workflow-intelligence gap
+  that <code>ubie</code> and <code>yigitkonur</code> once held is largely closed; ubie's remaining edge
+  is <code>fmt</code>/<code>trace</code>.</li>
+<li><strong><code>edenreich/n8n-cli</code></strong> — if you want <em>only</em> GitOps sync and nothing else, it is
+  smaller and has less to learn.</li>
+</ul>
+<h2 id="a-note-on-mcp-and-agents">A note on MCP and agents<a class="headerlink" href="#a-note-on-mcp-and-agents" title="Permanent link">&para;</a></h2>
+<p><code>n8nctl</code>'s MCP server operates at a different layer from n8n's own MCP support, and
+is complementary to it. <strong>n8n the platform is already MCP-native at the workflow
+layer</strong> — the <strong>MCP Server Trigger</strong> node turns a workflow into an MCP server
+(agents call your workflows as tools) and the <strong>MCP Client Tool</strong> node lets a
+workflow consume external MCP tools. That is the <em>data plane</em>: automations exposed
+as tools. <code>n8nctl mcp</code> is the <em>control plane</em>: it exposes the n8n <strong>management
+API</strong> (list / create / activate / delete workflows, manage credentials, projects,
+executions, <strong>across instances</strong>) so an agent can <em>operate and administer</em> a fleet.
+None of the other CLIs expose their management surface over MCP.</p>
+<h2 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h2>
+<p>A single API call is <strong>network-bound</strong>: per-request time is dominated by the
+instance's latency, not the CLI. The CLI's own processing is in the microseconds:</p>
+<table>
+<thead>
+<tr>
+<th>Operation (50-record page, no network)</th>
+<th>n8nctl</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decode a list page</td>
+<td>~50 µs</td>
+</tr>
+<tr>
+<td>Render a table</td>
+<td>~150 µs</td>
+</tr>
+<tr>
+<td>Render JSON</td>
+<td>~80 µs</td>
+</tr>
+<tr>
+<td>Apply a <code>--jq</code> filter (full gojq)</td>
+<td>~90 µs</td>
+</tr>
+</tbody>
+</table>
+<p>The one place a CLI's own cost is visible is <strong>process startup</strong>, paid on every
+invocation. The numbers below are measured (<code>hyperfine</code>, warm, 40 runs of
+<code>--help</code> on an Apple-silicon Mac); the two Go binaries start ~20–40× faster than
+anything running a JavaScript runtime:</p>
+<table>
+<thead>
+<tr>
+<th>CLI</th>
+<th>Runtime</th>
+<th>Startup (warm)</th>
+<th>Footprint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>n8nctl</strong></td>
+<td>Go static</td>
+<td><strong>5.5 ms</strong></td>
+<td>one 15 MB binary, no runtime</td>
+</tr>
+<tr>
+<td>edenreich</td>
+<td>Go static</td>
+<td>4.6 ms</td>
+<td>one 11 MB binary, no runtime</td>
+</tr>
+<tr>
+<td>@n8n/cli</td>
+<td>Node</td>
+<td>108 ms</td>
+<td>5.7 MB <code>node_modules</code> <strong>+ a Node runtime</strong></td>
+</tr>
+<tr>
+<td>yigitkonur</td>
+<td>Node</td>
+<td>136 ms</td>
+<td><strong>514 MB <code>node_modules</code></strong> + a Node runtime</td>
+</tr>
+<tr>
+<td>ubie</td>
+<td>Bun compiled</td>
+<td>197 ms</td>
+<td>one 59 MB binary (Bun runtime embedded)</td>
+</tr>
+</tbody>
+</table>
+<p>Two findings stand out. A <strong>Bun-compiled binary is not a fast-start binary</strong>: ubie
+is the slowest of the five, because the single file still boots the embedded Bun
+runtime and its bundled modules on every call. And <code>yigitkonur</code> depends on
+<code>isolated-vm</code> (a native V8 module, for sandboxed expression evaluation) which
+<strong>fails to compile on current Node</strong> and pulls a 514 MB <code>node_modules</code> — a
+portability cost a static Go binary does not have.</p>
+<p>For a single command none of this matters next to a network round-trip. It adds
+up when the CLI is invoked <strong>many times</strong> — a loop over 200 ids, an <code>xargs</code>
+pipeline, or a CI job — where ~150 ms each becomes ~30 s of overhead versus ~1 s
+for a fast-starting binary.</p>
+<p><em>Measured on Apple Silicon with <code>hyperfine --warmup 3 --runs 40</code>; Node startup has
+high variance. Reproduce with <code>go test -bench=. ./internal/...</code> and
+<code>hyperfine -N 'n8nctl version' 'n8n-cli --version'</code>.</em></p>
+<h2 id="which-should-you-use">Which should you use?<a class="headerlink" href="#which-should-you-use" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><code>@n8n/cli</code></strong> — the official tool; single instance, Node-native, newest endpoints.</li>
+<li><strong><code>ubie-oss/n8n-cli</code></strong> — authoring quality: schema-aware lint, formatting, and
+  server-side lint enforcement.</li>
+<li><strong><code>yigitkonur/n8n-cli</code></strong> — workflow correctness: offline validation, autofix,
+  node catalog, breaking-change detection, and template deployment.</li>
+<li><strong><code>edenreich/n8n-cli</code></strong> — minimal GitOps sync, nothing else.</li>
+<li><strong><code>n8nctl</code></strong> — multiple instances, no Node + a signed binary, keyring security,
+  production resilience, workflows-as-code across environments, fleet
+  backup/promote/search, and agent management (MCP + guard).</li>
+</ul>
+<p>Many teams will reasonably use more than one — for example, <code>yigitkonur</code> or <code>ubie</code>
+to validate and author workflows, and <code>n8nctl</code> to operate the fleet, promote
+across instances, manage it from an agent, and back it up.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 1, 2026 00:18:48 UTC"><span class="timeago" datetime="2026-07-01T00:18:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 1, 2026 00:18:48 UTC">2026-07-01</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="July 1, 2026 00:18:48 UTC"><span class="timeago" datetime="2026-07-01T00:18:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="July 1, 2026 00:18:48 UTC">2026-07-01</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "search.highlight", "search.suggest", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../js/timeago.min.js"></script>
+      
+        <script src="../js/timeago_mkdocs_material.js"></script>
+      
+    
+  </body>
+</html>
