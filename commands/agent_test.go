@@ -40,11 +40,32 @@ func TestClassifyAPICommands(t *testing.T) {
 	assert.True(t, w["n8n_restore"], "restore is a write")
 	assert.True(t, w["n8n_workflows_sync"], "sync is a write")
 
+	// packages import creates workflows/credentials on the instance — it must
+	// be gated as a write, never fall through as an unannotated local command.
+	assert.True(t, w["n8n_packages_import"], "packages import is a remote write")
+	assert.True(t, r["n8n_packages_export"], "packages export only reads the instance")
+
 	// Local utility commands (no API call) must never be classified/gated.
 	for _, m := range []map[string]bool{r, w, irr} {
 		assert.False(t, m["n8n_agent_guard"], "guard is not an API op")
 		assert.False(t, m["n8n_auth_login"], "auth is not an API op")
 		assert.False(t, m["n8n_config_use"], "config is not an API op")
+		// The raw `api` escape hatch cannot be classified by verb; it is
+		// covered separately (method-position patterns in the hook + rules).
+		assert.False(t, m["n8n_api"], "raw api escape is not verb-classifiable")
+	}
+
+	// Alias spellings are enumerated so `n8nctl wf delete` cannot bypass the
+	// Bash-surface rules built from these commands.
+	for _, gc := range irreversible {
+		if gc.tool == "n8n_workflows_delete" {
+			assert.Contains(t, gc.spellings, "workflows delete")
+			assert.Contains(t, gc.spellings, "wf delete")
+			assert.Contains(t, gc.spellings, "workflow delete")
+		}
+		if gc.tool == "n8n_executions_prune" {
+			assert.Contains(t, gc.spellings, "exec prune")
+		}
 	}
 
 	// No operation is in two buckets at once.
@@ -69,27 +90,33 @@ func runGuard(t *testing.T, args ...string) string {
 
 func TestGuard_ClaudeCode(t *testing.T) {
 	out := runGuard(t, "--host", "claude-code")
-	// the hook script blocks the irreversible verbs
+	// the hook script blocks the irreversible operations by exact path
 	assert.Contains(t, out, "n8nctl-guard.sh")
-	assert.Contains(t, out, "delete") // hook blocks the irreversible verbs
+	assert.Contains(t, out, "'workflows delete'") // hook blocked_cmds entry
+	assert.Contains(t, out, "'wf delete'")        // alias spelling is covered too
 	// settings.json denies delete (Bash + MCP) and asks on writes
-	assert.Contains(t, out, "Bash(n8nctl * delete:*)")
-	assert.Contains(t, out, "mcp__.*n8n.*_(")          // MCP deny pattern for irreversible verbs
-	assert.Contains(t, out, "Bash(n8nctl * create:*)") // a write -> ask
+	assert.Contains(t, out, "Bash(n8nctl workflows delete:*)")
+	assert.Contains(t, out, "Bash(n8nctl wf delete:*)")
+	assert.Contains(t, out, "Bash(n8nctl api DELETE:*)") // raw-api escape hatch
+	assert.Contains(t, out, "Bash(n8nctl api POST:*)")
+	assert.Contains(t, out, "mcp__n8nctl__n8n_workflows_delete") // exact MCP deny
+	assert.Contains(t, out, "Bash(n8nctl workflows create:*)")   // a write -> ask
+	assert.Contains(t, out, "Bash(n8nctl packages import:*)")    // remote write -> ask
 	// reads are not gated
-	assert.NotContains(t, out, "Bash(n8nctl * list:*)")
-	assert.NotContains(t, out, "Bash(n8nctl * search:*)")
+	assert.NotContains(t, out, "Bash(n8nctl workflows list:*)")
+	assert.NotContains(t, out, "Bash(n8nctl workflows search:*)")
+	// no verb-wildcard rules remain (they can't match top-level commands and
+	// false-match unrelated paths)
+	assert.NotContains(t, out, "Bash(n8nctl * ")
 }
 
 func TestGuard_AllWritesFoldsIntoDeny(t *testing.T) {
 	out := runGuard(t, "--host", "claude-code", "--all-writes")
-	// create/update join the hard-block verb set
-	assert.Contains(t, out, "create")
+	// create/update join the hard-block set
+	assert.Contains(t, out, "'workflows create'")
+	assert.Contains(t, out, "Bash(n8nctl workflows create:*)")
 	// and nothing is left in the ask list
-	var settings map[string]any
-	// extract the settings JSON block (last {...}) loosely: just assert ask is empty-ish
-	assert.Contains(t, out, "verbs='(")
-	_ = settings
+	assert.Contains(t, out, `"ask": []`)
 	assert.NotContains(t, out, "\"ask\": [\n      \"Bash") // no Bash ask entries remain
 }
 
@@ -102,7 +129,10 @@ func TestGuard_Codex(t *testing.T) {
 func TestGuard_OpenCode(t *testing.T) {
 	out := runGuard(t, "--host", "opencode")
 	assert.Contains(t, out, "opencode.json")
-	assert.Contains(t, out, "\"n8n_*_delete\": \"deny\"")
+	assert.Contains(t, out, "\"n8n_workflows_delete\": \"deny\"")
+	assert.Contains(t, out, "\"n8nctl wf delete\": \"deny\"")
+	assert.Contains(t, out, "\"n8nctl api DELETE\": \"deny\"")
+	assert.Contains(t, out, "\"n8nctl packages import\": \"ask\"")
 	// the generated config is valid JSON
 	start := strings.Index(out, "{")
 	require.GreaterOrEqual(t, start, 0)

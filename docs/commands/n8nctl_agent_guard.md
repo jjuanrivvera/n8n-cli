@@ -20,6 +20,12 @@ Pass --all-writes to block writes too.
 Because the MCP server uses whatever profile is active at startup (the --profile
 flag is not exposed to the model), an agent cannot switch instances on its own.
 
+IMPORTANT: the "n8nctl api" escape hatch can issue any HTTP verb. The guard
+blocks "n8nctl api DELETE/PUT/POST/PATCH" method patterns on the Bash surface
+but cannot enumerate arbitrary path arguments, and the n8n_api MCP tool cannot
+be classified by verb. For a hard guarantee, run the agent MCP-only (no Bash
+tool) or inside a read-only sandbox.
+
 Output is printed for review by default; pass --write to install it.
 
 ```

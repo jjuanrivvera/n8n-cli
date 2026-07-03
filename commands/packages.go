@@ -18,7 +18,11 @@ func init() {
 			"This is a beta n8n feature, disabled by default; the API returns 404 unless\n" +
 			"the instance sets N8N_PUBLIC_API_PACKAGES_ENABLED=true.",
 	}
-	pkg.AddCommand(packageExportCmd(), packageImportCmd())
+	// export only reads the instance (the archive lands in a local file);
+	// import CREATES workflows/credentials on the instance — a remote write that
+	// must carry openWorldHint so `n8nctl agent guard` gates it (an unannotated
+	// top-level command is treated as local/utility and never gated).
+	pkg.AddCommand(readOnlyHints(packageExportCmd()), writeHints(packageImportCmd()))
 	rootCmd.AddCommand(pkg)
 }
 

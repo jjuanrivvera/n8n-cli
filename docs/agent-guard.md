@@ -23,11 +23,13 @@ reaches the CLI.
 
 The default posture splits operations into three tiers:
 
-- **Hard-block** the irreversible operations: `delete` and `delete-rows`. The
-  agent cannot run these at all.
+- **Hard-block** the irreversible operations: `delete`, `delete-rows`, and
+  `prune`, plus the destructive raw-api methods (`n8nctl api
+  DELETE/PUT/POST/PATCH`). The agent cannot run these at all.
 - **Require approval** for ordinary writes: `create`, `update`, `activate`,
   `deactivate`, `archive`, `transfer`, `restore`, `sync`, `apply`, `retry`,
-  `stop`, member changes, and the rest. These pause for a human to confirm.
+  `stop`, `packages import`, member changes, and the rest. These pause for a
+  human to confirm.
 - **Allow** reads (`list`, `get`, `search`, `lint`, `diff`, `schema`, `members`,
   `audit`, `backup`) to run freely.
 
@@ -55,46 +57,74 @@ For `--host claude-code` the guard emits two files:
   MCP-tool branch and best-effort-blocks the Bash branch.
 - `.claude/settings.json` — deny/ask permission rules plus the hook wiring.
 
+The hook matches blocked operations by **exact subcommand path at the command
+position**, not by bare verbs anywhere in the line. That means
+`n8nctl workflows create --set name=delete-old` is allowed (the blocked word is
+in an argument), while `n8nctl workflows delete 42` is denied — including after
+`;`, `|`, `&&`, an `env` prefix, a newline continuation, or when the binary is
+invoked by path (`./bin/n8nctl`, `/usr/local/bin/n8nctl`). A different binary
+that merely ends in `n8nctl` is not matched. The blocked set enumerates every
+built-in alias spelling (`wf delete`, `exec prune`, `dt delete-rows`, …), and
+quotes/backslashes are stripped first so `de""lete`-style obfuscation cannot
+slip past. The MCP branch is an exact set-membership check on the tool basename,
+so it covers any MCP server name and cannot false-match a near-miss tool name.
+
 The hook (excerpt):
 
 ```bash
-verbs='(delete|delete-rows)'
+blocked_cmds=(
+  'workflows delete'
+  'workflow delete'
+  'wf delete'
+  'executions prune'
+  ...
+)
+blocked_tools=(
+  'n8n_workflows_delete'
+  ...
+)
 ...
-tool=$(printf '%s' "$input" | jq -r '.tool_name // empty')
 case "$tool" in
   Bash)
-    cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
-    # Strip quotes/backslashes to defeat trivial obfuscation, flatten newlines.
-    stripped=$(printf '%s' "$cmd" | tr -d '\042\047\134')
-    if printf '%s\n%s' "$cmd" "$stripped" | tr '\n' ' ' | grep -qiE "\bn8nctl\b.*\b${verbs}\b"; then
-      deny "n8nctl agent guard: irreversible operation blocked (${verbs})."
+    raw_cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
+    cleaned=$(deobfuscate "$raw_cmd")
+    if bash_is_blocked "$cleaned"; then
+      deny "n8nctl agent guard: irreversible operation blocked."
+    fi
+    if api_is_blocked "$cleaned"; then
+      deny "n8nctl agent guard: destructive raw-api call blocked."
     fi
     ;;
-  mcp__*n8n*)
-    if printf '%s' "$tool" | grep -qiE "_${verbs}$"; then
-      deny "n8nctl agent guard: irreversible MCP tool blocked (${tool})."
-    fi
+  mcp__*)
+    base="${tool##*__}"
+    for t in "${blocked_tools[@]}"; do
+      if [ "$base" = "$t" ]; then
+        deny "n8nctl agent guard: irreversible MCP tool blocked (${tool})."
+      fi
+    done
     ;;
 esac
 ```
 
-The permission rules in `.claude/settings.json` are belt-and-suspenders: `deny`
-for the destructive operations, `ask` for the writes, across both the Bash and
-MCP surfaces:
+The permission rules in `.claude/settings.json` are belt-and-suspenders: exact
+per-command `deny` rules for the destructive operations (one per alias
+spelling), `ask` for the writes, plus exact MCP tool names:
 
 ```json
 {
   "permissions": {
     "ask": [
-      "Bash(n8nctl * create:*)",
-      "Bash(n8nctl * update:*)",
-      "Bash(n8nctl * activate:*)",
-      "mcp__.*n8n.*_(activate|create|update|…)"
+      "Bash(n8nctl workflows create:*)",
+      "Bash(n8nctl workflows update:*)",
+      "Bash(n8nctl packages import:*)",
+      "mcp__n8nctl__n8n_workflows_create"
     ],
     "deny": [
-      "Bash(n8nctl * delete:*)",
-      "Bash(n8nctl * delete-rows:*)",
-      "mcp__.*n8n.*_(delete|delete-rows)"
+      "Bash(n8nctl workflows delete:*)",
+      "Bash(n8nctl wf delete:*)",
+      "Bash(n8nctl api DELETE:*)",
+      "Bash(n8nctl api POST:*)",
+      "mcp__n8nctl__n8n_workflows_delete"
     ]
   }
 }
@@ -128,15 +158,17 @@ over the `*` catch-all, which allows everything else:
   "permission": {
     "bash": {
       "*": "allow",
-      "n8nctl * create*": "ask",
-      "n8nctl * update*": "ask",
-      "n8nctl * delete*": "deny",
-      "n8nctl * delete-rows*": "deny"
+      "n8nctl workflows create": "ask",
+      "n8nctl workflows update": "ask",
+      "n8nctl workflows delete": "deny",
+      "n8nctl wf delete": "deny",
+      "n8nctl api DELETE": "deny",
+      "n8nctl data-tables delete-rows": "deny"
     },
-    "n8n_*_create": "ask",
-    "n8n_*_update": "ask",
-    "n8n_*_delete": "deny",
-    "n8n_*_delete-rows": "deny"
+    "n8n_workflows_create": "ask",
+    "n8n_workflows_update": "ask",
+    "n8n_workflows_delete": "deny",
+    "n8n_data-tables_delete-rows": "deny"
   }
 }
 ```
@@ -146,17 +178,34 @@ over the `*` catch-all, which allows everything else:
 The guard fences two surfaces, and they are not equally strong:
 
 - **The MCP-tool branch is a hard block.** MCP tool names are structured and
-  cannot be obfuscated, so the guard matches them exactly and denies the
-  destructive ones outright.
-- **The Bash branch is best-effort.** It defeats quote/backslash obfuscation and
-  flattens newlines so a split verb cannot slip past the match, but it cannot
-  defeat variable indirection or shell aliases.
+  cannot be obfuscated, so the guard matches them exactly (by tool basename,
+  covering any server name) and denies the destructive ones outright.
+- **The Bash branch is best-effort.** It defeats quote/backslash obfuscation,
+  flattens newlines so a split verb cannot slip past the match, covers
+  path-invoked binaries and every built-in alias spelling — but it cannot
+  defeat variable indirection (`a=delete; n8nctl workflows $a 42`), shell
+  aliases, or user-defined `n8nctl alias` expansions.
 
 The strongest configuration is therefore to run the agent **MCP-only** (no Bash
 access to `n8nctl`) — or in a read-only sandbox — combined with the guard. That
 way the only operations available are the [MCP tools](mcp.md), with the
 destructive ones hard-blocked. Because `agent guard` is itself excluded from the
 MCP surface, an agent cannot disable its own rails.
+
+## Known limitations
+
+- **The `n8nctl api` escape hatch.** The guard blocks
+  `n8nctl api DELETE/PUT/POST/PATCH` at the method position on the Bash surface
+  (a `GET` whose path merely contains "delete" is not blocked), but it cannot
+  enumerate arbitrary path arguments, and the `n8n_api` MCP tool cannot be
+  classified by verb. Treat raw-api access with the same care as Bash access.
+- **Conservative false positives.** De-obfuscation strips quotes before
+  matching, so a quoted blocked string at a command position — e.g.
+  `rg "n8nctl workflows delete" src/` — is denied. This errs on the safe side;
+  unquoted or regex-style search patterns are unaffected.
+- **Variable indirection, shell aliases, and `n8nctl alias`.** These rewrite
+  the command line outside the hook's view. MCP-only operation or a read-only
+  sandbox is the hard guarantee.
 
 ## See also
 

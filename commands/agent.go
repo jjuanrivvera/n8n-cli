@@ -41,9 +41,37 @@ func isIrreversibleVerb(verb string) bool {
 
 // guardCmd is one API operation the guard config targets.
 type guardCmd struct {
-	cli  string // CLI path without the root, e.g. "workflows delete"
-	tool string // MCP tool name, e.g. "n8n_workflows_delete"
-	verb string // last path segment, e.g. "delete"
+	cli       string   // canonical CLI path without the root, e.g. "workflows delete"
+	tool      string   // MCP tool name, e.g. "n8n_workflows_delete"
+	verb      string   // last path segment, e.g. "delete"
+	spellings []string // every CLI spelling incl. cobra aliases, e.g. "wf delete"
+}
+
+// cliSpellings returns every CLI spelling of a command path (canonical first),
+// crossing each path segment's name with its cobra aliases. Without this,
+// alias spellings like `n8nctl wf delete` or `n8nctl exec prune` would bypass
+// Bash-surface rules that match only the canonical path.
+func cliSpellings(sub, root *cobra.Command) []string {
+	var chain []*cobra.Command
+	for c := sub; c != nil && c != root; c = c.Parent() {
+		chain = append([]*cobra.Command{c}, chain...)
+	}
+	spellings := []string{""}
+	for _, c := range chain {
+		names := append([]string{c.Name()}, c.Aliases...)
+		next := make([]string, 0, len(spellings)*len(names))
+		for _, s := range spellings {
+			for _, n := range names {
+				if s == "" {
+					next = append(next, n)
+				} else {
+					next = append(next, s+" "+n)
+				}
+			}
+		}
+		spellings = next
+	}
+	return spellings
 }
 
 func init() {
@@ -75,6 +103,12 @@ Pass --all-writes to block writes too.
 
 Because the MCP server uses whatever profile is active at startup (the --profile
 flag is not exposed to the model), an agent cannot switch instances on its own.
+
+IMPORTANT: the "n8nctl api" escape hatch can issue any HTTP verb. The guard
+blocks "n8nctl api DELETE/PUT/POST/PATCH" method patterns on the Bash surface
+but cannot enumerate arbitrary path arguments, and the n8n_api MCP tool cannot
+be classified by verb. For a hard guarantee, run the agent MCP-only (no Bash
+tool) or inside a read-only sandbox.
 
 Output is printed for review by default; pass --write to install it.`,
 		Args: cobra.NoArgs,
@@ -133,11 +167,6 @@ func (g guardPlan) asked() []guardCmd {
 	return g.writes
 }
 
-// blockedVerbs returns the distinct verbs in the hard-block set (for regexes).
-func (g guardPlan) blockedVerbs() []string {
-	return distinctVerbs(g.blocked())
-}
-
 // classifyAPICommands walks the command tree and buckets the operations that hit
 // the n8n API (those carry the openWorldHint annotation, which excludes local
 // utility commands like auth/config/agent). Read operations carry readOnlyHint;
@@ -149,9 +178,10 @@ func classifyAPICommands(root *cobra.Command) (read, writes, irreversible []guar
 			if sub.Runnable() && !sub.Hidden && sub.Name() != "help" {
 				cli := strings.TrimPrefix(sub.CommandPath(), root.Name()+" ")
 				gc := guardCmd{
-					cli:  cli,
-					tool: guardMCPPrefix + "_" + strings.ReplaceAll(cli, " ", "_"),
-					verb: sub.Name(),
+					cli:       cli,
+					tool:      guardMCPPrefix + "_" + strings.ReplaceAll(cli, " ", "_"),
+					verb:      sub.Name(),
+					spellings: cliSpellings(sub, root),
 				}
 				switch {
 				case sub.Annotations["openWorldHint"] != "true":
@@ -176,19 +206,6 @@ func classifyAPICommands(root *cobra.Command) (read, writes, irreversible []guar
 
 func sortGuard(cs []guardCmd) {
 	sort.Slice(cs, func(i, j int) bool { return cs[i].tool < cs[j].tool })
-}
-
-func distinctVerbs(cs []guardCmd) []string {
-	seen := map[string]bool{}
-	var out []string
-	for _, c := range cs {
-		if !seen[c.verb] {
-			seen[c.verb] = true
-			out = append(out, c.verb)
-		}
-	}
-	sort.Strings(out)
-	return out
 }
 
 // writeOrPrint either writes content to path (creating parent dirs) when write is
