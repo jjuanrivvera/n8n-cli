@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-07-02
+
+### Fixed
+- **`agent guard` now generates a PreToolUse enforcement hook** (Bash + MCP
+  matchers); previously it emitted only permission rules, which are bypassed by
+  path-invoked binaries, obfuscation, and command chaining. The hook anchors
+  blocked subcommands, matches `./bin/n8nctl` and `/usr/local/bin/n8nctl` while
+  ignoring a different binary ending in `n8nctl`, and blocks `api
+  DELETE/PUT/POST/PATCH` at the method position.
+- **`packages import` is now gated.** It was added without annotations and so
+  classified as a local/utility command and silently allowed, yet it creates
+  workflows and credentials on the instance; it now requires approval, locked by
+  a test asserting every API command is annotated.
+- `agent guard` now emits every cobra-alias spelling (`wf delete`, `exec prune`,
+  …), replaces the non-functional regex MCP permission rules with exact tool
+  names, and its no-jq hook fallback no longer fails open.
+
 ## [0.5.1] - 2026-06-23
 
 ### Fixed
