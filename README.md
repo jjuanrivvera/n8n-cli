@@ -163,6 +163,10 @@ make docs-serve     # preview the docs site
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the architecture and contribution
 workflow.
 
+## Built with cliwright
+
+Part of a fleet of single-purpose CLIs generated with [cliwright](https://cliwright.jjuanrivvera.com) — browse them all at **[cliwright.jjuanrivvera.com](https://cliwright.jjuanrivvera.com)**.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
