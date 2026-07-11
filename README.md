@@ -11,6 +11,7 @@ Control any n8n instance from your terminal. One static binary, many instances.
 [![Go Reference](https://pkg.go.dev/badge/github.com/jjuanrivvera/n8n-cli.svg)](https://pkg.go.dev/github.com/jjuanrivvera/n8n-cli)
 [![Go version](https://img.shields.io/github/go-mod/go-version/jjuanrivvera/n8n-cli)](go.mod)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Built with cliwright](https://img.shields.io/badge/built_with-cliwright-1f6feb)](https://cliwright.jjuanrivvera.com)
 
 <br>
 
@@ -30,8 +31,6 @@ with secrets in your **OS keyring**.
 
 > Unofficial. Not affiliated with n8n. Talks to the public API at
 > `<your-host>/api/v1` using the `X-N8N-API-KEY` header.
-
-> 🏭 Part of the [cliwright](https://github.com/jjuanrivvera/cliwright) CLI fleet.
 
 ## Why n8nctl
 
@@ -162,10 +161,6 @@ make docs-serve     # preview the docs site
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the architecture and contribution
 workflow.
-
-## Built with cliwright
-
-Part of a fleet of single-purpose CLIs generated with [cliwright](https://cliwright.jjuanrivvera.com) — browse them all at **[cliwright.jjuanrivvera.com](https://cliwright.jjuanrivvera.com)**.
 
 ## License
 
