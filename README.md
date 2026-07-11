@@ -38,8 +38,8 @@ with secrets in your **OS keyring**.
 - **Multi-instance, first class.** One named profile per instance — switch with
   `--instance` (`--profile` still works as an alias). API keys live in your **OS
   keyring**, never in a plaintext file.
-- **One static binary, no Node.** `brew install`, `go install`, or a single
-  download; starts in ~6 ms, painless on CI runners.
+- **One static binary, no Node.** `brew install`, `go install`, or a one-line
+  `curl | sh`; starts in ~6 ms, painless on CI runners.
 - **Workflows as code.** Declarative `apply` (with `--prune` / `--dry-run`),
   plus `lint`, `diff`, `convert`, and `backup` / `restore` / `sync` across
   instances.
@@ -56,6 +56,9 @@ an honest, lane-by-lane breakdown of all of them, see the
 ## Install
 
 ```bash
+# Install script (macOS/Linux) — downloads the release binary, verifies its checksum
+curl -fsSL https://raw.githubusercontent.com/jjuanrivvera/n8n-cli/main/install.sh | sh
+
 # Homebrew (macOS/Linux) — installed as a cask
 brew install jjuanrivvera/n8n-cli/n8nctl-cli
 # or, tap first then install by name
