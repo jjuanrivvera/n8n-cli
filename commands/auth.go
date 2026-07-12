@@ -164,5 +164,15 @@ func promptSecret(cmd *cobra.Command, label string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return strings.TrimSpace(string(b)), nil
+	return sanitizeSecret(string(b)), nil
+}
+
+// sanitizeSecret strips terminal bracketed-paste markers (ESC[200~ … ESC[201~) and trims
+// surrounding whitespace. With bracketed paste enabled, a raw read (unlike the shell's line
+// editor) receives those wrappers around pasted text; left in they corrupt a pasted key so it
+// fails auth. Stripping them fixes the common "typing works, pasting fails".
+func sanitizeSecret(s string) string {
+	s = strings.ReplaceAll(s, "\x1b[200~", "")
+	s = strings.ReplaceAll(s, "\x1b[201~", "")
+	return strings.TrimSpace(s)
 }
