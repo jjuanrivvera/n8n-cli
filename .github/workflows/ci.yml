@@ -1,149 +1,20 @@
+# CI — delegates to the fleet-canonical reusable workflow in jjuanrivvera/.github.
+# Change fleet-wide CI policy there, not here. Repo-specific inputs only live below.
+# (node-catalog.yml stays as its own workflow; `make verify`'s cliwright gates run locally + pre-commit.)
 name: CI
 
 on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main, develop]
 
 permissions:
   contents: read
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-          cache: true
-      - name: gofmt
-        run: |
-          unformatted=$(gofmt -l .)
-          if [ -n "$unformatted" ]; then
-            echo "Unformatted files:"; echo "$unformatted"; exit 1
-          fi
-      - name: go vet
-        run: go vet ./...
-      - name: golangci-lint
-        # Build golangci-lint from source with the repo's Go toolchain. The
-        # prebuilt release binaries are built with an older Go and refuse to run
-        # against a newer go.mod target (the toolchain pinned here).
-        run: |
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
-          golangci-lint run
-      - name: Command reference is up to date
-        # Fail if the generated docs/commands tree drifts from the cobra tree.
-        run: |
-          make docs-gen
-          git diff --exit-code -- docs/commands || {
-            echo "::error::docs/commands is stale — run 'make docs-gen' and commit the result"
-            exit 1
-          }
-
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-          cache: true
-      - name: govulncheck (blocking)
-        run: |
-          # Build from latest so it compiles with the runner's Go toolchain; the
-          # determinism that matters (the vuln DB) is fetched live regardless.
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
-      - name: gosec (gate on high severity)
-        # Build gosec from source with this job's Go — same reason as golangci-lint
-        # and govulncheck above: the prebuilt action/binary lags the toolchain and
-        # chokes on a module already on a newer Go ("invalid array length"). @latest
-        # compiled here always matches the module's Go. Fails the build on
-        # high/medium-confidence high-severity findings.
-        run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
-          gosec -severity high -confidence medium ./...
-
-  verify:
-    # The deterministic acceptance gate: `make verify` == build/vet/lint/test +
-    # spec-completeness (manifest vs the enumerated public API) + coverage. No LLM
-    # judge, so it is CI- and token-safe. golangci-lint is built from source with
-    # this job's Go (the prebuilt action lags the toolchain); jq ships on the runner.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-          cache: true
-      - name: Install golangci-lint (from source, this job's Go)
-        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
-      - name: make verify
-        run: make verify
-
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-          cache: true
-      - name: Test (race)
-        run: go test -race ./...
-      - name: Build
-        run: go build ./...
-
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-          cache: true
-      - name: Test (race + coverage)
-        run: go test -race -covermode=atomic -coverprofile=coverage.out ./...
-      - name: Coverage gate (>= 80%)
-        run: |
-          total=$(go tool cover -func=coverage.out | awk '/^total:/ {print substr($3, 1, length($3)-1)}')
-          echo "Total coverage: ${total}%"
-          awk -v c="$total" 'BEGIN { if (c+0 < 80.0) { print "FAIL: total coverage below 80%"; exit 1 } }'
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v7
-        with:
-          files: coverage.out
-          slug: jjuanrivvera/n8n-cli
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-          cache: true
-      - name: GoReleaser check
-        # Fail on deprecated/invalid config so a release-time breakage is caught
-        # on PR, not at tag time.
-        uses: goreleaser/goreleaser-action@v7
-        with:
-          version: '~> v2'
-          args: check
-      - name: GoReleaser snapshot
-        # Snapshot build to catch packaging regressions. Skip signing, SBOMs,
-        # and any publishers — those only run on a tagged release.
-        uses: goreleaser/goreleaser-action@v7
-        with:
-          version: '~> v2'
-          args: release --snapshot --clean --skip=sign,sbom,publish
+  ci:
+    uses: jjuanrivvera/.github/.github/workflows/go-ci.yml@main
+    with:
+      coverage-threshold: "80"
+      run-gosec: true
+      run-docs-check: true
