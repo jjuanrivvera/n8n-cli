@@ -6,11 +6,11 @@ Control any n8n instance from your terminal. One static binary, many instances.
 
 [![CI](https://github.com/jjuanrivvera/n8n-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/jjuanrivvera/n8n-cli/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/jjuanrivvera/n8n-cli)](https://github.com/jjuanrivvera/n8n-cli/releases/latest)
-[![codecov](https://codecov.io/gh/jjuanrivvera/n8n-cli/branch/main/graph/badge.svg)](https://codecov.io/gh/jjuanrivvera/n8n-cli)
-[![Go Report Card](https://goreportcard.com/badge/github.com/jjuanrivvera/n8n-cli)](https://goreportcard.com/report/github.com/jjuanrivvera/n8n-cli)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A580%25-brightgreen)](https://github.com/jjuanrivvera/n8n-cli/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/jjuanrivvera/n8n-cli.svg)](https://pkg.go.dev/github.com/jjuanrivvera/n8n-cli)
 [![Go version](https://img.shields.io/github/go-mod/go-version/jjuanrivvera/n8n-cli)](go.mod)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/jjuanrivvera/n8n-cli)
 [![Built with cliwright](https://img.shields.io/badge/built_with-cliwright-1f6feb)](https://cliwright.jjuanrivvera.com)
 
 <br>
