@@ -69,3 +69,8 @@ nav:
       - Command Reference: commands/index.md
       - vs. Other n8n CLIs: comparison.md
       - Contributing: contributing.md
+
+extra:
+  analytics:
+    provider: google
+    property: G-9HY9P7C366
