@@ -36,6 +36,14 @@ func TestLint_RequiredFields(t *testing.T) {
 	assert.GreaterOrEqual(t, Errors(fs), 1)
 }
 
+func TestLint_EmptyNodesArray(t *testing.T) {
+	// "nodes": [] is present but empty — a byte-length check would miss it.
+	w := wf(`[]`, `{}`)
+	fs := Lint(w, nil)
+	assert.True(t, rules(fs)["required-fields"], "empty nodes array must flag required-fields")
+	assert.GreaterOrEqual(t, Errors(fs), 1)
+}
+
 func TestLint_ConnectionReference(t *testing.T) {
 	w := wf(`[{"name":"A","type":"x","parameters":{}}]`,
 		`{"A":{"main":[[{"node":"Ghost","type":"main","index":0}]]}}`)

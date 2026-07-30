@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -368,6 +369,40 @@ func newDeleteCmd[T any](sp resourceSpec[T]) *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "skip the confirmation prompt")
+	return cmd
+}
+
+// buildTransferCmd builds the shared "transfer <id> --project <projectId>" verb
+// for resources that can move between projects (workflows, credentials). The
+// transfer callback runs the resource-specific API call.
+func buildTransferCmd(noun string, transfer func(ctx context.Context, c *api.Client, id, projectID string) error) *cobra.Command {
+	var project string
+	cmd := &cobra.Command{
+		Use:   "transfer <id> --project <projectId>",
+		Short: "Transfer a " + noun + " to another project",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if project == "" {
+				return fmt.Errorf("--project is required")
+			}
+			client, err := getAPIClient(cmd)
+			if err != nil {
+				return err
+			}
+			if err := transfer(cmd.Context(), client, args[0], project); err != nil {
+				if api.IsDryRun(err) {
+					dryRunNotice(cmd)
+					return nil
+				}
+				return err
+			}
+			if !flagQuiet {
+				fmt.Fprintf(cmd.OutOrStdout(), "transferred %s %s to project %s\n", noun, args[0], project)
+			}
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&project, "project", "", "destination project id (required)")
 	return cmd
 }
 

@@ -58,12 +58,18 @@ func Lint(wf *api.Workflow, disabled map[string]bool) []Finding {
 	var out []Finding
 	on := func(rule string) bool { return !disabled[rule] }
 
+	// Parse nodes up front so required-fields can tell an empty array ("nodes": [])
+	// from a populated one. A byte-length check on the raw JSON would see "[]" as
+	// two bytes and treat a node-less workflow as valid.
+	var nodes []node
+	_ = json.Unmarshal(wf.Nodes, &nodes)
+
 	// required-fields
 	if on("required-fields") {
 		if strings.TrimSpace(wf.Name) == "" {
 			out = append(out, Finding{"required-fields", Error, "", "workflow has no name"})
 		}
-		if len(wf.Nodes) == 0 || string(wf.Nodes) == "null" {
+		if len(nodes) == 0 {
 			out = append(out, Finding{"required-fields", Error, "", "workflow has no nodes"})
 		}
 		if len(wf.Connections) == 0 || string(wf.Connections) == "null" {
@@ -71,8 +77,6 @@ func Lint(wf *api.Workflow, disabled map[string]bool) []Finding {
 		}
 	}
 
-	var nodes []node
-	_ = json.Unmarshal(wf.Nodes, &nodes)
 	names := map[string]bool{}
 	for _, n := range nodes {
 		names[n.Name] = true

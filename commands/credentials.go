@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/spf13/cobra"
 
@@ -47,32 +47,7 @@ func credentialExtra(parent *cobra.Command, _ resourceSpec[api.Credential]) {
 	}))
 
 	// transfer <id> --project <projectId>
-	var project string
-	transfer := &cobra.Command{
-		Use:   "transfer <id> --project <projectId>",
-		Short: "Transfer a credential to another project",
-		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if project == "" {
-				return fmt.Errorf("--project is required")
-			}
-			client, err := getAPIClient(cmd)
-			if err != nil {
-				return err
-			}
-			if err := client.TransferCredential(cmd.Context(), args[0], project); err != nil {
-				if api.IsDryRun(err) {
-					dryRunNotice(cmd)
-					return nil
-				}
-				return err
-			}
-			if !flagQuiet {
-				fmt.Fprintf(cmd.OutOrStdout(), "transferred credential %s to project %s\n", args[0], project)
-			}
-			return nil
-		},
-	}
-	transfer.Flags().StringVar(&project, "project", "", "destination project id (required)")
-	parent.AddCommand(transfer)
+	parent.AddCommand(buildTransferCmd("credential", func(ctx context.Context, c *api.Client, id, projectID string) error {
+		return c.TransferCredential(ctx, id, projectID)
+	}))
 }
