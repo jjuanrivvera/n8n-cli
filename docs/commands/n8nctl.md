@@ -64,6 +64,7 @@ instance's API key in your OS keyring, and switch with --instance or
 * [n8nctl stats](n8nctl_stats.md)	 - One-shot instance health summary
 * [n8nctl tags](n8nctl_tags.md)	 - Manage workflow tags
 * [n8nctl templates](n8nctl_templates.md)	 - Browse and deploy workflows from the n8n template gallery
+* [n8nctl update](n8nctl_update.md)	 - Update n8nctl to the latest GitHub release
 * [n8nctl users](n8nctl_users.md)	 - Manage users (instance owner only)
 * [n8nctl variables](n8nctl_variables.md)	 - Manage instance variables
 * [n8nctl version](n8nctl_version.md)	 - Print version, commit, and build date

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,6 +11,9 @@ import (
 
 func TestKeyringRoundTrip(t *testing.T) {
 	keyring.MockInit() // in-memory provider; no real OS keyring touched
+	// Pin the config dir so the lazy package store's encrypted fallback (if ever consulted)
+	// lives in a temp dir, never the real ~/.n8nctl-cli.
+	t.Setenv("N8NCTL_CONFIG", filepath.Join(t.TempDir(), "config.yaml"))
 
 	// Missing key -> ErrNotFound and empty Lookup.
 	_, err := Get("missing")
