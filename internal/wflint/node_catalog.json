@@ -1,6 +1,6 @@
 {
  "generatedFrom": {
-  "@n8n/n8n-nodes-langchain": "2.27.3",
+  "@n8n/n8n-nodes-langchain": "2.37.2",
   "n8n-nodes-base": "2.15.1"
  },
  "nodes": {
@@ -654,7 +654,7 @@
    }
   },
   "@n8n/n8n-nodes-langchain.alibabaCloud": {
-   "displayName": "Alibaba Cloud Model Studio",
+   "displayName": "Qwen Cloud",
    "version": 1,
    "params": {
     "binaryPropertyName": [
@@ -3592,6 +3592,11 @@
      {
       "type": "notice"
      }
+    ],
+    "options": [
+     {
+      "type": "collection"
+     }
     ]
    }
   },
@@ -3661,6 +3666,17 @@
    "displayName": "Embeddings Google Vertex",
    "version": 1,
    "params": {
+    "location": [
+     {
+      "type": "options",
+      "options": [
+       "",
+       "eu",
+       "global",
+       "us"
+      ]
+     }
+    ],
     "modelName": [
      {
       "type": "string"
@@ -5074,7 +5090,7 @@
    }
   },
   "@n8n/n8n-nodes-langchain.lmChatAlibabaCloud": {
-   "displayName": "Alibaba Cloud Chat Model",
+   "displayName": "Qwen Cloud Chat Model",
    "version": 1,
    "params": {
     "model": [
@@ -5188,6 +5204,17 @@
      },
      {
       "type": "resourceLocator",
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "@version": [
+         "1.5"
+        ]
+       }
+      }
+     },
+     {
+      "type": "resourceLocator",
       "required": true
      }
     ],
@@ -5199,6 +5226,19 @@
     "options": [
      {
       "type": "collection"
+     }
+    ],
+    "promptCachingNotice": [
+     {
+      "type": "notice",
+      "displayOptions": {
+       "show": {
+        "/options.promptCaching": [
+         "5m",
+         "1h"
+        ]
+       }
+      }
      }
     ]
    }
@@ -5236,6 +5276,9 @@
         ]
        }
       }
+     },
+     {
+      "type": "options"
      }
     ],
     "modelSource": [
@@ -5377,6 +5420,17 @@
    "displayName": "Google Vertex Chat Model",
    "version": 1,
    "params": {
+    "location": [
+     {
+      "type": "options",
+      "options": [
+       "",
+       "eu",
+       "global",
+       "us"
+      ]
+     }
+    ],
     "modelName": [
      {
       "type": "string"
@@ -5458,6 +5512,26 @@
        "MiniMax-M2.5-highspeed",
        "MiniMax-M2.7",
        "MiniMax-M2.7-highspeed"
+      ],
+      "displayOptions": {
+       "show": {
+        "@version": [
+         "1"
+        ]
+       }
+      }
+     },
+     {
+      "type": "options",
+      "options": [
+       "MiniMax-M2",
+       "MiniMax-M2.1",
+       "MiniMax-M2.1-highspeed",
+       "MiniMax-M2.5",
+       "MiniMax-M2.5-highspeed",
+       "MiniMax-M2.7",
+       "MiniMax-M2.7-highspeed",
+       "MiniMax-M3"
       ]
      }
     ],
@@ -6167,10 +6241,39 @@
       ]
      }
     ],
+    "includeUserInOutput": [
+     {
+      "type": "boolean",
+      "displayOptions": {
+       "show": {
+        "authentication": [
+         "n8nOAuth2"
+        ]
+       }
+      }
+     }
+    ],
+    "instructions": [
+     {
+      "type": "string"
+     }
+    ],
     "path": [
      {
       "type": "string",
       "required": true
+     }
+    ],
+    "requireExecuteAccess": [
+     {
+      "type": "boolean",
+      "displayOptions": {
+       "show": {
+        "authentication": [
+         "n8nOAuth2"
+        ]
+       }
+      }
      }
     ]
    }
@@ -7069,6 +7172,11 @@
        "6"
       ],
       "displayOptions": {
+       "hide": {
+        "modelId": [
+         "MiniMax-H3"
+        ]
+       },
        "show": {
         "operation": [
          "textToVideo"
@@ -7086,7 +7194,116 @@
        "6"
       ],
       "displayOptions": {
+       "hide": {
+        "modelId": [
+         "MiniMax-H3"
+        ]
+       },
        "show": {
+        "operation": [
+         "imageToVideo"
+        ],
+        "resource": [
+         "video"
+        ]
+       }
+      }
+     }
+    ],
+    "h3Duration": [
+     {
+      "type": "options",
+      "options": [
+       "10",
+       "11",
+       "12",
+       "13",
+       "14",
+       "15",
+       "4",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9"
+      ],
+      "displayOptions": {
+       "show": {
+        "modelId": [
+         "MiniMax-H3"
+        ],
+        "operation": [
+         "textToVideo"
+        ],
+        "resource": [
+         "video"
+        ]
+       }
+      }
+     },
+     {
+      "type": "options",
+      "options": [
+       "10",
+       "11",
+       "12",
+       "13",
+       "14",
+       "15",
+       "4",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9"
+      ],
+      "displayOptions": {
+       "show": {
+        "modelId": [
+         "MiniMax-H3"
+        ],
+        "operation": [
+         "imageToVideo"
+        ],
+        "resource": [
+         "video"
+        ]
+       }
+      }
+     }
+    ],
+    "h3Resolution": [
+     {
+      "type": "options",
+      "options": [
+       "2K",
+       "768P"
+      ],
+      "displayOptions": {
+       "show": {
+        "modelId": [
+         "MiniMax-H3"
+        ],
+        "operation": [
+         "textToVideo"
+        ],
+        "resource": [
+         "video"
+        ]
+       }
+      }
+     },
+     {
+      "type": "options",
+      "options": [
+       "2K",
+       "768P"
+      ],
+      "displayOptions": {
+       "show": {
+        "modelId": [
+         "MiniMax-H3"
+        ],
         "operation": [
          "imageToVideo"
         ],
@@ -7201,6 +7418,9 @@
       ],
       "displayOptions": {
        "show": {
+        "@version": [
+         "1"
+        ],
         "operation": [
          "message"
         ],
@@ -7213,6 +7433,52 @@
      {
       "type": "options",
       "options": [
+       "MiniMax-M2",
+       "MiniMax-M2.1",
+       "MiniMax-M2.1-highspeed",
+       "MiniMax-M2.5",
+       "MiniMax-M2.5-highspeed",
+       "MiniMax-M2.7",
+       "MiniMax-M2.7-highspeed",
+       "MiniMax-M3"
+      ],
+      "displayOptions": {
+       "show": {
+        "operation": [
+         "message"
+        ],
+        "resource": [
+         "text"
+        ]
+       }
+      }
+     },
+     {
+      "type": "options",
+      "options": [
+       "MiniMax-Hailuo-02",
+       "MiniMax-Hailuo-2.3",
+       "T2V-01",
+       "T2V-01-Director"
+      ],
+      "displayOptions": {
+       "show": {
+        "@version": [
+         "1"
+        ],
+        "operation": [
+         "textToVideo"
+        ],
+        "resource": [
+         "video"
+        ]
+       }
+      }
+     },
+     {
+      "type": "options",
+      "options": [
+       "MiniMax-H3",
        "MiniMax-Hailuo-02",
        "MiniMax-Hailuo-2.3",
        "T2V-01",
@@ -7235,6 +7501,31 @@
        "I2V-01",
        "I2V-01-Director",
        "I2V-01-live",
+       "MiniMax-Hailuo-02",
+       "MiniMax-Hailuo-2.3",
+       "MiniMax-Hailuo-2.3-Fast"
+      ],
+      "displayOptions": {
+       "show": {
+        "@version": [
+         "1"
+        ],
+        "operation": [
+         "imageToVideo"
+        ],
+        "resource": [
+         "video"
+        ]
+       }
+      }
+     },
+     {
+      "type": "options",
+      "options": [
+       "I2V-01",
+       "I2V-01-Director",
+       "I2V-01-live",
+       "MiniMax-H3",
        "MiniMax-Hailuo-02",
        "MiniMax-Hailuo-2.3",
        "MiniMax-Hailuo-2.3-Fast"
@@ -7364,6 +7655,11 @@
      {
       "type": "collection",
       "displayOptions": {
+       "hide": {
+        "modelId": [
+         "MiniMax-H3"
+        ]
+       },
        "show": {
         "operation": [
          "textToVideo"
@@ -7407,6 +7703,11 @@
       "type": "string",
       "required": true,
       "displayOptions": {
+       "hide": {
+        "modelId": [
+         "MiniMax-H3"
+        ]
+       },
        "show": {
         "operation": [
          "textToVideo"
@@ -7419,10 +7720,75 @@
      },
      {
       "type": "string",
+      "required": true,
       "displayOptions": {
+       "show": {
+        "modelId": [
+         "MiniMax-H3"
+        ],
+        "operation": [
+         "textToVideo"
+        ],
+        "resource": [
+         "video"
+        ]
+       }
+      }
+     },
+     {
+      "type": "string",
+      "displayOptions": {
+       "hide": {
+        "modelId": [
+         "MiniMax-H3"
+        ]
+       },
        "show": {
         "operation": [
          "imageToVideo"
+        ],
+        "resource": [
+         "video"
+        ]
+       }
+      }
+     },
+     {
+      "type": "string",
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "modelId": [
+         "MiniMax-H3"
+        ],
+        "operation": [
+         "imageToVideo"
+        ],
+        "resource": [
+         "video"
+        ]
+       }
+      }
+     }
+    ],
+    "ratio": [
+     {
+      "type": "options",
+      "options": [
+       "16:9",
+       "1:1",
+       "21:9",
+       "3:4",
+       "4:3",
+       "9:16"
+      ],
+      "displayOptions": {
+       "show": {
+        "modelId": [
+         "MiniMax-H3"
+        ],
+        "operation": [
+         "textToVideo"
         ],
         "resource": [
          "video"
@@ -7440,6 +7806,11 @@
        "768P"
       ],
       "displayOptions": {
+       "hide": {
+        "modelId": [
+         "MiniMax-H3"
+        ]
+       },
        "show": {
         "operation": [
          "textToVideo"
@@ -7459,6 +7830,11 @@
        "768P"
       ],
       "displayOptions": {
+       "hide": {
+        "modelId": [
+         "MiniMax-H3"
+        ]
+       },
        "show": {
         "operation": [
          "imageToVideo"
