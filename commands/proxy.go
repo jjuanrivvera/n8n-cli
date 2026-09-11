@@ -93,12 +93,17 @@ func proxyCmd() *cobra.Command {
 // bodies and rejects errors with 422, optionally blocking workflow DELETEs. It
 // injects apiKey as X-N8N-API-KEY so clients forward without the secret.
 func newLintProxy(target *url.URL, apiKey string, disabled map[string]bool, blockDestructive, rejectDupNames bool, logw io.Writer) http.Handler {
-	rp := httputil.NewSingleHostReverseProxy(target)
-	director := rp.Director
-	rp.Director = func(req *http.Request) {
-		director(req)
-		req.Host = target.Host
-		req.Header.Set("X-N8N-API-KEY", apiKey)
+	// Rewrite, not Director: Director quedó deprecado en Go 1.26. SetURL hace el
+	// mismo empalme de ruta y query que NewSingleHostReverseProxy, y SetXForwarded
+	// mantiene el X-Forwarded-For que Director agregaba solo, con la diferencia
+	// deliberada de que reemplaza el del cliente en vez de confiar en él.
+	rp := &httputil.ReverseProxy{
+		Rewrite: func(pr *httputil.ProxyRequest) {
+			pr.SetURL(target)
+			pr.SetXForwarded()
+			pr.Out.Host = target.Host
+			pr.Out.Header.Set("X-N8N-API-KEY", apiKey)
+		},
 	}
 	httpc := &http.Client{Timeout: 15 * time.Second}
 

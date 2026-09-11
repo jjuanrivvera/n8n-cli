@@ -1,8 +1,7 @@
 module github.com/jjuanrivvera/n8n-cli
 
-go 1.25.12
+go 1.26.8
 
-toolchain go1.25.13
 
 require (
 	github.com/itchyny/gojq v0.12.19
