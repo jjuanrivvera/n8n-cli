@@ -1,6 +1,6 @@
 {
  "generatedFrom": {
-  "@n8n/n8n-nodes-langchain": "2.37.2",
+  "@n8n/n8n-nodes-langchain": "2.41.4",
   "n8n-nodes-base": "2.15.1"
  },
  "nodes": {
@@ -966,6 +966,7 @@
        "qwen-image",
        "qwen-image-max",
        "qwen-image-plus",
+       "wan2.6-image",
        "wan2.6-t2i",
        "z-image-turbo"
       ],
@@ -1182,6 +1183,21 @@
       }
      }
     ],
+    "referenceImages": [
+     {
+      "type": "fixedCollection",
+      "displayOptions": {
+       "show": {
+        "operation": [
+         "generate"
+        ],
+        "resource": [
+         "image"
+        ]
+       }
+      }
+     }
+    ],
     "resolution": [
      {
       "type": "options",
@@ -1340,6 +1356,21 @@
        "show": {
         "operation": [
          "analyze"
+        ],
+        "resource": [
+         "image"
+        ]
+       }
+      }
+     }
+    ],
+    "wanImageEditNotice": [
+     {
+      "type": "notice",
+      "displayOptions": {
+       "show": {
+        "operation": [
+         "generate"
         ],
         "resource": [
          "image"
@@ -3138,6 +3169,21 @@
       }
      }
     ],
+    "includeUserInOutput": [
+     {
+      "type": "boolean",
+      "displayOptions": {
+       "show": {
+        "authentication": [
+         "n8nUserAuth"
+        ],
+        "public": [
+         "true"
+        ]
+       }
+      }
+     }
+    ],
     "initialMessages": [
      {
       "type": "string",
@@ -3247,6 +3293,24 @@
     "public": [
      {
       "type": "boolean"
+     }
+    ],
+    "requireExecuteAccess": [
+     {
+      "type": "boolean",
+      "displayOptions": {
+       "show": {
+        "authentication": [
+         "n8nUserAuth"
+        ],
+        "mode": [
+         "hostedChat"
+        ],
+        "public": [
+         "true"
+        ]
+       }
+      }
      }
     ],
     "suggestedPrompts": [
@@ -3642,6 +3706,28 @@
     "notice": [
      {
       "type": "notice"
+     }
+    ]
+   }
+  },
+  "@n8n/n8n-nodes-langchain.embeddingsDatabricks": {
+   "displayName": "Embeddings Databricks",
+   "version": 1,
+   "params": {
+    "model": [
+     {
+      "type": "resourceLocator",
+      "required": true
+     }
+    ],
+    "notice": [
+     {
+      "type": "notice"
+     }
+    ],
+    "options": [
+     {
+      "type": "collection"
      }
     ]
    }
@@ -5364,6 +5450,38 @@
     ]
    }
   },
+  "@n8n/n8n-nodes-langchain.lmChatDatabricks": {
+   "displayName": "Databricks Chat Model",
+   "version": 1,
+   "params": {
+    "model": [
+     {
+      "type": "resourceLocator",
+      "required": true
+     }
+    ],
+    "notice": [
+     {
+      "type": "notice"
+     },
+     {
+      "type": "notice",
+      "displayOptions": {
+       "show": {
+        "/options.responseFormat": [
+         "json_object"
+        ]
+       }
+      }
+     }
+    ],
+    "options": [
+     {
+      "type": "collection"
+     }
+    ]
+   }
+  },
   "@n8n/n8n-nodes-langchain.lmChatDeepSeek": {
    "displayName": "DeepSeek Chat Model",
    "version": 1,
@@ -5532,7 +5650,18 @@
        "MiniMax-M2.7",
        "MiniMax-M2.7-highspeed",
        "MiniMax-M3"
-      ]
+      ],
+      "displayOptions": {
+       "show": {
+        "@version": [
+         "1.1"
+        ]
+       }
+      }
+     },
+     {
+      "type": "resourceLocator",
+      "required": true
      }
     ],
     "notice": [
@@ -7442,6 +7571,23 @@
        "MiniMax-M2.7-highspeed",
        "MiniMax-M3"
       ],
+      "displayOptions": {
+       "show": {
+        "@version": [
+         "1.1"
+        ],
+        "operation": [
+         "message"
+        ],
+        "resource": [
+         "text"
+        ]
+       }
+      }
+     },
+     {
+      "type": "resourceLocator",
+      "required": true,
       "displayOptions": {
        "show": {
         "operation": [
