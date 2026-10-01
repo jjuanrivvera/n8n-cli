@@ -37,6 +37,11 @@ jobs:
       - name: Open a PR if the catalog changed
         uses: peter-evans/create-pull-request@v8
         with:
+          # This repo is git-flow: develop integrates and main carries releases.
+          # Without a base, the action targets the default branch, so every
+          # monthly refresh landed straight on main and develop fell behind —
+          # it was two refreshes behind when this was found.
+          base: develop
           add-paths: internal/wflint/node_catalog.json
           branch: chore/refresh-node-catalog
           commit-message: "chore: refresh embedded n8n node catalog"
