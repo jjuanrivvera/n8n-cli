@@ -143,10 +143,8 @@ homebrew_casks:
     # Strip the quarantine attribute so the unsigned binary runs without a Gatekeeper prompt.
     hooks:
       post:
-        install: |
-          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/n8nctl"]
-          end
+        install_steps: |
+          run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/n8nctl"]
 
 scoops:
   - repository:
