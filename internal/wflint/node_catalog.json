@@ -1,6 +1,6 @@
 {
  "generatedFrom": {
-  "@n8n/n8n-nodes-langchain": "2.41.4",
+  "@n8n/n8n-nodes-langchain": "2.45.6",
   "n8n-nodes-base": "2.15.1"
  },
  "nodes": {
@@ -32,22 +32,6 @@
      },
      {
       "type": "hidden"
-     }
-    ],
-    "aiAgentStarterCallout": [
-     {
-      "type": "callout"
-     },
-     {
-      "type": "callout",
-      "displayOptions": {
-       "show": {
-        "agent": [
-         "conversationalAgent",
-         "toolsAgent"
-        ]
-       }
-      }
      }
     ],
     "binaryPropertyName": [
@@ -1914,6 +1898,25 @@
       }
      }
     ],
+    "promptCachingNotice": [
+     {
+      "type": "notice",
+      "displayOptions": {
+       "show": {
+        "/options.promptCaching": [
+         "5m",
+         "1h"
+        ],
+        "operation": [
+         "message"
+        ],
+        "resource": [
+         "text"
+        ]
+       }
+      }
+     }
+    ],
     "resource": [
      {
       "type": "options",
@@ -3324,6 +3327,24 @@
        }
       }
      }
+    ],
+    "trustedSource": [
+     {
+      "type": "options",
+      "displayOptions": {
+       "show": {
+        "authentication": [
+         "n8nUserAuth"
+        ],
+        "mode": [
+         "hostedChat"
+        ],
+        "public": [
+         "true"
+        ]
+       }
+      }
+     }
     ]
    }
   },
@@ -3349,6 +3370,101 @@
     "outputs": [
      {
       "type": "fixedCollection"
+     }
+    ]
+   }
+  },
+  "@n8n/n8n-nodes-langchain.databricksAiAgent": {
+   "displayName": "Databricks AI Agent",
+   "version": 2,
+   "params": {
+    "experiment": [
+     {
+      "type": "resourceLocator",
+      "displayOptions": {
+       "show": {
+        "exportTraces": [
+         "true"
+        ]
+       }
+      }
+     }
+    ],
+    "exportTraces": [
+     {
+      "type": "boolean"
+     }
+    ],
+    "fallbackNotice": [
+     {
+      "type": "notice",
+      "displayOptions": {
+       "show": {
+        "needsFallback": [
+         "true"
+        ]
+       }
+      }
+     }
+    ],
+    "hasOutputParser": [
+     {
+      "type": "boolean"
+     }
+    ],
+    "needsFallback": [
+     {
+      "type": "boolean"
+     }
+    ],
+    "notice": [
+     {
+      "type": "notice",
+      "displayOptions": {
+       "show": {
+        "hasOutputParser": [
+         "true"
+        ]
+       }
+      }
+     }
+    ],
+    "options": [
+     {
+      "type": "collection"
+     }
+    ],
+    "promptType": [
+     {
+      "type": "options",
+      "options": [
+       "auto",
+       "define"
+      ]
+     }
+    ],
+    "text": [
+     {
+      "type": "string",
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "promptType": [
+         "auto"
+        ]
+       }
+      }
+     },
+     {
+      "type": "string",
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "promptType": [
+         "define"
+        ]
+       }
+      }
      }
     ]
    }
@@ -3665,9 +3781,18 @@
    }
   },
   "@n8n/n8n-nodes-langchain.embeddingsAzureOpenAi": {
-   "displayName": "Embeddings Azure OpenAI",
+   "displayName": "Microsoft Foundry Embeddings",
    "version": 1,
    "params": {
+    "authentication": [
+     {
+      "type": "options",
+      "options": [
+       "azureEntraCognitiveServicesOAuth2Api",
+       "azureOpenAiApi"
+      ]
+     }
+    ],
     "model": [
      {
       "type": "string"
@@ -3752,6 +3877,15 @@
    "displayName": "Embeddings Google Vertex",
    "version": 1,
    "params": {
+    "authentication": [
+     {
+      "type": "options",
+      "options": [
+       "googleApi",
+       "googleVertexAiApi"
+      ]
+     }
+    ],
     "location": [
      {
       "type": "options",
@@ -3776,7 +3910,14 @@
     "projectId": [
      {
       "type": "resourceLocator",
-      "required": true
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "authentication": [
+         "googleApi"
+        ]
+       }
+      }
      }
     ]
    }
@@ -5389,7 +5530,7 @@
    }
   },
   "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi": {
-   "displayName": "Azure OpenAI Chat Model",
+   "displayName": "Microsoft Foundry Chat Model",
    "version": 1,
    "params": {
     "authentication": [
@@ -5404,7 +5545,27 @@
     "model": [
      {
       "type": "string",
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "@version": [
+         "1"
+        ]
+       }
+      }
+     },
+     {
+      "type": "resourceLocator",
       "required": true
+     }
+    ],
+    "modelFamily": [
+     {
+      "type": "options",
+      "options": [
+       "anthropic",
+       "openai"
+      ]
      }
     ],
     "notice": [
@@ -5425,6 +5586,23 @@
     "options": [
      {
       "type": "collection"
+     }
+    ],
+    "project": [
+     {
+      "type": "string"
+     }
+    ],
+    "responsesApiEnabled": [
+     {
+      "type": "boolean",
+      "displayOptions": {
+       "show": {
+        "modelFamily": [
+         "openai"
+        ]
+       }
+      }
      }
     ]
    }
@@ -5538,6 +5716,15 @@
    "displayName": "Google Vertex Chat Model",
    "version": 1,
    "params": {
+    "authentication": [
+     {
+      "type": "options",
+      "options": [
+       "googleApi",
+       "googleVertexAiApi"
+      ]
+     }
+    ],
     "location": [
      {
       "type": "options",
@@ -5567,7 +5754,14 @@
     "projectId": [
      {
       "type": "resourceLocator",
-      "required": true
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "authentication": [
+         "googleApi"
+        ]
+       }
+      }
      }
     ]
    }
@@ -6503,6 +6697,105 @@
     "simplifyOutput": [
      {
       "type": "boolean"
+     }
+    ]
+   }
+  },
+  "@n8n/n8n-nodes-langchain.memoryLakebaseChat": {
+   "displayName": "Databricks Lakebase Chat Memory",
+   "version": 1,
+   "params": {
+    "authentication": [
+     {
+      "type": "hidden"
+     }
+    ],
+    "contextWindowLength": [
+     {
+      "type": "number"
+     }
+    ],
+    "createTableNotice": [
+     {
+      "type": "notice"
+     }
+    ],
+    "lakebaseBranch": [
+     {
+      "type": "resourceLocator",
+      "required": true
+     }
+    ],
+    "lakebaseDatabase": [
+     {
+      "type": "resourceLocator",
+      "required": true
+     }
+    ],
+    "lakebaseProject": [
+     {
+      "type": "resourceLocator",
+      "required": true
+     }
+    ],
+    "lakebaseSchema": [
+     {
+      "type": "resourceLocator",
+      "required": true
+     }
+    ],
+    "lakebaseTable": [
+     {
+      "type": "string",
+      "required": true
+     }
+    ],
+    "notice": [
+     {
+      "type": "notice"
+     }
+    ],
+    "scopedSessionHintNotice": [
+     {
+      "type": "notice",
+      "displayOptions": {
+       "show": {
+        "sessionIdType": [
+         "fromInput"
+        ]
+       }
+      }
+     }
+    ],
+    "sessionIdType": [
+     {
+      "type": "options",
+      "options": [
+       "customKey",
+       "fromInput"
+      ]
+     }
+    ],
+    "sessionKey": [
+     {
+      "type": "string",
+      "displayOptions": {
+       "show": {
+        "sessionIdType": [
+         "fromInput"
+        ]
+       }
+      }
+     },
+     {
+      "type": "string",
+      "displayOptions": {
+       "show": {
+        "sessionIdType": [
+         "customKey"
+        ]
+       }
+      }
      }
     ]
    }
@@ -10544,6 +10837,18 @@
       "type": "fixedCollection"
      }
     ],
+    "confidenceScoresNotice": [
+     {
+      "type": "notice",
+      "displayOptions": {
+       "show": {
+        "/options.includeConfidenceScores": [
+         "true"
+        ]
+       }
+      }
+     }
+    ],
     "inputText": [
      {
       "type": "string",
@@ -11766,6 +12071,169 @@
        "show": {
         "mode": [
          "retrieve"
+        ]
+       }
+      }
+     }
+    ],
+    "prompt": [
+     {
+      "type": "string",
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "load"
+        ]
+       }
+      }
+     }
+    ],
+    "ragStarterCallout": [
+     {
+      "type": "callout"
+     }
+    ],
+    "toolDescription": [
+     {
+      "type": "string",
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "retrieve-as-tool"
+        ]
+       }
+      }
+     }
+    ],
+    "toolName": [
+     {
+      "type": "string",
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "retrieve-as-tool"
+        ]
+       }
+      }
+     }
+    ],
+    "topK": [
+     {
+      "type": "number",
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "load",
+         "retrieve-as-tool"
+        ]
+       }
+      }
+     }
+    ],
+    "useReranker": [
+     {
+      "type": "boolean",
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "load",
+         "retrieve",
+         "retrieve-as-tool"
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  "@n8n/n8n-nodes-langchain.vectorStoreDatabricks": {
+   "displayName": "Databricks Vector Store",
+   "version": 1,
+   "params": {
+    "contentColumn": [
+     {
+      "type": "options"
+     }
+    ],
+    "databricksIndex": [
+     {
+      "type": "resourceLocator",
+      "required": true
+     }
+    ],
+    "embeddingBatchSize": [
+     {
+      "type": "number",
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "insert"
+        ]
+       }
+      }
+     }
+    ],
+    "id": [
+     {
+      "type": "string",
+      "required": true,
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "update"
+        ]
+       }
+      }
+     }
+    ],
+    "includeDocumentMetadata": [
+     {
+      "type": "boolean",
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "load",
+         "retrieve-as-tool"
+        ]
+       }
+      }
+     }
+    ],
+    "mode": [
+     {
+      "type": "options",
+      "options": [
+       "insert",
+       "load",
+       "retrieve",
+       "retrieve-as-tool"
+      ]
+     }
+    ],
+    "notice": [
+     {
+      "type": "notice",
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "retrieve"
+        ]
+       }
+      }
+     }
+    ],
+    "options": [
+     {
+      "type": "collection",
+      "displayOptions": {
+       "show": {
+        "mode": [
+         "load",
+         "retrieve",
+         "retrieve-as-tool"
         ]
        }
       }
