@@ -18,25 +18,25 @@ n8nctl init [flags]
 ### Options
 
 ```
-      --api-key string    API key (otherwise prompted without echo)
-      --base-url string   instance base URL
-  -h, --help              help for init
-      --instance string   instance (profile) name to create/update
+      --api-key string      API key (otherwise prompted without echo)
+      --base-url string     instance base URL
+  -h, --help[=true|false]   help for init
+      --instance string     instance (profile) name to create/update
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --columns strings   comma-separated columns for table/csv output
-      --dry-run           print the equivalent curl and send no request
-      --jq string         apply a jq program to the result (e.g. '.[].id'); implies JSON input
-      --no-color          disable colored output [env: NO_COLOR]
-      --no-header         hide the table header row
-  -o, --output string     output format: table|json|yaml|csv|id [env: N8NCTL_OUTPUT]
-  -q, --quiet             suppress non-essential chatter
-      --rps float         client-side rate limit in requests/sec (0 = use config/default)
-      --show-token        do not redact the API key in --dry-run output
-  -v, --verbose           verbose (debug) logging to stderr
+      --columns strings           comma-separated columns for table/csv output
+      --dry-run[=true|false]      print the equivalent curl and send no request
+      --jq string                 apply a jq program to the result (e.g. '.[].id'); implies JSON input
+      --no-color[=true|false]     disable colored output [env: NO_COLOR]
+      --no-header[=true|false]    hide the table header row
+  -o, --output string             output format: table|json|yaml|csv|id [env: N8NCTL_OUTPUT]
+  -q, --quiet[=true|false]        suppress non-essential chatter
+      --rps float                 client-side rate limit in requests/sec (0 = use config/default)
+      --show-token[=true|false]   do not redact the API key in --dry-run output
+  -v, --verbose[=true|false]      verbose (debug) logging to stderr
 ```
 
 ### SEE ALSO
